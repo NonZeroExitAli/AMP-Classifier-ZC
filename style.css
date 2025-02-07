@@ -1,151 +1,47 @@
-/* General Styles */
 body {
-    font-family: 'Arial', sans-serif;
-    background: #f4f7fc;
-    margin: 0;
-    padding: 0;
-    color: #333;
-}
-
-/* Header */
-header {
-    background: #3a86ff;
-    padding: 15px;
-    text-align: center;
-    color: white;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-}
-
-header h1 {
-    margin: 0;
-    font-size: 1.8rem;
-}
-
-/* Navigation */
-nav {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
-    margin-top: 10px;
+    min-height: 100vh;
+    text-align: center;
+    margin: 0;
+    background-color: #f4f4f4;
 }
 
-nav a {
-    color: white;
-    text-decoration: none;
-    padding: 10px 20px;
-    margin: 0 5px;
-    font-size: 1rem;
-    background: #1d4ed8;
-    border-radius: 8px;
-    transition: 0.3s ease-in-out;
+main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
 }
 
-nav a:hover, nav a.active {
-    background: #0c2c9c;
-}
-
-/* Prediction Card */
 .prediction-card {
-    width: 50%;
-    margin: 30px auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
     background: white;
     padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-}
-
-/* Input Box */
-.input-box {
-    text-align: center;
-}
-
-textarea {
-    width: 90%;
-    height: 120px;
-    padding: 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    resize: none;
-}
-
-textarea:focus {
-    border: 1px solid #3a86ff;
-    outline: none;
-}
-
-/* Counter */
-.counter {
-    font-size: 0.9rem;
-    margin-top: 5px;
-    color: #666;
-}
-
-/* Example Buttons */
-.example-sequences {
-    margin-top: 15px;
-}
-
-.example-btn {
-    background: #1d4ed8;
-    color: white;
-    border: none;
-    padding: 8px 15px;
-    margin: 5px;
-    border-radius: 6px;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
-.example-btn:hover {
-    background: #0c2c9c;
-}
-
-/* Predict Button */
-.predict-btn {
-    background: #e63946;
-    color: white;
-    padding: 12px 20px;
-    font-size: 1rem;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    margin-top: 15px;
-    transition: 0.3s;
-}
-
-.predict-btn:hover {
-    background: #b71c1c;
-}
-
-/* Result Box */
-.result-box {
-    margin-top: 25px;
-    padding: 15px;
-    background: #eef2ff;
-    border-radius: 8px;
-    text-align: center;
-}
-
-/* Probability Meter */
-.probability-meter {
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     width: 80%;
-    height: 15px;
-    background: #ddd;
-    margin: auto;
-    position: relative;
-    border-radius: 8px;
+    max-width: 600px;
 }
 
-.confidence-fill {
-    height: 100%;
-    width: 0%;
-    background: linear-gradient(90deg, #ff6b6b, #1d4ed8);
-    border-radius: 8px;
-    transition: width 0.5s ease-in-out;
+.info-cards {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 20px;
 }
 
-#probability-value {
-    display: block;
-    margin-top: 10px;
-    font-size: 1.1rem;
-    font-weight: bold;
+.info-card {
+    text-align: center;
+    width: 250px;
+    background: white;
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
