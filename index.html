@@ -3,87 +3,250 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AMP Prediction - SVM_ALI</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>AMP Classifier</title>
+    <style>
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f6fa;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: var(--primary-color);
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
+
+        #sequence {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
+
+        #sequence:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
+
+        button:disabled {
+            background-color: #bdc3c7;
+            cursor: not-allowed;
+        }
+
+        .result-card {
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 1.1rem;
+            display: none;
+        }
+
+        .success {
+            background-color: #e8f6ef;
+            color: var(--success-color);
+            border: 2px solid var(--success-color);
+        }
+
+        .warning {
+            background-color: #fdefe6;
+            color: var(--warning-color);
+            border: 2px solid var(--warning-color);
+        }
+
+        .processing-time {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .character-count {
+            text-align: right;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            h1 {
+                font-size: 1.5rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <header>
-        <h1><i class="fas fa-dna"></i> SVM_ALI AMP Predictor</h1>
-        <nav>
-            <a href="index.html" class="active"><i class="fas fa-rocket"></i> Predict</a>
-            <a href="explainability.html"><i class="fas fa-microscope"></i> Explain</a>
-            <a href="stats.html"><i class="fas fa-chart-bar"></i> Stats</a>
-        </nav>
-    </header>
-
-    <main>
-        <section class="prediction-card">
-            <div class="input-box">
-                <h2><i class="fas fa-vial"></i> Sequence Analysis</h2>
-                <div id="error-container"></div>
-                <div class="input-group">
-                    <textarea id="sequence-input" 
-                            placeholder="Enter 10-100 amino acid sequence (e.g., 'MAGLRDIVRI...')"
-                            minlength="10"
-                            maxlength="100"
-                            oninput="updateCounter()"></textarea>
-                    <div class="counter" id="char-counter">0/100 characters</div>
-                    <div class="length-guide">
-                        <span>10 AA</span>
-                        <div class="scale-bar"><div class="optimal-range"></div></div>
-                        <span>100 AA</span>
-                    </div>
-                </div>
-                
-                <div class="example-sequences">
-                    <p>Quick examples:</p>
-                    <button class="example-btn" onclick="loadExample('min')">
-                        <i class="fas fa-angle-double-down"></i> 10aa
-                    </button>
-                    <button class="example-btn" onclick="loadExample('max')">
-                        <i class="fas fa-angle-double-up"></i> 100aa
-                    </button>
-                </div>
-                
-                <button class="predict-btn" onclick="validateAndPredict()">
-                    <i class="fas fa-play"></i> Analyze
-                </button>
+    <div class="container">
+        <h1>Antimicrobial Peptide Classifier</h1>
+        
+        <div class="input-group">
+            <textarea 
+                id="sequence" 
+                placeholder="Enter amino acid sequence (10-100 characters)..."
+                maxlength="100"
+            ></textarea>
+            <div class="character-count">
+                <span id="char-count">0</span>/100
             </div>
+        </div>
 
-            <div class="result-box" id="result-box">
-                <div class="loader" id="loader"></div>
-                <div id="prediction-result">
-                    <h3><i class="fas fa-poll-h"></i> Results</h3>
-                    <div class="result-card">
-                        <div class="probability-meter">
-                            <div class="confidence-fill" id="confidence-fill"></div>
-                            <span id="probability-value">--%</span>
-                        </div>
-                        <div class="verdict" id="verdict"></div>
-                        <div class="result-details">
-                            <div><i class="fas fa-ruler"></i> Length: <span id="seq-length">--</span></div>
-                            <div><i class="fas fa-stopwatch"></i> Time: <span id="proc-time">--</span>s</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
+        <div class="error-message" id="error"></div>
 
-        <section class="info-cards">
-            <div class="info-card">
-                <i class="fas fa-question-circle"></i>
-                <h3>How to Use</h3>
-                <p>Enter a protein sequence (10-100 amino acids) using single-letter codes</p>
-            </div>
-            <div class="info-card">
-                <i class="fas fa-exclamation-triangle"></i>
-                <h3>Validation Rules</h3>
-                <p>Only standard 20 amino acids allowed (A,C,D,E,F,G,H,I,K,L,M,N,P,Q,R,S,T,V,W,Y)</p>
-            </div>
-        </section>
-    </main>
+        <button onclick="predict()" id="predict-btn">Classify Sequence</button>
 
-    <script src="assets/js/script.js"></script>
+        <div class="result-card" id="result">
+            <div id="prediction-text"></div>
+        </div>
+
+        <div class="processing-time" id="time"></div>
+    </div>
+
+    <script>
+        const sequenceInput = document.getElementById('sequence');
+        const charCount = document.getElementById('char-count');
+        const errorDiv = document.getElementById('error');
+        const resultDiv = document.getElementById('result');
+        const predictionText = document.getElementById('prediction-text');
+        const predictBtn = document.getElementById('predict-btn');
+
+        // Character count update
+        sequenceInput.addEventListener('input', () => {
+            const length = sequenceInput.value.length;
+            charCount.textContent = length;
+            
+            if (length < 10) {
+                showError('Sequence must be at least 10 characters');
+            } else if (length > 100) {
+                showError('Sequence cannot exceed 100 characters');
+            } else {
+                clearError();
+            }
+        });
+
+        // Input validation
+        sequenceInput.addEventListener('keypress', (e) => {
+            const validChars = /^[ACDEFGHIKLMNPQRSTVWY]$/i;
+            if (!validChars.test(e.key)) {
+                e.preventDefault();
+                showError('Only standard amino acid characters are allowed');
+            }
+        });
+
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            predictBtn.disabled = true;
+        }
+
+        function clearError() {
+            errorDiv.style.display = 'none';
+            predictBtn.disabled = false;
+        }
+
+        async function predict() {
+            const sequence = sequenceInput.value.toUpperCase();
+            
+            // Basic validation
+            if (!sequence || sequence.length < 10) {
+                showError('Please enter a valid sequence (10-100 characters)');
+                return;
+            }
+
+            // Simulate API call
+            predictBtn.disabled = true;
+            predictBtn.textContent = 'Processing...';
+            resultDiv.style.display = 'none';
+            
+            const startTime = performance.now();
+            
+            // Simulated delay
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            
+            const processingTime = ((performance.now() - startTime)/1000).toFixed(2);
+            
+            // Simulated result
+            const isAMP = Math.random() > 0.5;
+            
+            predictBtn.disabled = false;
+            predictBtn.textContent = 'Classify Sequence';
+            
+            resultDiv.className = `result-card ${isAMP ? 'success' : 'warning'}`;
+            predictionText.textContent = isAMP 
+                ? `Prediction: Antimicrobial Peptide (Confidence: ${(Math.random()*100).toFixed(1)}%)`
+                : `Prediction: Non-antimicrobial Peptide (Confidence: ${(Math.random()*100).toFixed(1)}%)`;
+            
+            resultDiv.style.display = 'block';
+            document.getElementById('time').textContent = `Processing time: ${processingTime} seconds`;
+        }
+
+        // Handle Enter key
+        sequenceInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                predict();
+            }
+        });
+    </script>
 </body>
 </html>
