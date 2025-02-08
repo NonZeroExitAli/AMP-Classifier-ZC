@@ -5,7 +5,7 @@ import time
 app = Flask(__name__)
 
 # 🔹 Load the trained model
-model = joblib.load("model.joblib")  # Ensure this file is in the correct directory
+model = joblib.load("SVM.joblib")  # Ensure this file is in the correct directory
 
 @app.route('/predict', methods=['POST'])
 def predict():
