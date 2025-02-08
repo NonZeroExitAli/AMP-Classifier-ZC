@@ -15,7 +15,7 @@ async function predict() {
     let start = performance.now();
 
     try {
-        let response = await fetch("https://your-backend-url.onrender.com/predict", {
+        let response = await fetch("https://amp-classifier-zc.fly.dev/", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sequence })
