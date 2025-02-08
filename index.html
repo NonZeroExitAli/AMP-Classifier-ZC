@@ -205,58 +205,51 @@
         }
 
         async function predict() {
-            const sequence = sequenceInput.value.toUpperCase();
+            const sequence = document.getElementById("sequence").value.trim();
+            const resultDiv = document.getElementById("result");
+            const timeDiv = document.getElementById("time");
         
-            if (!sequence || sequence.length < 10 || sequence.length > 100) {
-                showError('Please enter a valid sequence (10-100 characters)');
+            // Input validation
+            if (sequence.length < 10 || sequence.length > 100) {
+                alert("Sequence length must be between 10 and 100.");
                 return;
             }
         
-            predictBtn.disabled = true;
-            predictBtn.textContent = 'Processing...';
-            resultDiv.style.display = 'none';
-            errorDiv.style.display = 'none';
+            // Show loading message
+            resultDiv.innerText = "Processing...";
+            timeDiv.innerText = "";
         
-            const startTime = performance.now();
+            const start = performance.now();
         
             try {
-                const response = await fetch('https://amp-classifier-zc.fly.dev/', {  // Ensure the correct API URL
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sequence })
+                const response = await fetch("https://nonzeroexit-amp-classifier.hf.space/api/predict", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        data: [sequence]  // Gradio expects array input under "data" key
+                    })
                 });
         
-                const data = await response.json();
-                const processingTime = ((performance.now() - startTime) / 1000).toFixed(2);
-        
                 if (!response.ok) {
-                    throw new Error(data.error || 'Unexpected error occurred');
+                    throw new Error(`Server error: ${response.status}`);
                 }
         
-                // Update UI with the prediction result
-                predictBtn.disabled = false;
-                predictBtn.textContent = 'Classify Sequence';
-                
-                resultDiv.className = `result-card ${data.prediction === 'AMP' ? 'success' : 'warning'}`;
-                predictionText.textContent = `Prediction: ${data.prediction} (Confidence: ${data.confidence}%)`;
+                const data = await response.json();
+                const end = performance.now();
         
-                resultDiv.style.display = 'block';
-                document.getElementById('time').textContent = `Processing time: ${processingTime} seconds`;
+                // Gradio returns prediction in data.data array
+                const prediction = data.data[0]; 
+                const confidence = ""; // Add confidence if your model returns probabilities
+        
+                resultDiv.innerText = `Prediction: ${prediction}`;
+                timeDiv.innerText = `Processing time: ${(end - start).toFixed(2)}ms`;
         
             } catch (error) {
-                showError(error.message);
-                predictBtn.disabled = false;
-                predictBtn.textContent = 'Classify Sequence';
+                console.error("Prediction error:", error);
+                resultDiv.innerText = "Error: Prediction failed - " + error.message;
+                timeDiv.innerText = "";
             }
         }
-
-
-        // Handle Enter key
-        sequenceInput.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                predict();
-            }
         });
     </script>
 </body>
