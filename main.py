@@ -10,11 +10,11 @@ def predict():
     if not sequence or len(sequence) < 10 or len(sequence) > 100:
         return jsonify({"error": "Sequence length must be between 10 and 100."}), 400
 
-    # Dummy model logic (Replace with your actual ML model)
+    # Dummy prediction logic (replace with your real model)
     prediction = "AMP" if "A" in sequence else "non-AMP"
-    confidence = 85.5  # Replace with actual confidence score
+    confidence = 85.5  # Example confidence score
 
     return jsonify({"prediction": prediction, "confidence": confidence})
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    app.run(host="0.0.0.0", port=5000)
