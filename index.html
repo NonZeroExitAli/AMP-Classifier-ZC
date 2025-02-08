@@ -206,39 +206,50 @@
 
         async function predict() {
             const sequence = sequenceInput.value.toUpperCase();
-            
-            // Basic validation
-            if (!sequence || sequence.length < 10) {
+        
+            if (!sequence || sequence.length < 10 || sequence.length > 100) {
                 showError('Please enter a valid sequence (10-100 characters)');
                 return;
             }
-
-            // Simulate API call
+        
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
             resultDiv.style.display = 'none';
-            
+            errorDiv.style.display = 'none';
+        
             const startTime = performance.now();
-            
-            // Simulated delay
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            
-            const processingTime = ((performance.now() - startTime)/1000).toFixed(2);
-            
-            // Simulated result
-            const isAMP = Math.random() > 0.5;
-            
-            predictBtn.disabled = false;
-            predictBtn.textContent = 'Classify Sequence';
-            
-            resultDiv.className = `result-card ${isAMP ? 'success' : 'warning'}`;
-            predictionText.textContent = isAMP 
-                ? `Prediction: Antimicrobial Peptide (Confidence: ${(Math.random()*100).toFixed(1)}%)`
-                : `Prediction: Non-antimicrobial Peptide (Confidence: ${(Math.random()*100).toFixed(1)}%)`;
-            
-            resultDiv.style.display = 'block';
-            document.getElementById('time').textContent = `Processing time: ${processingTime} seconds`;
+        
+            try {
+                const response = await fetch('https://amp-classifier-zc.fly.dev/', {  // Ensure the correct API URL
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sequence })
+                });
+        
+                const data = await response.json();
+                const processingTime = ((performance.now() - startTime) / 1000).toFixed(2);
+        
+                if (!response.ok) {
+                    throw new Error(data.error || 'Unexpected error occurred');
+                }
+        
+                // Update UI with the prediction result
+                predictBtn.disabled = false;
+                predictBtn.textContent = 'Classify Sequence';
+                
+                resultDiv.className = `result-card ${data.prediction === 'AMP' ? 'success' : 'warning'}`;
+                predictionText.textContent = `Prediction: ${data.prediction} (Confidence: ${data.confidence}%)`;
+        
+                resultDiv.style.display = 'block';
+                document.getElementById('time').textContent = `Processing time: ${processingTime} seconds`;
+        
+            } catch (error) {
+                showError(error.message);
+                predictBtn.disabled = false;
+                predictBtn.textContent = 'Classify Sequence';
+            }
         }
+
 
         // Handle Enter key
         sequenceInput.addEventListener('keydown', (e) => {
