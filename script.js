@@ -15,7 +15,7 @@ async function predict() {
     let start = performance.now();
 
     try {
-        let response = await fetch("https://amp-classifier-zc.fly.dev/", {
+        let response = await fetch("https://huggingface.co/spaces/nonzeroexit/AMP-Classifier", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ sequence })
