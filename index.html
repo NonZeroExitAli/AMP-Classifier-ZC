@@ -176,7 +176,9 @@
         const predictionText = document.getElementById('prediction-text');
         const timeDiv = document.getElementById('time');
         const predictBtn = document.getElementById('predict-btn');
-
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark-mode");
+            
         // Character count update
         sequenceInput.addEventListener('input', () => {
             const length = sequenceInput.value.length;
