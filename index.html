@@ -204,7 +204,6 @@
             errorDiv.style.display = 'none';
             predictBtn.disabled = false;
         }
-
         async function predict() {
             const sequence = sequenceInput.value.trim().toUpperCase();
             
@@ -212,36 +211,33 @@
             resultDiv.style.display = 'none';
             predictionText.textContent = '';
             timeDiv.textContent = '';
-
-            // Input validation
+        
             if (sequence.length < 10 || sequence.length > 100) {
                 showError('Sequence length must be between 10 and 100');
                 return;
             }
-
-            // Show loading state
+        
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
-
+        
             try {
                 const start = performance.now();
-                const response = await fetch("https://nonzeroexit-AMP-Classifier.hf.space/run/predict", {
+                const response = await fetch("https://nonzeroexit-amp-classifier.hf.space/api/predict", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ data: [sequence] })
+                    body: JSON.stringify({ sequence: sequence })  // Ensure the format matches your backend expectation
                 });
-
+        
                 if (!response.ok) throw new Error(`Server error: ${response.status}`);
-                
+        
                 const data = await response.json();
                 const end = performance.now();
-                
-                // Update UI
+        
                 resultDiv.style.display = 'block';
-                resultDiv.className = `result-card ${data.data[0] === 'AMP' ? 'success' : 'warning'}`;
-                predictionText.textContent = `Prediction: ${data.data[0]}`;
+                resultDiv.className = `result-card ${data.prediction === 'AMP' ? 'success' : 'warning'}`;
+                predictionText.textContent = `Prediction: ${data.prediction}`;
                 timeDiv.textContent = `Processing time: ${(end - start).toFixed(2)}ms`;
-
+        
             } catch (error) {
                 console.error("Prediction error:", error);
                 resultDiv.style.display = 'block';
@@ -252,6 +248,7 @@
                 predictBtn.textContent = 'Classify Sequence';
             }
         }
+
     </script>
 </body>
 </html>
