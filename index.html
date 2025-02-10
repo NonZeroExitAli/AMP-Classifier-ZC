@@ -206,92 +206,34 @@
         }
 
         async function predict() {
-            const sequence = sequenceInput.value.trim().toUpperCase();
-            
-            // Clear previous results
-            resultDiv.style.display = 'none';
-            predictionText.textContent = '';
-            timeDiv.textContent = '';
+                const sequence = document.getElementById('sequence').value.trim().toUpperCase();
+                const resultDiv = document.getElementById('result');
+                const predictionText = document.getElementById('prediction-text');
+                const predictBtn = document.getElementById('predict-btn');
         
-            // Enhanced input validation
-            const validAAs = /^[ACDEFGHIKLMNPQRSTVWY]+$/i;
-            if (!validAAs.test(sequence)) {
-                showError('Contains invalid amino acid characters');
-                return;
-            }
-            if (sequence.length < 10 || sequence.length > 100) {
-                showError('Sequence length must be between 10 and 100');
-                return;
-            }
-        
-            // Show loading state
-            predictBtn.disabled = true;
-            predictBtn.textContent = 'Processing...';
-        
-            try {
-                const start = performance.now();
-                
-                // Correct API endpoint (try both possibilities)
-                const API_ENDPOINT = [
-                    "https://nonzeroexit-amp-classifier.hf.space/run/predict",
-                    "https://nonzeroexit-amp-classifier.hf.space/api/predict"
-                ][0]; // Try index 0 first, then 1 if needed
-        
-                const response = await fetch(API_ENDPOINT, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({
-                        data: [sequence]
-                    })
-                });
-        
-                console.log('Response status:', response.status);
-                const data = await response.json();
-                console.log('Full response:', data);
-        
-                if (!response.ok) {
-                    throw new Error(`API Error: ${data.error || response.statusText}`);
+                if (sequence.length < 10 || sequence.length > 100) {
+                    alert('Sequence length must be between 10 and 100.');
+                    return;
                 }
         
-                const end = performance.now();
-                
-                // Handle different response formats
-                let result;
-                if (data.data && data.data[0] && data.data[0].confidences) {
-                    // New format: {label: "AMP", confidences: [...]}
-                    result = data.data[0];
-                } else if (data.data && Array.isArray(data.data)) {
-                    // Alternative format: ["AMP", 0.95]
-                    result = {
-                        label: data.data[0],
-                        confidence: data.data[1]
-                    };
-                } else {
-                    throw new Error('Unexpected response format');
+                predictBtn.disabled = true;
+                predictBtn.textContent = 'Processing...';
+        
+                try {
+                    const client = new gradio.Client("nonzeroexit/AMP-Classifier");
+                    const response = await client.predict("/predict", { sequence });
+        
+                    resultDiv.style.display = 'block';
+                    resultDiv.className = `result-card ${response.data === 'AMP' ? 'success' : 'warning'}`;
+                    predictionText.textContent = `Prediction: ${response.data}`;
+                } catch (error) {
+                    console.error('Error:', error);
+                    predictionText.textContent = 'Error occurred while processing';
                 }
         
-                const isAMP = result.label === "AMP";
-                const confidence = (result.confidence * 100).toFixed(1);
-        
-                // Update UI
-                resultDiv.style.display = 'block';
-                resultDiv.className = `result-card ${isAMP ? 'success' : 'warning'}`;
-                predictionText.innerHTML = `
-                    Prediction: ${result.label}<br>
-                    Confidence: ${confidence}%
-                `;
-                timeDiv.textContent = `Processing time: ${(end - start).toFixed(2)}ms`;
-        
-            } catch (error) {
-                console.error("Prediction error:", error);
-                resultDiv.style.display = 'block';
-                resultDiv.className = 'result-card warning';
-                predictionText.textContent = `Error: ${error.message || 'Prediction failed'}`;
-            } finally {
                 predictBtn.disabled = false;
                 predictBtn.textContent = 'Classify Sequence';
             }
-        }
     </script>
 </body>
 </html>
