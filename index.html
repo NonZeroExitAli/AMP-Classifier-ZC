@@ -204,36 +204,51 @@
             errorDiv.style.display = 'none';
             predictBtn.disabled = false;
         }
-
         async function predict() {
-                const sequence = document.getElementById('sequence').value.trim().toUpperCase();
-                const resultDiv = document.getElementById('result');
-                const predictionText = document.getElementById('prediction-text');
-                const predictBtn = document.getElementById('predict-btn');
+            const sequence = document.getElementById('sequence').value.trim().toUpperCase();
+            const resultDiv = document.getElementById('result');
+            const predictionText = document.getElementById('prediction-text');
+            const predictBtn = document.getElementById('predict-btn');
         
-                if (sequence.length < 10 || sequence.length > 100) {
-                    alert('Sequence length must be between 10 and 100.');
-                    return;
-                }
-        
-                predictBtn.disabled = true;
-                predictBtn.textContent = 'Processing...';
-        
-                try {
-                    const client = new gradio.Client("nonzeroexit/AMP-Classifier");
-                    const response = await client.predict("/predict", { sequence });
-        
-                    resultDiv.style.display = 'block';
-                    resultDiv.className = `result-card ${response.data === 'AMP' ? 'success' : 'warning'}`;
-                    predictionText.textContent = `Prediction: ${response.data}`;
-                } catch (error) {
-                    console.error('Error:', error);
-                    predictionText.textContent = 'Error occurred while processing';
-                }
-        
-                predictBtn.disabled = false;
-                predictBtn.textContent = 'Classify Sequence';
+            // Validate sequence length
+            if (sequence.length < 10 || sequence.length > 100) {
+                alert('Sequence length must be between 10 and 100.');
+                return;
             }
+        
+            predictBtn.disabled = true;
+            predictBtn.textContent = 'Processing...';
+        
+            try {
+                // Ensure Gradio client is loaded
+                if (!window.gradio) {
+                    throw new Error("Gradio client is not available. Make sure the script is properly included.");
+                }
+        
+                // Connect to Gradio API
+                const client = await window.gradio.Client.connect("nonzeroexit/AMP-Classifier");
+        
+                // Send sequence to model
+                const response = await client.predict("/predict", { sequence });
+        
+                console.log("Prediction response:", response);
+        
+                // Display results
+                resultDiv.style.display = 'block';
+                resultDiv.className = `result-card ${response.data.prediction === 'AMP' ? 'success' : 'warning'}`;
+                predictionText.textContent = `Prediction: ${response.data.prediction} (Confidence: ${response.data.confidence}%)`;
+        
+            } catch (error) {
+                console.error('Error:', error);
+                predictionText.textContent = 'Error: Unable to classify sequence. Please try again.';
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result-card warning';
+            }
+        
+            predictBtn.disabled = false;
+            predictBtn.textContent = 'Classify Sequence';
+        }
+
     </script>
 </body>
 </html>
