@@ -5,240 +5,70 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMP Classifier</title>
     <style>
-        :root {
-            --primary-color: #2c3e50;
-            --secondary-color: #3498db;
-            --success-color: #27ae60;
-            --warning-color: #e67e22;
-        }
-
         body {
-            font-family: 'Arial', sans-serif;
-            line-height: 1.6;
-            margin: 0;
-            padding: 20px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            background-color: #f5f6fa;
-        }
-
-        .container {
-            max-width: 800px;
-            width: 100%;
-            padding: 2rem;
-            background: white;
-            border-radius: 10px;
-            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        }
-
-        h1 {
-            color: var(--primary-color);
+            font-family: Arial, sans-serif;
             text-align: center;
-            margin-bottom: 2rem;
+            margin: 50px;
         }
-
-        .input-group {
-            margin-bottom: 1.5rem;
+        input, button {
+            padding: 10px;
+            font-size: 16px;
         }
-
-        #sequence {
-            width: 100%;
-            height: 150px;
-            padding: 1rem;
-            border: 2px solid #ddd;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 1rem;
-            resize: vertical;
-            transition: border-color 0.3s ease;
-        }
-
-        #sequence:focus {
-            outline: none;
-            border-color: var(--secondary-color);
-        }
-
-        button {
-            background-color: var(--secondary-color);
-            color: white;
-            border: none;
-            padding: 0.8rem 2rem;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            transition: transform 0.2s ease, background-color 0.3s ease;
-            width: 100%;
-            margin-top: 1rem;
-        }
-
-        button:hover {
-            background-color: #2980b9;
-            transform: translateY(-1px);
-        }
-
-        button:disabled {
-            background-color: #bdc3c7;
-            cursor: not-allowed;
-        }
-
         .result-card {
-            padding: 1.5rem;
-            border-radius: 8px;
-            margin-top: 2rem;
-            text-align: center;
-            font-size: 1.1rem;
+            margin-top: 20px;
+            padding: 15px;
             display: none;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
         }
-
-        .success {
-            background-color: #e8f6ef;
-            color: var(--success-color);
-            border: 2px solid var(--success-color);
-        }
-
-        .warning {
-            background-color: #fdefe6;
-            color: var(--warning-color);
-            border: 2px solid var(--warning-color);
-        }
-
-        .processing-time {
-            text-align: center;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        .error-message {
-            color: #e74c3c;
-            text-align: center;
-            margin-top: 1rem;
-            display: none;
-        }
-
-        .character-count {
-            text-align: right;
-            color: #7f8c8d;
-            font-size: 0.9rem;
-            margin-top: 0.5rem;
-        }
-
-        @media (max-width: 600px) {
-            .container {
-                padding: 1rem;
-            }
-            
-            h1 {
-                font-size: 1.5rem;
-            }
-        }
+        .success { background-color: #4CAF50; color: white; }
+        .warning { background-color: #FFC107; color: black; }
     </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Zewail City Antimicrobial Peptide Predictor</h1>
-        
-        <div class="input-group">
-            <textarea 
-                id="sequence" 
-                placeholder="Enter amino acid sequence (10-100 Valid AAs)..."
-                maxlength="100"
-            ></textarea>
-            <div class="character-count">
-                <span id="char-count">0</span>/100
-            </div>
-        </div>
+    <script type="module">
+        import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
 
-        <div class="error-message" id="error"></div>
-
-        <button onclick="predict()" id="predict-btn">Classify Sequence</button>
-
-        <div class="result-card" id="result">
-            <div id="prediction-text"></div>
-        </div>
-
-        <div class="processing-time" id="time"></div>
-    </div>
-
-    <script>
-        const sequenceInput = document.getElementById('sequence');
-        const charCount = document.getElementById('char-count');
-        const errorDiv = document.getElementById('error');
-        const resultDiv = document.getElementById('result');
-        const predictionText = document.getElementById('prediction-text');
-        const timeDiv = document.getElementById('time');
-        const predictBtn = document.getElementById('predict-btn');
-
-        // Character count update
-        sequenceInput.addEventListener('input', () => {
-            const length = sequenceInput.value.length;
-            charCount.textContent = length;
-            
-            if (length < 10) {
-                showError('Sequence must be at least 10 characters');
-            } else if (length > 100) {
-                showError('Sequence cannot exceed 100 characters');
-            } else {
-                clearError();
-            }
-        });
-
-        // Input validation
-        sequenceInput.addEventListener('keypress', (e) => {
-            const validChars = /^[ACDEFGHIKLMNPQRSTVWY]$/i;
-            if (!validChars.test(e.key)) {
-                e.preventDefault();
-                showError('Only standard amino acid characters are allowed');
-            }
-        });
-
-        function showError(message) {
-            errorDiv.textContent = message;
-            errorDiv.style.display = 'block';
-            predictBtn.disabled = true;
-        }
-
-        function clearError() {
-            errorDiv.style.display = 'none';
-            predictBtn.disabled = false;
-        }
-        import { Client } from "@gradio/client";
-        
         async function predict() {
+            const sequenceInput = document.getElementById("sequenceInput");
+            const predictBtn = document.getElementById("predictBtn");
+            const resultDiv = document.getElementById("resultDiv");
+            const predictionText = document.getElementById("predictionText");
+            const timeDiv = document.getElementById("timeDiv");
+
             const sequence = sequenceInput.value.trim().toUpperCase();
-        
+
             // Clear previous results
             resultDiv.style.display = 'none';
             predictionText.textContent = '';
             timeDiv.textContent = '';
-        
+
             // Input validation
             if (sequence.length < 10 || sequence.length > 100) {
-                showError('Sequence length must be between 10 and 100');
+                resultDiv.style.display = 'block';
+                resultDiv.className = 'result-card warning';
+                predictionText.textContent = 'Sequence length must be between 10 and 100 characters.';
                 return;
             }
-        
+
             // Show loading state
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
-        
+
             try {
                 const start = performance.now();
                 
                 // Create Gradio client and send request
                 const client = await Client.connect("nonzeroexit/AMP-Classifier");
                 const result = await client.predict("/predict", { sequence });
-        
+
                 const end = performance.now();
-        
+
                 // Update UI based on result
                 resultDiv.style.display = 'block';
                 resultDiv.className = `result-card ${result.data[0] === 'AMP' ? 'success' : 'warning'}`;
                 predictionText.textContent = `Prediction: ${result.data[0]}`;
                 timeDiv.textContent = `Processing time: ${(end - start).toFixed(2)}ms`;
-        
+
             } catch (error) {
                 console.error("Prediction error:", error);
                 resultDiv.style.display = 'block';
@@ -249,8 +79,17 @@
                 predictBtn.textContent = 'Classify Sequence';
             }
         }
-
-
     </script>
+</head>
+<body>
+    <h1>AMP Classifier</h1>
+    <p>Enter a peptide sequence (10-100 characters):</p>
+    <input type="text" id="sequenceInput" placeholder="Enter sequence" />
+    <button id="predictBtn" onclick="predict()">Classify Sequence</button>
+
+    <div id="resultDiv" class="result-card">
+        <p id="predictionText"></p>
+        <p id="timeDiv"></p>
+    </div>
 </body>
 </html>
