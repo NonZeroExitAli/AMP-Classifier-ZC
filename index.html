@@ -204,6 +204,7 @@
             errorDiv.style.display = 'none';
             predictBtn.disabled = false;
         }
+        
         async function predict() {
             const sequence = document.getElementById('sequence').value.trim().toUpperCase();
             const resultDiv = document.getElementById('result');
@@ -248,6 +249,7 @@
             predictBtn.disabled = false;
             predictBtn.textContent = 'Classify Sequence';
         }
+
 
     </script>
 </body>
