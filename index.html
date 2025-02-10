@@ -221,23 +221,30 @@
             predictBtn.textContent = 'Processing...';
         
             try {
-                // Ensure Gradio client is loaded
-                if (!window.gradio) {
-                    throw new Error("Gradio client is not available. Make sure the script is properly included.");
+                // Replace with your Gradio API URL
+                const API_URL = "https://nonzeroexit-amp-classifier.hf.space/api/predict/";
+        
+                const response = await fetch(API_URL, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ data: [sequence] }) // Ensure data is sent as an array
+                });
+        
+                const result = await response.json();
+                console.log("Prediction response:", result);
+        
+                if (!result.data) {
+                    throw new Error("Invalid response from server.");
                 }
         
-                // Connect to Gradio API
-                const client = await window.gradio.Client.connect("nonzeroexit/AMP-Classifier");
-        
-                // Send sequence to model
-                const response = await client.predict("/predict", { sequence });
-        
-                console.log("Prediction response:", response);
+                // Extract prediction results
+                const prediction = result.data[0];  // Gradio returns data in an array
+                const confidence = (result.data[1] * 100).toFixed(2); // Assuming confidence is the second value
         
                 // Display results
                 resultDiv.style.display = 'block';
-                resultDiv.className = `result-card ${response.data.prediction === 'AMP' ? 'success' : 'warning'}`;
-                predictionText.textContent = `Prediction: ${response.data.prediction} (Confidence: ${response.data.confidence}%)`;
+                resultDiv.className = `result-card ${prediction === 'AMP' ? 'success' : 'warning'}`;
+                predictionText.textContent = `Prediction: ${prediction} (Confidence: ${confidence}%)`;
         
             } catch (error) {
                 console.error('Error:', error);
@@ -249,7 +256,6 @@
             predictBtn.disabled = false;
             predictBtn.textContent = 'Classify Sequence';
         }
-
 
     </script>
 </body>
