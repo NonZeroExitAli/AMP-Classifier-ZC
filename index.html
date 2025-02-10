@@ -204,6 +204,7 @@
             errorDiv.style.display = 'none';
             predictBtn.disabled = false;
         }
+        import { Client } from "@gradio/client";
         
         async function predict() {
             const sequence = document.getElementById('sequence').value.trim().toUpperCase();
@@ -221,25 +222,21 @@
             predictBtn.textContent = 'Processing...';
         
             try {
-                // Replace with your Gradio API URL
-                const API_URL = "https://nonzeroexit-amp-classifier.hf.space/api/predict/";
+                // Initialize Gradio Client
+                const client = await Client.connect("nonzeroexit/AMP-Classifier");
         
-                const response = await fetch(API_URL, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ data: [sequence] }) // Ensure data is sent as an array
-                });
+                // Fetch available options
+                const availableOptions = await client.options("/predict");
+                console.log("Available options:", availableOptions);
         
-                const result = await response.json();
-                console.log("Prediction response:", result);
+                // Send sequence to model
+                const response = await client.predict("/predict", { data: [sequence] });
         
-                if (!result.data) {
-                    throw new Error("Invalid response from server.");
-                }
+                console.log("Prediction response:", response);
         
-                // Extract prediction results
-                const prediction = result.data[0];  // Gradio returns data in an array
-                const confidence = (result.data[1] * 100).toFixed(2); // Assuming confidence is the second value
+                // Extract results
+                const prediction = response.data[0];
+                const confidence = (response.data[1] * 100).toFixed(2);
         
                 // Display results
                 resultDiv.style.display = 'block';
@@ -256,6 +253,7 @@
             predictBtn.disabled = false;
             predictBtn.textContent = 'Classify Sequence';
         }
+
 
     </script>
 </body>
