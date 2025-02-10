@@ -129,7 +129,6 @@
             .container {
                 padding: 1rem;
             }
-            
             h1 {
                 font-size: 1.5rem;
             }
@@ -141,11 +140,7 @@
         <h1>Zewail City Antimicrobial Peptide Predictor</h1>
         
         <div class="input-group">
-            <textarea 
-                id="sequence" 
-                placeholder="Enter amino acid sequence (10-100 Valid AAs)..."
-                maxlength="100"
-            ></textarea>
+            <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
             <div class="character-count">
                 <span id="char-count">0</span>/100
             </div>
@@ -158,8 +153,6 @@
         <div class="result-card" id="result">
             <div id="prediction-text"></div>
         </div>
-
-        <div class="processing-time" id="time"></div>
     </div>
 
     <script>
@@ -168,27 +161,15 @@
         const errorDiv = document.getElementById('error');
         const resultDiv = document.getElementById('result');
         const predictionText = document.getElementById('prediction-text');
-        const timeDiv = document.getElementById('time');
         const predictBtn = document.getElementById('predict-btn');
 
-        // Character count update
         sequenceInput.addEventListener('input', () => {
-            const length = sequenceInput.value.length;
-            charCount.textContent = length;
-            
-            if (length < 10) {
-                showError('Sequence must be at least 10 characters');
-            } else if (length > 100) {
-                showError('Sequence cannot exceed 100 characters');
-            } else {
-                clearError();
-            }
+            charCount.textContent = sequenceInput.value.length;
+            validateInput();
         });
 
-        // Input validation
         sequenceInput.addEventListener('keypress', (e) => {
-            const validChars = /^[ACDEFGHIKLMNPQRSTVWY]$/i;
-            if (!validChars.test(e.key)) {
+            if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
                 e.preventDefault();
                 showError('Only standard amino acid characters are allowed');
             }
@@ -204,67 +185,46 @@
             errorDiv.style.display = 'none';
             predictBtn.disabled = false;
         }
-        import { Client } from "@gradio/client";
-        
+
+        function validateInput() {
+            const length = sequenceInput.value.length;
+            if (length < 10) showError('Sequence must be at least 10 characters');
+            else clearError();
+        }
+
         async function predict() {
-            const sequence = document.getElementById('sequence').value.trim().toUpperCase();
-            const resultDiv = document.getElementById('result');
-            const predictionText = document.getElementById('prediction-text');
-            const predictBtn = document.getElementById('predict-btn');
-        
-            // Validate sequence length
+            const sequence = sequenceInput.value.trim().toUpperCase();
             if (sequence.length < 10 || sequence.length > 100) {
-                alert('Sequence length must be between 10 and 100.');
+                showError('Sequence length must be between 10 and 100.');
                 return;
             }
-        
+
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
-        
+            
             try {
-                // Fetch available model options (optional)
-                const optionsResponse = await fetch("https://nonzeroexit-amp-classifier.hf.space/api/predict", {
-                    method: "OPTIONS"
-                });
-                const optionsData = await optionsResponse.json();
-                console.log("Model options:", optionsData);
-        
-                // Make prediction request
                 const response = await fetch("https://nonzeroexit-amp-classifier.hf.space/api/predict", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ data: [sequence] })
                 });
-        
+
                 if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
-        
+                
                 const responseData = await response.json();
-                console.log("Prediction response:", responseData);
-        
-                // Extract prediction results
-                const prediction = responseData.data[0]; // AMP or non-AMP
-                const confidence = (responseData.data[1] * 100).toFixed(2); // Convert confidence to %
-        
-                // Display results
+                const prediction = responseData.data[0];
+                const confidence = (responseData.data[1] * 100).toFixed(2);
+                
                 resultDiv.style.display = 'block';
                 resultDiv.className = `result-card ${prediction === 'AMP' ? 'success' : 'warning'}`;
                 predictionText.textContent = `Prediction: ${prediction} (Confidence: ${confidence}%)`;
-        
             } catch (error) {
-                console.error('Error:', error);
-                predictionText.textContent = 'Error: Unable to classify sequence. Please try again.';
-                resultDiv.style.display = 'block';
-                resultDiv.className = 'result-card warning';
+                showError('Error: Unable to classify sequence. Please try again.');
             }
-        
+
             predictBtn.disabled = false;
             predictBtn.textContent = 'Classify Sequence';
         }
-
-
-
     </script>
 </body>
 </html>
