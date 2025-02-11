@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMP Classifier</title>
     <style>
+        /* Your CSS styles (no changes needed here) */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -103,7 +104,7 @@
 <body>
     <div class="container">
         <h1>Zewail City Antimicrobial Peptide Predictor</h1>
-        
+
         <div class="input-group">
             <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
             <div class="character-count">
@@ -148,9 +149,14 @@
 
         function validateInput() {
             const length = sequenceInput.value.length;
-            if (length < 10) showError('Sequence must be at least 10 characters');
-            else clearError();
+            if (length < 10) {
+                showError('Sequence must be at least 10 characters');
+            }
+            else {
+                clearError();
+            }
         }
+
 
         function classifySequence() {
             const sequence = sequenceInput.value.trim().toUpperCase();
@@ -158,24 +164,95 @@
                 showError('Sequence length must be between 10 and 100.');
                 return;
             }
-            
+
             clearError();
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
             resultDiv.textContent = '';
 
             const apiURL = `https://nonzeroexit-amp-classifier.hf.space?s=${encodeURIComponent(sequence)}`;
-            
+
             fetch(apiURL)
-                .then(response => response.text())
-                .then(data => {
-                    console.log("Raw response:", data);
-                    let result = data.trim() === "Non-AMP" ? "Non-AMP" : "AMP"; // Strict check
-                    resultDiv.textContent = "Classification: " + result;
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! Status: ${response.status}`);
+                    }
+                    const contentType = response.headers.get('Content-Type');
+                    console.log("Content-Type:", contentType); // Log for debugging
+
+                    // Try JSON first, as it's efficient if it's the correct format.
+                    if (contentType && contentType.includes('application/json')) {
+                        return response.json().then(data => ({ type: 'json', data }));
+                    } else {
+                        // Fallback to text (for HTML or plain text)
+                        return response.text().then(data => ({ type: 'text', data }));
+                    }
+                })
+                .then(responseObj => {
+                    console.log("Raw response:", responseObj.data); // ALWAYS LOG THE RAW DATA
+
+                    if (responseObj.type === 'json') {
+                        // --- JSON Handling ---
+                        const data = responseObj.data;
+                        // *** INSPECT THE JSON IN THE CONSOLE TO DETERMINE THE CORRECT KEY ***
+                        let result = data.classification; // Example: if the JSON is { "classification": "AMP" }
+                        //  OR: let result = data.result.prediction; //Another possible key structure
+
+                        //If it is not consistent (sometimes AMP, sometimes Antimicrobial Peptide)
+                        if (typeof result === 'string') {
+                            result = result.toLowerCase().includes("non") ? "Non-AMP" : "AMP";
+                        }
+
+                        if (result) {
+                            resultDiv.textContent = "Classification: " + result;
+                        } else {
+                            showError("Could not find classification data in JSON.");
+                        }
+
+                    } else {
+                        // --- HTML (or Plain Text) Handling ---
+                        const data = responseObj.data;
+                        const parser = new DOMParser();
+                        const doc = parser.parseFromString(data, 'text/html');
+
+                        // *** YOU MUST INSPECT THE HTML IN THE CONSOLE TO FIND THE CORRECT SELECTOR ***
+                        // This is just an example; it WILL likely be different for your API.
+                        const classificationElement = doc.querySelector('.result-class'); // Example
+                        // OR: const classificationElement = doc.getElementById('result-id'); // Example
+                        // OR const classificationElement = doc.querySelector('div > p:nth-child(2)');
+
+                        if (classificationElement) {
+                            const classificationText = classificationElement.textContent.trim();
+                            let result;
+                            if (classificationText.toLowerCase().includes("non-amp") || classificationText.toLowerCase().includes("non antimicrobial") || classificationText.toLowerCase().includes("not an amp")) {
+                                result = "Non-AMP";
+                            } else if (classificationText.toLowerCase().includes("amp") || classificationText.toLowerCase().includes("antimicrobial")) {
+                                result = "AMP";
+                            } else {
+                                result = "Unknown";
+                                showError("Could not determine classification.");
+                            }
+                            resultDiv.textContent = "Classification: " + result;
+
+                        } else {
+                            // If no element found, it might be plain text.  Check for that.
+                            const cleanedData = data.trim().toLowerCase();
+                            let result;
+                             if (cleanedData.includes("non-amp")) {
+                                result = "Non-AMP";
+                            } else if (cleanedData.includes("amp")) {
+                                result = "AMP";
+                            } else {
+                                result = "Unknown"; // Handle cases where it's neither
+                                showError("Could not determine classification from response.");
+                            }
+                            resultDiv.textContent = "Classification: " + result;
+                        }
+                    }
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
-                    showError("Failed to get response from classifier.");
+                    showError("Failed to get response from classifier: " + error.message);
                 })
                 .finally(() => {
                     predictBtn.disabled = false;
