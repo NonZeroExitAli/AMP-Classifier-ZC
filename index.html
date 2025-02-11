@@ -11,145 +11,146 @@
             --success-color: #27ae60;
             --warning-color: #e67e22;
         }
-body {
-        font-family: 'Arial', sans-serif;
-        line-height: 1.6;
-        margin: 0;
-        padding: 20px;
-        min-height: 100vh;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        background-color: #f5f6fa;
-    }
 
-    .container {
-        max-width: 800px;
-        width: 100%;
-        padding: 2rem;
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-        text-align: center;
-    }
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f6fa;
+        }
 
-    h1 {
-        color: var(--primary-color);
-        margin-bottom: 2rem;
-    }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
 
-    .input-group {
-        margin-bottom: 1.5rem;
-    }
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
 
-    #sequence {
-        width: 100%;
-        height: 150px;
-        padding: 1rem;
-        border: 2px solid #ddd;
-        border-radius: 8px;
-        font-family: monospace;
-        font-size: 1rem;
-        resize: vertical;
-        transition: border-color 0.3s ease;
-    }
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
 
-    #sequence:focus {
-        outline: none;
-        border-color: var(--secondary-color);
-    }
+        #sequence {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
 
-    button {
-        background-color: var(--secondary-color);
-        color: white;
-        border: none;
-        padding: 0.8rem 2rem;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 1rem;
-        transition: transform 0.2s ease, background-color 0.3s ease;
-        width: 100%;
-        margin-top: 1rem;
-    }
+        #sequence:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
 
-    button:hover {
-        background-color: #2980b9;
-        transform: translateY(-1px);
-    }
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
 
-    .character-count {
-        text-align: right;
-        color: #7f8c8d;
-        font-size: 0.9rem;
-        margin-top: 0.5rem;
-    }
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
 
-    .error-message {
-        color: #e74c3c;
-        text-align: center;
-        margin-top: 1rem;
-        display: none;
-    }
+        .character-count {
+            text-align: right;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
 
-    .result {
-        margin-top: 1.5rem;
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: var(--primary-color);
-    }
-</style>
- Use code with caution.
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .result {
+            margin-top: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h1>Zewail City Antimicrobial Peptide Predictor</h1>
-<div class="input-group">
-        <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
-        <div class="character-count">
-            <span id="char-count">0</span>/100
+        
+        <div class="input-group">
+            <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
+            <div class="character-count">
+                <span id="char-count">0</span>/100
+            </div>
         </div>
+
+        <div class="error-message" id="error"></div>
+        <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
+        <div class="result" id="result"></div>
     </div>
 
-    <div class="error-message" id="error"></div>
-    <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
-    <div class="result" id="result"></div>
-</div>
+    <script>
+        const sequenceInput = document.getElementById('sequence');
+        const charCount = document.getElementById('char-count');
+        const errorDiv = document.getElementById('error');
+        const predictBtn = document.getElementById('predict-btn');
+        const resultDiv = document.getElementById('result');
 
-<script>
-    const sequenceInput = document.getElementById('sequence');
-    const charCount = document.getElementById('char-count');
-    const errorDiv = document.getElementById('error');
-    const predictBtn = document.getElementById('predict-btn');
-    const resultDiv = document.getElementById('result');
+        sequenceInput.addEventListener('input', () => {
+            charCount.textContent = sequenceInput.value.length;
+            validateInput();
+        });
 
-    sequenceInput.addEventListener('input', () => {
-        charCount.textContent = sequenceInput.value.length;
-        validateInput();
-    });
+        sequenceInput.addEventListener('keypress', (e) => {
+            if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
+                e.preventDefault();
+                showError('Only standard amino acid characters are allowed');
+            }
+        });
 
-    sequenceInput.addEventListener('keypress', (e) => {
-        if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
-            e.preventDefault();
-            showError('Only standard amino acid characters are allowed');
+        function showError(message) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+            predictBtn.disabled = true;
         }
-    });
 
-    function showError(message) {
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-        predictBtn.disabled = true;
-    }
+        function clearError() {
+            errorDiv.style.display = 'none';
+            predictBtn.disabled = false;
+        }
 
-    function clearError() {
-        errorDiv.style.display = 'none';
-        predictBtn.disabled = false;
-    }
-
-    function validateInput() {
-        const length = sequenceInput.value.length;
-        if (length < 10) showError('Sequence must be at least 10 characters');
-        else clearError();
-    }
+        function validateInput() {
+            const length = sequenceInput.value.length;
+            if (length < 10) showError('Sequence must be at least 10 characters');
+            else clearError();
+        }
 
         function classifySequence() {
             const sequence = sequenceInput.value.trim().toUpperCase();
@@ -157,44 +158,30 @@ body {
                 showError('Sequence length must be between 10 and 100.');
                 return;
             }
-        
+            
             clearError();
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
             resultDiv.textContent = '';
-        
-            const apiURL = `https://nonzeroexit-amp-classifier.hf.space/api/predict`; // Correct API endpoint
-        
-            fetch(apiURL, {  // Use a POST request
-                method: 'GET',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ data: [sequence] })  // Send data as JSON
-            })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`HTTP error ${response.status}`);
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log("API Response:", data);
-                if (data && data.data && data.data[0] && data.data[0].label) {
-                    let result = data.data[0].label;
+
+            const apiURL = `https://nonzeroexit-amp-classifier.hf.space?s=${encodeURIComponent(sequence)}`;
+            
+            fetch(apiURL)
+                .then(response => response.text())
+                .then(data => {
+                    console.log("Raw response:", data);
+                    let result = data.includes("Non-AMP") ? "Non-AMP" : "AMP";
                     resultDiv.textContent = "Classification: " + result;
-                } else {
-                    showError("Unexpected response format. See console.");
-                    console.error("Unexpected Response:", data);
-                }
-            })
-            .catch(error => {
-                console.error("Prediction error:", error);
-                showError("Failed to get a prediction.  Try again later.");
-            })
-            .finally(() => {
-                predictBtn.disabled = false;
-                predictBtn.textContent = 'Classify Sequence';
-            });
+                })
+                .catch(error => {
+                    console.error("Error fetching data:", error);
+                    showError("Failed to get response from classifier.");
+                })
+                .finally(() => {
+                    predictBtn.disabled = false;
+                    predictBtn.textContent = 'Classify Sequence';
+                });
         }
-</script>
+    </script>
 </body>
 </html>
