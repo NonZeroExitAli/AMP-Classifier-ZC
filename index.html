@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMP Classifier</title>
     <style>
-        /* Your CSS (no changes) */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -99,22 +98,12 @@
             font-weight: bold;
             color: var(--primary-color);
         }
-
-    .loading-indicator { /* Add a loading indicator */
-      display: none; /* Hidden by default */
-      margin-top: 0.5rem;
-      color: #3498db;
-    }
-
-    .loading-indicator.active { /* Show when active */
-        display: block;
-    }
     </style>
 </head>
 <body>
     <div class="container">
         <h1>Zewail City Antimicrobial Peptide Predictor</h1>
-
+        
         <div class="input-group">
             <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
             <div class="character-count">
@@ -124,7 +113,6 @@
 
         <div class="error-message" id="error"></div>
         <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
-         <div class="loading-indicator" id="loading">Loading...</div>  <!-- Loading indicator -->
         <div class="result" id="result"></div>
     </div>
 
@@ -134,7 +122,6 @@
         const errorDiv = document.getElementById('error');
         const predictBtn = document.getElementById('predict-btn');
         const resultDiv = document.getElementById('result');
-        const loadingIndicator = document.getElementById('loading'); // Get loading indicator
 
         sequenceInput.addEventListener('input', () => {
             charCount.textContent = sequenceInput.value.length;
@@ -152,7 +139,6 @@
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
             predictBtn.disabled = true;
-             loadingIndicator.classList.remove('active'); // Hide loading indicator on error
         }
 
         function clearError() {
@@ -162,12 +148,8 @@
 
         function validateInput() {
             const length = sequenceInput.value.length;
-            if (length < 10) {
-                showError('Sequence must be at least 10 characters');
-            }
-            else {
-                clearError();
-            }
+            if (length < 10) showError('Sequence must be at least 10 characters');
+            else clearError();
         }
 
         function classifySequence() {
@@ -176,84 +158,28 @@
                 showError('Sequence length must be between 10 and 100.');
                 return;
             }
-
+            
             clearError();
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
             resultDiv.textContent = '';
-            loadingIndicator.classList.add('active'); // Show loading indicator
 
             const apiURL = `https://nonzeroexit-amp-classifier.hf.space?s=${encodeURIComponent(sequence)}`;
-
+            
             fetch(apiURL)
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error(`HTTP error! Status: ${response.status}`);
-                    }
-                    return response.text();
-                })
-                .then(htmlText => {
-                    console.log("Raw HTML:", htmlText);
-
-                    const parser = new DOMParser();
-                    const doc = parser.parseFromString(htmlText, 'text/html');
-
-                    // *** Observe a PARENT element ***
-                    //  '#component-1' is a good candidate, based on the full HTML you provided.
-                    const parentElement = doc.querySelector('#component-1');
-
-                    if (!parentElement) {
-                        showError("Could not find the parent element.");
-                        return;
-                    }
-
-                    const observer = new MutationObserver((mutationsList, observer) => {
-                       // Use a MORE GENERAL selector *inside* the observer.
-                       //  Look for ANY element with text content "AMP" or "Non-AMP",
-                       //  *within* the parentElement.
-
-                        const classificationElement = parentElement.querySelector('div:not(.empty)'); // Select non-empty divs
-                       console.log("Classification Element (inside observer):", classificationElement)
-
-                        if (classificationElement && classificationElement.textContent.trim() !== "") {
-
-                            const classificationText = classificationElement.textContent.trim();
-                            console.log("Classification Text (from observer):", classificationText);
-
-                            let result;
-                            const nonAmpRegex = /non[- ]?amp|not antimicrobial|non[- ]?antimicrobial/i;
-                            if (nonAmpRegex.test(classificationText)) {
-                                result = "Non-AMP";
-                            } else if (classificationText.toLowerCase().includes("amp")){
-                                result = "AMP";
-                            }
-                            else {
-                                result = "Unknown";
-                                showError("Could not determine classification.");
-                            }
-
-                            resultDiv.textContent = "Classification: " + result;
-                            observer.disconnect();
-                            predictBtn.disabled = false;
-                            predictBtn.textContent = 'Classify Sequence';
-                             loadingIndicator.classList.remove('active'); // Hide loading indicator
-                        }
-                    });
-
-                    observer.observe(parentElement, { childList: true, subtree: true, attributes: true, characterData: true });
-                    //Observe changes in all the descendant of the parent, including attributes, and data changes.
-
-                    // Inject the *parent* element into the DOM
-                    resultDiv.innerHTML = ''; // Clear previous content
-                    resultDiv.appendChild(parentElement);
-
+                .then(response => response.text())
+                .then(data => {
+                    console.log("Raw response:", data);
+                    let result = data.includes("Non-AMP") ? "Non-AMP" : "AMP";
+                    resultDiv.textContent = "Classification: " + result;
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
-                    showError("Failed to get response from classifier: " + error.message);
-                    predictBtn.disabled = false; //Re-enable even on error
+                    showError("Failed to get response from classifier.");
+                })
+                .finally(() => {
+                    predictBtn.disabled = false;
                     predictBtn.textContent = 'Classify Sequence';
-                    loadingIndicator.classList.remove('active'); // Hide loading indicator on error
                 });
         }
     </script>
