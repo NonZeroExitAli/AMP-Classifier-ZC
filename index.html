@@ -31,11 +31,11 @@
             background: white;
             border-radius: 10px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            text-align: center;
         }
 
         h1 {
             color: var(--primary-color);
-            text-align: center;
             margin-bottom: 2rem;
         }
 
@@ -92,10 +92,12 @@
             display: none;
         }
 
-        .iframe-container {
+        .result {
             margin-top: 2rem;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
             display: none;
-            text-align: center;
         }
     </style>
 </head>
@@ -104,7 +106,7 @@
         <h1>Zewail City Antimicrobial Peptide Predictor</h1>
         
         <div class="input-group">
-            <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
+            <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)" maxlength="100"></textarea>
             <div class="character-count">
                 <span id="char-count">0</span>/100
             </div>
@@ -112,11 +114,9 @@
 
         <div class="error-message" id="error"></div>
 
-        <button onclick="updateIframe()" id="predict-btn">Classify Sequence</button>
+        <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
 
-        <div class="iframe-container" id="iframe-container">
-            <iframe id="classifier-iframe" src="https://nonzeroexit-amp-classifier.hf.space" frameborder="0" width="850" height="450"></iframe>
-        </div>
+        <div class="result" id="result"></div>
     </div>
 
     <script>
@@ -124,8 +124,7 @@
         const charCount = document.getElementById('char-count');
         const errorDiv = document.getElementById('error');
         const predictBtn = document.getElementById('predict-btn');
-        const iframeContainer = document.getElementById('iframe-container');
-        const classifierIframe = document.getElementById('classifier-iframe');
+        const resultDiv = document.getElementById('result');
 
         sequenceInput.addEventListener('input', () => {
             charCount.textContent = sequenceInput.value.length;
@@ -156,7 +155,7 @@
             else clearError();
         }
 
-        function updateIframe() {
+        async function classifySequence() {
             const sequence = sequenceInput.value.trim().toUpperCase();
             if (sequence.length < 10 || sequence.length > 100) {
                 showError('Sequence length must be between 10 and 100.');
@@ -166,14 +165,27 @@
             clearError();
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
-
-            iframeContainer.style.display = 'block';
-            classifierIframe.src = `https://nonzeroexit-amp-classifier.hf.space?s=${encodeURIComponent(sequence)}`;
-
-            setTimeout(() => {
-                predictBtn.disabled = false;
-                predictBtn.textContent = 'Classify Sequence';
-            }, 3000);
+            resultDiv.style.display = 'none';
+            
+            try {
+                const response = await fetch(`https://nonzeroexit-amp-classifier.hf.space?s=${encodeURIComponent(sequence)}`);
+                const text = await response.text();
+                
+                const match = text.match(/(AMP|Non-AMP)/);
+                if (match) {
+                    resultDiv.textContent = match[0];
+                    resultDiv.style.display = 'block';
+                } else {
+                    resultDiv.textContent = 'Classification Error';
+                    resultDiv.style.display = 'block';
+                }
+            } catch (error) {
+                resultDiv.textContent = 'Error fetching classification';
+                resultDiv.style.display = 'block';
+            }
+            
+            predictBtn.disabled = false;
+            predictBtn.textContent = 'Classify Sequence';
         }
     </script>
 </body>
