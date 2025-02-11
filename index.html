@@ -170,7 +170,7 @@
                 .then(response => response.text())
                 .then(data => {
                     console.log("Raw response:", data);
-                    let result = data.includes("Non-AMP") ? "Non-AMP" : "AMP";
+                    let result = data.includes("non-AMP") ? "non-AMP" : "AMP";
                     resultDiv.textContent = "Classification: " + result;
                 })
                 .catch(error => {
