@@ -151,36 +151,50 @@ body {
         else clearError();
     }
 
-    function classifySequence() {
-        const sequence = sequenceInput.value.trim().toUpperCase();
-        if (sequence.length < 10 || sequence.length > 100) {
-            showError('Sequence length must be between 10 and 100.');
-            return;
-        }
+        function classifySequence() {
+            const sequence = sequenceInput.value.trim().toUpperCase();
+            if (sequence.length < 10 || sequence.length > 100) {
+                showError('Sequence length must be between 10 and 100.');
+                return;
+            }
         
-        clearError();
-        predictBtn.disabled = true;
-        predictBtn.textContent = 'Processing...';
-        resultDiv.textContent = '';
-
-        const apiURL = `https://nonzeroexit-amp-classifier.hf.space?s=${encodeURIComponent(sequence)}`;
+            clearError();
+            predictBtn.disabled = true;
+            predictBtn.textContent = 'Processing...';
+            resultDiv.textContent = '';
         
-        fetch(apiURL)
-            .then(response => response.text())
+            const apiURL = `https://nonzeroexit-amp-classifier.hf.space/api/predict`; // Correct API endpoint
+        
+            fetch(apiURL, {  // Use a POST request
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ data: [sequence] })  // Send data as JSON
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error ${response.status}`);
+                }
+                return response.json();
+            })
             .then(data => {
-                console.log("Raw response:", data);
-                let result = data.includes("Non-AMP") ? "Non-AMP" : "AMP";
-                resultDiv.textContent = "Classification: " + result;
+                console.log("API Response:", data);
+                if (data && data.data && data.data[0] && data.data[0].label) {
+                    let result = data.data[0].label;
+                    resultDiv.textContent = "Classification: " + result;
+                } else {
+                    showError("Unexpected response format. See console.");
+                    console.error("Unexpected Response:", data);
+                }
             })
             .catch(error => {
-                console.error("Error fetching data:", error);
-                showError("Failed to get response from classifier.");
+                console.error("Prediction error:", error);
+                showError("Failed to get a prediction.  Try again later.");
             })
             .finally(() => {
                 predictBtn.disabled = false;
                 predictBtn.textContent = 'Classify Sequence';
             });
-    }
+        }
 </script>
 </body>
 </html>
