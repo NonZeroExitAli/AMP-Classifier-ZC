@@ -166,7 +166,7 @@ body {
             const apiURL = `https://nonzeroexit-amp-classifier.hf.space/api/predict`; // Correct API endpoint
         
             fetch(apiURL, {  // Use a POST request
-                method: 'POST',
+                method: 'GET',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ data: [sequence] })  // Send data as JSON
             })
