@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMP Classifier</title>
     <style>
+        /* (Your existing CSS - no changes needed here) */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -116,17 +117,54 @@
         <div class="result" id="result"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@gradio/client@0.2.7/dist/index.min.js"></script>
     <script>
         const sequenceInput = document.getElementById('sequence');
         const charCount = document.getElementById('char-count');
         const errorDiv = document.getElementById('error');
         const predictBtn = document.getElementById('predict-btn');
         const resultDiv = document.getElementById('result');
+        let client; // Store the Gradio client instance
+
+        // Initialize the Gradio client when the page loads
+        async function initClient() {
+            try {
+                client = await window.gradio.client("nonzeroexit/AMP-Classifier");
+                console.log("Gradio client initialized:", client);
+            } catch (error) {
+                console.error("Failed to initialize Gradio client:", error);
+                showError("Failed to connect to the classifier service.");
+                predictBtn.disabled = true; // Disable button if client fails
+            }
+        }
+
+        initClient(); // Call the initialization function
 
         sequenceInput.addEventListener('input', () => {
             charCount.textContent = sequenceInput.value.length;
             validateInput();
         });
+
+       sequenceInput.addEventListener('paste', (e) => {
+            let paste = (e.clipboardData || window.clipboardData).getData('text');
+            paste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, ''); // Remove invalid chars
+            const currentText = sequenceInput.value;
+            const selectionStart = sequenceInput.selectionStart;
+            const selectionEnd = sequenceInput.selectionEnd;
+            const newText = currentText.substring(0, selectionStart) + paste + currentText.substring(selectionEnd);
+
+            if (newText.length > 100) {
+                showError('Sequence cannot exceed 100 characters after pasting.');
+                e.preventDefault(); // Prevent pasting if it exceeds the limit
+                return;
+            }
+          sequenceInput.value = newText
+          charCount.textContent = sequenceInput.value.length;
+          validateInput();
+          e.preventDefault();
+          
+        });
+
 
         sequenceInput.addEventListener('keypress', (e) => {
             if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
@@ -148,39 +186,34 @@
 
         function validateInput() {
             const length = sequenceInput.value.length;
-            if (length < 10) showError('Sequence must be at least 10 characters');
+            if (length < 10 && length !=0) showError('Sequence must be at least 10 characters');
             else clearError();
         }
 
-        function classifySequence() {
+
+        async function classifySequence() {
             const sequence = sequenceInput.value.trim().toUpperCase();
             if (sequence.length < 10 || sequence.length > 100) {
                 showError('Sequence length must be between 10 and 100.');
                 return;
             }
-            
+
             clearError();
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
             resultDiv.textContent = '';
 
-            const apiURL = `https://nonzeroexit-amp-classifier.hf.space?s=${encodeURIComponent(sequence)}`;
-            
-            fetch(apiURL)
-                .then(response => response.text())
-                .then(data => {
-                    console.log("Raw response:", data);
-                    let result = data.includes("Non-AMP") ? "Non-AMP" : "AMP";
-                    resultDiv.textContent = "Classification: " + result;
-                })
-                .catch(error => {
-                    console.error("Error fetching data:", error);
-                    showError("Failed to get response from classifier.");
-                })
-                .finally(() => {
-                    predictBtn.disabled = false;
-                    predictBtn.textContent = 'Classify Sequence';
-                });
+            try {
+                const result = await client.predict("/predict", [sequence]);
+                console.log("Prediction result:", result);
+                resultDiv.textContent = "Classification: " + result.data[0].label;  // Access the label correctly
+            } catch (error) {
+                console.error("Error during prediction:", error);
+                showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+            } finally {
+                predictBtn.disabled = false;
+                predictBtn.textContent = 'Classify Sequence';
+            }
         }
     </script>
 </body>
