@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMP Classifier</title>
     <style>
-        /* (Your existing CSS - no changes needed here) */
+        /* Your existing CSS */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -117,6 +117,7 @@
         <div class="result" id="result"></div>
     </div>
 
+    <!-- TRY THIS FIRST (Module Approach with window.onload) -->
     <script type="module">
         import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
         window.gradio = { client }; // Make it available globally
@@ -141,7 +142,9 @@
             }
         }
 
-        initClient(); // Call the initialization function
+        window.onload = function() {
+            initClient(); // Call initClient ONLY after the entire page has loaded
+        };
 
         sequenceInput.addEventListener('input', () => {
             charCount.textContent = sequenceInput.value.length;
@@ -219,5 +222,53 @@
             }
         }
     </script>
+
+    <!-- IF THE ABOVE DOESN'T WORK, TRY THIS FALLBACK (Non-Module Approach) -->
+    <!--
+    <script src="https://cdn.jsdelivr.net/npm/@gradio/client@0.2.7/dist/index.min.js"></script>
+    <script>
+      let client; // Store the Gradio client instance
+
+        // Initialize the Gradio client when the page loads
+        async function initClient() {
+            try {
+                client = await window.gradio.client("nonzeroexit/AMP-Classifier");
+                console.log("Gradio client initialized:", client);
+            } catch (error) {
+                console.error("Failed to initialize Gradio client:", error);
+                showError("Failed to connect to the classifier service.");
+                predictBtn.disabled = true; // Disable button if client fails
+            }
+        }
+
+        window.onload = function() {
+            initClient(); // Call initClient ONLY after the entire page has loaded
+        };
+     async function classifySequence() {
+            const sequence = sequenceInput.value.trim().toUpperCase();
+            if (sequence.length < 10 || sequence.length > 100) {
+                showError('Sequence length must be between 10 and 100.');
+                return;
+            }
+
+            clearError();
+            predictBtn.disabled = true;
+            predictBtn.textContent = 'Processing...';
+            resultDiv.textContent = '';
+
+            try {
+                const result = await client.predict("/predict", [sequence]);
+                console.log("Prediction result:", result);
+                resultDiv.textContent = "Classification: " + result.data[0].label;  // Access the label correctly
+            } catch (error) {
+                console.error("Error during prediction:", error);
+                showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+            } finally {
+                predictBtn.disabled = false;
+                predictBtn.textContent = 'Classify Sequence';
+            }
+        }
+    </script>
+    -->
 </body>
 </html>
