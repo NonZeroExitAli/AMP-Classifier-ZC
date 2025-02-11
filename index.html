@@ -117,20 +117,23 @@
         <div class="result" id="result"></div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@gradio/client@0.2.7/dist/index.min.js"></script>
+    <script type="module">
+        import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
+        window.gradio = { client }; // Make it available globally
+    </script>
     <script>
         const sequenceInput = document.getElementById('sequence');
         const charCount = document.getElementById('char-count');
         const errorDiv = document.getElementById('error');
         const predictBtn = document.getElementById('predict-btn');
         const resultDiv = document.getElementById('result');
-        let client; // Store the Gradio client instance
+        let clientInstance; // Store the Gradio client instance
 
         // Initialize the Gradio client when the page loads
         async function initClient() {
             try {
-                client = await window.gradio.client("nonzeroexit/AMP-Classifier");
-                console.log("Gradio client initialized:", client);
+                clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier");
+                console.log("Gradio client initialized:", clientInstance);
             } catch (error) {
                 console.error("Failed to initialize Gradio client:", error);
                 showError("Failed to connect to the classifier service.");
@@ -204,7 +207,7 @@
             resultDiv.textContent = '';
 
             try {
-                const result = await client.predict("/predict", [sequence]);
+                const result = await clientInstance.predict("/predict", [sequence]);
                 console.log("Prediction result:", result);
                 resultDiv.textContent = "Classification: " + result.data[0].label;  // Access the label correctly
             } catch (error) {
