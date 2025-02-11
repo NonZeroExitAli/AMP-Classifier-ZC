@@ -5,102 +5,111 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AMP Classifier</title>
     <style>
-/* Your CSS (no changes needed) */
-:root {
-    --primary-color: #2c3e50;
-    --secondary-color: #3498db;
-    --success-color: #27ae60;
-    --warning-color: #e67e22;
-}
+        /* Your CSS (no changes) */
+        :root {
+            --primary-color: #2c3e50;
+            --secondary-color: #3498db;
+            --success-color: #27ae60;
+            --warning-color: #e67e22;
+        }
 
-body {
-    font-family: 'Arial', sans-serif;
-    line-height: 1.6;
-    margin: 0;
-    padding: 20px;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    background-color: #f5f6fa;
-}
+        body {
+            font-family: 'Arial', sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-color: #f5f6fa;
+        }
 
-.container {
-    max-width: 800px;
-    width: 100%;
-    padding: 2rem;
-    background: white;
-    border-radius: 10px;
-    box-shadow: 0 2px 15px rgba(0,0,0,0.1);
-    text-align: center;
-}
+        .container {
+            max-width: 800px;
+            width: 100%;
+            padding: 2rem;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.1);
+            text-align: center;
+        }
 
-h1 {
-    color: var(--primary-color);
-    margin-bottom: 2rem;
-}
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 2rem;
+        }
 
-.input-group {
-    margin-bottom: 1.5rem;
-}
+        .input-group {
+            margin-bottom: 1.5rem;
+        }
 
-#sequence {
-    width: 100%;
-    height: 150px;
-    padding: 1rem;
-    border: 2px solid #ddd;
-    border-radius: 8px;
-    font-family: monospace;
-    font-size: 1rem;
-    resize: vertical;
-    transition: border-color 0.3s ease;
-}
+        #sequence {
+            width: 100%;
+            height: 150px;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 1rem;
+            resize: vertical;
+            transition: border-color 0.3s ease;
+        }
 
-#sequence:focus {
-    outline: none;
-    border-color: var(--secondary-color);
-}
+        #sequence:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
 
-button {
-    background-color: var(--secondary-color);
-    color: white;
-    border: none;
-    padding: 0.8rem 2rem;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 1rem;
-    transition: transform 0.2s ease, background-color 0.3s ease;
-    width: 100%;
-    margin-top: 1rem;
-}
+        button {
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.8rem 2rem;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: transform 0.2s ease, background-color 0.3s ease;
+            width: 100%;
+            margin-top: 1rem;
+        }
 
-button:hover {
-    background-color: #2980b9;
-    transform: translateY(-1px);
-}
+        button:hover {
+            background-color: #2980b9;
+            transform: translateY(-1px);
+        }
 
-.character-count {
-    text-align: right;
-    color: #7f8c8d;
-    font-size: 0.9rem;
-    margin-top: 0.5rem;
-}
+        .character-count {
+            text-align: right;
+            color: #7f8c8d;
+            font-size: 0.9rem;
+            margin-top: 0.5rem;
+        }
 
-.error-message {
-    color: #e74c3c;
-    text-align: center;
-    margin-top: 1rem;
-    display: none;
-}
+        .error-message {
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 1rem;
+            display: none;
+        }
 
-.result {
-    margin-top: 1.5rem;
-    font-size: 1.2rem;
-    font-weight: bold;
-    color: var(--primary-color);
-}
+        .result {
+            margin-top: 1.5rem;
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+
+    .loading-indicator { /* Add a loading indicator */
+      display: none; /* Hidden by default */
+      margin-top: 0.5rem;
+      color: #3498db;
+    }
+
+    .loading-indicator.active { /* Show when active */
+        display: block;
+    }
     </style>
-
 </head>
 <body>
     <div class="container">
@@ -115,6 +124,7 @@ button:hover {
 
         <div class="error-message" id="error"></div>
         <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
+         <div class="loading-indicator" id="loading">Loading...</div>  <!-- Loading indicator -->
         <div class="result" id="result"></div>
     </div>
 
@@ -124,6 +134,7 @@ button:hover {
         const errorDiv = document.getElementById('error');
         const predictBtn = document.getElementById('predict-btn');
         const resultDiv = document.getElementById('result');
+        const loadingIndicator = document.getElementById('loading'); // Get loading indicator
 
         sequenceInput.addEventListener('input', () => {
             charCount.textContent = sequenceInput.value.length;
@@ -141,6 +152,7 @@ button:hover {
             errorDiv.textContent = message;
             errorDiv.style.display = 'block';
             predictBtn.disabled = true;
+             loadingIndicator.classList.remove('active'); // Hide loading indicator on error
         }
 
         function clearError() {
@@ -169,6 +181,7 @@ button:hover {
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
             resultDiv.textContent = '';
+            loadingIndicator.classList.add('active'); // Show loading indicator
 
             const apiURL = `https://nonzeroexit-amp-classifier.hf.space?s=${encodeURIComponent(sequence)}`;
 
@@ -177,67 +190,70 @@ button:hover {
                     if (!response.ok) {
                         throw new Error(`HTTP error! Status: ${response.status}`);
                     }
-                    return response.text(); // We only need the text to get the initial DOM structure
+                    return response.text();
                 })
                 .then(htmlText => {
-                    console.log("Raw HTML:", htmlText); // Log the raw HTML (it will be empty initially)
+                    console.log("Raw HTML:", htmlText);
 
-                    // 1. Parse the initial HTML
                     const parser = new DOMParser();
                     const doc = parser.parseFromString(htmlText, 'text/html');
 
-                    // 2. Find the target element that will be updated.  This is the KEY.
-                    const targetElement = doc.querySelector('.empty.svelte-1oiin9d.small.unpadded_box');
+                    // *** Observe a PARENT element ***
+                    //  '#component-1' is a good candidate, based on the full HTML you provided.
+                    const parentElement = doc.querySelector('#component-1');
 
-                    if (!targetElement) {
-                        showError("Could not find the target element for the prediction.");
+                    if (!parentElement) {
+                        showError("Could not find the parent element.");
                         return;
                     }
 
-                    // 3. Create a MutationObserver
                     const observer = new MutationObserver((mutationsList, observer) => {
-                        for (const mutation of mutationsList) {
-                            if (mutation.type === 'childList' && targetElement.textContent.trim() !== "") {
-                                // The content of targetElement has changed (and is not empty)
-                                const classificationText = targetElement.textContent.trim();
-                                console.log("Classification Text (from observer):", classificationText);
+                       // Use a MORE GENERAL selector *inside* the observer.
+                       //  Look for ANY element with text content "AMP" or "Non-AMP",
+                       //  *within* the parentElement.
 
-                                let result;
-                                const nonAmpRegex = /non[- ]?amp|not antimicrobial|non[- ]?antimicrobial/i;
-                                if (nonAmpRegex.test(classificationText)) {
-                                    result = "Non-AMP";
-                                } else if(classificationText.toLowerCase().includes("amp")){
-                                     result = "AMP";
-                                } else {
-                                    result = "Unknown";
-                                    showError("Could not determine classification.");
-                                }
+                        const classificationElement = parentElement.querySelector('div:not(.empty)'); // Select non-empty divs
+                       console.log("Classification Element (inside observer):", classificationElement)
 
-                                resultDiv.textContent = "Classification: " + result;
-                                observer.disconnect(); // Stop observing once we have the result
-                                predictBtn.disabled = false;
-                                predictBtn.textContent = 'Classify Sequence';
+                        if (classificationElement && classificationElement.textContent.trim() !== "") {
+
+                            const classificationText = classificationElement.textContent.trim();
+                            console.log("Classification Text (from observer):", classificationText);
+
+                            let result;
+                            const nonAmpRegex = /non[- ]?amp|not antimicrobial|non[- ]?antimicrobial/i;
+                            if (nonAmpRegex.test(classificationText)) {
+                                result = "Non-AMP";
+                            } else if (classificationText.toLowerCase().includes("amp")){
+                                result = "AMP";
                             }
+                            else {
+                                result = "Unknown";
+                                showError("Could not determine classification.");
+                            }
+
+                            resultDiv.textContent = "Classification: " + result;
+                            observer.disconnect();
+                            predictBtn.disabled = false;
+                            predictBtn.textContent = 'Classify Sequence';
+                             loadingIndicator.classList.remove('active'); // Hide loading indicator
                         }
                     });
 
-                    // 4. Start observing the target element
-                    observer.observe(targetElement, { childList: true, subtree: true });
+                    observer.observe(parentElement, { childList: true, subtree: true, attributes: true, characterData: true });
+                    //Observe changes in all the descendant of the parent, including attributes, and data changes.
 
-                    // Now, we need to inject this initial (empty) DOM into our page.  This is
-                    // *essential* because the MutationObserver needs to observe a *live* DOM element,
-                    // not just a parsed string. The easiest place is inside resultDiv
-                    resultDiv.innerHTML = ''; //Clear it first
-                    resultDiv.appendChild(targetElement);
-
-
+                    // Inject the *parent* element into the DOM
+                    resultDiv.innerHTML = ''; // Clear previous content
+                    resultDiv.appendChild(parentElement);
 
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
                     showError("Failed to get response from classifier: " + error.message);
-                     predictBtn.disabled = false; //Re-enable even on error
-                     predictBtn.textContent = 'Classify Sequence';
+                    predictBtn.disabled = false; //Re-enable even on error
+                    predictBtn.textContent = 'Classify Sequence';
+                    loadingIndicator.classList.remove('active'); // Hide loading indicator on error
                 });
         }
     </script>
