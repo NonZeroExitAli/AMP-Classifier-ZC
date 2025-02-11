@@ -157,7 +157,6 @@
             }
         }
 
-
         function classifySequence() {
             const sequence = sequenceInput.value.trim().toUpperCase();
             if (sequence.length < 10 || sequence.length > 100) {
@@ -180,7 +179,7 @@
                     const contentType = response.headers.get('Content-Type');
                     console.log("Content-Type:", contentType); // Log for debugging
 
-                    // Try JSON first, as it's efficient if it's the correct format.
+                    // Try JSON first
                     if (contentType && contentType.includes('application/json')) {
                         return response.json().then(data => ({ type: 'json', data }));
                     } else {
@@ -189,24 +188,26 @@
                     }
                 })
                 .then(responseObj => {
+                    console.log("API URL:", apiURL); // Log the full URL
                     console.log("Raw response:", responseObj.data); // ALWAYS LOG THE RAW DATA
+
+                    let result; // Declare result here
 
                     if (responseObj.type === 'json') {
                         // --- JSON Handling ---
                         const data = responseObj.data;
-                        // *** INSPECT THE JSON IN THE CONSOLE TO DETERMINE THE CORRECT KEY ***
-                        let result = data.classification; // Example: if the JSON is { "classification": "AMP" }
-                        //  OR: let result = data.result.prediction; //Another possible key structure
+                        // *** INSPECT JSON, USE CORRECT KEY ***
+                        result = data.classification; //  Example: if { "classification": "AMP" }
+                        // OR result = data.result.prediction;  // Another possible structure
 
-                        //If it is not consistent (sometimes AMP, sometimes Antimicrobial Peptide)
-                        if (typeof result === 'string') {
-                            result = result.toLowerCase().includes("non") ? "Non-AMP" : "AMP";
+                        if (typeof result === 'string') { //defensive check
+                             result = result.toLowerCase().includes("non") ? "Non-AMP" : "AMP";
                         }
 
-                        if (result) {
-                            resultDiv.textContent = "Classification: " + result;
-                        } else {
+
+                        if (!result) { //check if result exists
                             showError("Could not find classification data in JSON.");
+                            return; //important to prevent further processing
                         }
 
                     } else {
@@ -215,40 +216,43 @@
                         const parser = new DOMParser();
                         const doc = parser.parseFromString(data, 'text/html');
 
-                        // *** YOU MUST INSPECT THE HTML IN THE CONSOLE TO FIND THE CORRECT SELECTOR ***
-                        // This is just an example; it WILL likely be different for your API.
-                        const classificationElement = doc.querySelector('.result-class'); // Example
-                        // OR: const classificationElement = doc.getElementById('result-id'); // Example
-                        // OR const classificationElement = doc.querySelector('div > p:nth-child(2)');
+                        // *** INSPECT HTML, FIND CORRECT SELECTOR ***
+                        const classificationElement = doc.querySelector('.output > .pred'); // Updated selector!
+                        console.log("Classification Element:", classificationElement);
 
                         if (classificationElement) {
                             const classificationText = classificationElement.textContent.trim();
-                            let result;
-                            if (classificationText.toLowerCase().includes("non-amp") || classificationText.toLowerCase().includes("non antimicrobial") || classificationText.toLowerCase().includes("not an amp")) {
+                            console.log("Classification Text:", classificationText);
+
+                            const nonAmpRegex = /non[- ]?amp|not antimicrobial|non[- ]?antimicrobial/i; // 'i' flag = case-insensitive
+                            if (nonAmpRegex.test(classificationText)) {
                                 result = "Non-AMP";
-                            } else if (classificationText.toLowerCase().includes("amp") || classificationText.toLowerCase().includes("antimicrobial")) {
+                            } else if (classificationText.toLowerCase().includes("amp")) {
+                                //Keep checking for AMP even with regex
+                                result = "AMP"
+                            }
+                            else {
+                                result = "Unknown";
+                                showError("Could not determine classification.");
+                            }
+
+                        } else {
+                             // If no element found, try plain text (less likely, but good fallback)
+                            const cleanedData = data.trim().toLowerCase();
+                            const nonAmpRegex = /non[- ]?amp|not antimicrobial|non[- ]?antimicrobial/i;
+                            if (nonAmpRegex.test(cleanedData)) {
+                                result = "Non-AMP";
+                            } else if (cleanedData.toLowerCase().includes("amp")) {
                                 result = "AMP";
                             } else {
                                 result = "Unknown";
                                 showError("Could not determine classification.");
                             }
-                            resultDiv.textContent = "Classification: " + result;
-
-                        } else {
-                            // If no element found, it might be plain text.  Check for that.
-                            const cleanedData = data.trim().toLowerCase();
-                            let result;
-                             if (cleanedData.includes("non-amp")) {
-                                result = "Non-AMP";
-                            } else if (cleanedData.includes("amp")) {
-                                result = "AMP";
-                            } else {
-                                result = "Unknown"; // Handle cases where it's neither
-                                showError("Could not determine classification from response.");
-                            }
-                            resultDiv.textContent = "Classification: " + result;
                         }
                     }
+                    console.log("Result before final assignment:", result); // Log *before* setting textContent
+                    resultDiv.textContent = "Classification: " + result;
+
                 })
                 .catch(error => {
                     console.error("Error fetching data:", error);
