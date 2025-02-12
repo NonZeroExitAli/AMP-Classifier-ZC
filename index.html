@@ -56,7 +56,7 @@
 
         h1 {
             color: var(--primary-color);
-            margin-bottom: 1rem; /* Reduced margin */
+            margin-bottom: 1rem;
         }
 
         .input-group {
@@ -108,7 +108,7 @@
             margin-top: 0.5rem;
         }
          .dark-mode .character-count {
-            color: #999; /* Lighter color in dark mode */
+            color: #999;
         }
 
         .error-message {
@@ -118,7 +118,7 @@
             display: none;
         }
          .dark-mode .error-message {
-            color: #ff6b6b; /* Lighter red in dark mode */
+            color: #ff6b6b;
         }
         .result {
             margin-top: 1.5rem;
@@ -223,29 +223,29 @@
             display: none;
         }
 
-        /* Dark Mode Toggle */
+       /* Dark Mode Toggle (Sun/Moon Icon) */
         .dark-mode-toggle {
             position: fixed;
             top: 1rem;
             right: 1rem;
-            background-color: var(--secondary-color);
-            color: white;
+            background-color: transparent; /* No background */
             border: none;
-            padding: 0.5rem 1rem;
-            border-radius: 5px;
             cursor: pointer;
             z-index: 20;
-        }
-        .dark-mode .dark-mode-toggle{
-          background-color: var(--primary-color);
+            font-size: 1.5rem; /* Larger icon */
+            color: var(--secondary-color); /* Icon color */
+            transition: color 0.3s ease;
         }
 
+        .dark-mode .dark-mode-toggle {
+            color: var(--primary-color);
+        }
         /* Tabs */
         .tabs {
             display: flex;
             justify-content: center;
             margin-bottom: 1rem;
-            border-bottom: 2px solid var(--border-color); /* Consistent border */
+            border-bottom: 2px solid var(--border-color);
         }
 
         .tab {
@@ -253,10 +253,10 @@
             margin: 0 0.5rem;
             cursor: pointer;
             border: 2px solid transparent;
-            border-radius: 5px 5px 0 0; /* Rounded top corners */
+            border-radius: 5px 5px 0 0;
             background-color: transparent;
-            color: var(--text-color); /* Use text color */
-            transition: border-color 0.3s ease, background-color 0.3s ease; /* Smooth transition */
+            color: var(--text-color);
+            transition: border-color 0.3s ease, background-color 0.3s ease;
         }
 
         .tab.active {
@@ -266,15 +266,15 @@
         }
 
         .tab-content {
-            display: none; /* Hide all content by default */
+            display: none;
             padding: 1rem;
-            text-align: left; /* Left-align content in tabs */
+            text-align: left;
         }
 
         .tab-content.active {
-            display: block; /* Show active content */
+            display: block;
         }
-        /* Model Metrics Table Styles */
+
         .metrics-table {
             width: 100%;
             border-collapse: collapse;
@@ -295,7 +295,10 @@
     </style>
 </head>
 <body>
-    <button id="dark-mode-toggle" class="dark-mode-toggle">Toggle Dark Mode</button>
+     <!-- Dark Mode Toggle (Sun/Moon Icon) -->
+    <button id="dark-mode-toggle" class="dark-mode-toggle">
+        <span id="dark-mode-icon">☾</span>  <!-- Moon icon by default -->
+    </button>
 
     <div class="container">
         <h1>BCBU-ZC AMP Classifier</h1>
@@ -440,6 +443,7 @@
     const confidenceContainer = document.getElementById('confidence-container');
     const confidenceBar = document.getElementById('confidence-bar');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const darkModeIcon = document.getElementById('dark-mode-icon'); // Get the icon span
 
     // Tab switching logic
     const tabs = document.querySelectorAll('.tab');
@@ -447,11 +451,8 @@
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
-            // Remove active class from all tabs and content
             tabs.forEach(t => t.classList.remove('active'));
             tabContents.forEach(c => c.classList.remove('active'));
-
-            // Add active class to clicked tab and corresponding content
             tab.classList.add('active');
             document.getElementById(tab.dataset.tab).classList.add('active');
         });
@@ -479,15 +480,19 @@
 
         // Dark Mode Toggle
         darkModeToggle.addEventListener('click', () => {
-            document.body.classList.toggle('dark-mode');
-              if (document.body.classList.contains('dark-mode')) {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            if (isDarkMode) {
                 localStorage.setItem('darkMode', 'enabled');
-              } else {
+                darkModeIcon.innerHTML = '☀'; // Sun icon
+            } else {
                 localStorage.setItem('darkMode', 'disabled');
-              }
+                darkModeIcon.innerHTML = '☾'; // Moon icon
+            }
         });
+         // Check for saved dark mode preference and set icon
         if (localStorage.getItem('darkMode') === 'enabled') {
-              document.body.classList.add('dark-mode');
+            document.body.classList.add('dark-mode');
+            darkModeIcon.innerHTML = '☀'; // Sun icon
         }
     };
 
