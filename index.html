@@ -10,8 +10,25 @@
             --secondary-color: #3498db;
             --success-color: #27ae60;
             --warning-color: #e67e22;
-            --info-color: #3498db; /* For info bubbles */
+            --info-color: #3498db;
+            --background-color: #f5f6fa;
+            --text-color: #333;
+            --container-bg-color: white;
+            --border-color: #ddd;
+            --button-hover-bg: #2980b9;
         }
+
+        /* Dark Mode Styles */
+        .dark-mode {
+            --background-color: #121212;
+            --text-color: #eee;
+            --container-bg-color: #222;
+            --border-color: #444;
+            --button-hover-bg: #4CAF50; /* Different hover color in dark mode */
+            --primary-color: #bb86fc; /* Adjust primary color for dark mode */
+            --secondary-color: #03dac6; /* Adjust secondary color */
+        }
+
 
         body {
             font-family: 'Arial', sans-serif;
@@ -22,17 +39,20 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            background-color: #f5f6fa;
+            background-color: var(--background-color);
+            color: var(--text-color); /* Apply text color variable */
+            transition: background-color 0.3s ease, color 0.3s ease; /* Smooth transition */
         }
 
         .container {
             max-width: 800px;
             width: 100%;
             padding: 2rem;
-            background: white;
+            background: var(--container-bg-color);
             border-radius: 10px;
             box-shadow: 0 2px 15px rgba(0,0,0,0.1);
             text-align: center;
+            transition: background-color 0.3s ease; /* Smooth transition for container */
         }
 
         h1 {
@@ -42,19 +62,21 @@
 
         .input-group {
             margin-bottom: 1.5rem;
-            position: relative; /* For absolute positioning of info icon */
+            position: relative;
         }
 
         #sequence {
             width: 100%;
             height: 150px;
             padding: 1rem;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border-color); /* Use variable for border */
             border-radius: 8px;
             font-family: monospace;
             font-size: 1rem;
             resize: vertical;
-            transition: border-color 0.3s ease;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
+            background-color: var(--container-bg-color); /* Consistent background */
+            color: var(--text-color);
         }
 
         #sequence:focus {
@@ -76,7 +98,7 @@
         }
 
         button:hover {
-            background-color: #2980b9;
+            background-color: var(--button-hover-bg); /* Use the hover variable */
             transform: translateY(-1px);
         }
 
@@ -86,12 +108,18 @@
             font-size: 0.9rem;
             margin-top: 0.5rem;
         }
+        .dark-mode .character-count {
+            color: #999; /* Lighter color in dark mode */
+        }
 
         .error-message {
             color: #e74c3c;
             text-align: center;
             margin-top: 1rem;
             display: none;
+        }
+        .dark-mode .error-message {
+            color: #ff6b6b; /* Lighter red in dark mode */
         }
 
         .result {
@@ -101,8 +129,6 @@
             color: var(--primary-color);
         }
 
-
-        /* Info Icon and Tooltip Styles */
         .info-icon {
             position: absolute;
             top: 1rem;
@@ -114,18 +140,22 @@
 
         .tooltip {
             position: absolute;
-            top: 100%; /* Position below the info icon */
+            top: 100%;
             right: 0;
             background-color: rgba(0, 0, 0, 0.8);
             color: white;
             padding: 0.5rem;
             border-radius: 5px;
-            display: none; /* Hidden by default */
-            z-index: 10;  /* Ensure tooltip is above other elements */
-            width: 250px; /* Fixed width */
-            text-align: left;  /* Left-align text */
+            display: none;
+            z-index: 10;
+            width: 250px;
+            text-align: left;
             font-size: 0.9rem;
             line-height: 1.4;
+        }
+        .dark-mode .tooltip{
+          background-color: rgba(255, 255, 255, 0.8);
+          color:#121212
         }
 
         .info-icon:hover + .tooltip,
@@ -133,25 +163,26 @@
             display: block;
         }
 
-        /* Progress Indicator Styles */
         .progress-container {
             width: 100%;
-            height: 8px; /* Thinner bar */
+            height: 8px;
             background-color: #ddd;
-            border-radius: 4px; /* Rounded corners */
+            border-radius: 4px;
             margin-top: 1rem;
-            overflow: hidden; /* Ensure progress bar stays within bounds */
-            display: none; /* Initially hidden */
+            overflow: hidden;
+            display: none;
+        }
+        .dark-mode .progress-container{
+            background-color: #444;
         }
 
         .progress-bar {
             height: 100%;
             width: 0;
             background-color: var(--success-color);
-            transition: width 0.3s ease; /* Smooth transition */
+            transition: width 0.3s ease;
         }
 
-        /*Result animation*/
 
         @keyframes fadeIn {
             from {
@@ -168,7 +199,6 @@
             animation: fadeIn 0.5s ease forwards;
         }
 
-        /*Confidence Score*/
         .confidence-container {
             display: flex;
             align-items: center;
@@ -177,19 +207,22 @@
         }
 
         .confidence-bar-container {
-            width: 80%; /* Wider bar */
+            width: 80%;
             height: 15px;
             background-color: #eee;
-            border-radius: 7.5px; /* Rounded corners */
+            border-radius: 7.5px;
             margin-left: 0.5rem;
-            overflow: hidden; /* Ensure the bar stays within bounds */
+            overflow: hidden;
+        }
+        .dark-mode .confidence-bar-container{
+            background-color: #444;
         }
 
         .confidence-bar {
             height: 100%;
-            background-color: var(--success-color); /* Default color */
+            background-color: var(--success-color);
             border-radius: 7.5px;
-            transition: width 0.3s ease, background-color 0.3s ease; /* Smooth transition */
+            transition: width 0.3s ease, background-color 0.3s ease;
         }
         .confidence-text{
             margin-right: 10px;
@@ -197,12 +230,33 @@
         .hidden {
          display: none;
         }
+
+        /* Dark Mode Toggle Button */
+        .dark-mode-toggle {
+            position: fixed; /* Fixed position */
+            top: 1rem;       /* Top right corner */
+            right: 1rem;
+            background-color: var(--secondary-color);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 5px;
+            cursor: pointer;
+            z-index: 20; /* Ensure it's above other elements */
+        }
+        .dark-mode .dark-mode-toggle{
+          background-color: var(--primary-color);
+        }
+
     </style>
 </head>
 <body>
+    <!-- Dark Mode Toggle Button -->
+    <button id="dark-mode-toggle" class="dark-mode-toggle">Toggle Dark Mode</button>
+
     <div class="container">
         <h1>Bioinformatics and Computational Biology Unit-Zewail City (BCBU-ZC) Antimicrobial Peptide Classifier</h1>
-        
+
         <div class="input-group">
             <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
             <div class="character-count">
@@ -234,7 +288,7 @@
 
     <script type="module">
         import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
-        window.gradio = { client }; 
+        window.gradio = { client };
     </script>
     <script>
         const sequenceInput = document.getElementById('sequence');
@@ -246,6 +300,8 @@
         const progressBar = document.getElementById('progress-bar');
         const confidenceContainer = document.getElementById('confidence-container');
         const confidenceBar = document.getElementById('confidence-bar');
+        const darkModeToggle = document.getElementById('dark-mode-toggle'); // Get the toggle button
+
 
         let clientInstance;
 
@@ -262,12 +318,25 @@
 
         window.onload = function() {
             initClient();
-            //tooltip show when load the page
             document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
             document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
+
+            // Dark Mode Toggle Event Listener
+            darkModeToggle.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+                // Local storage
+                if (document.body.classList.contains('dark-mode')) {
+                  localStorage.setItem('darkMode', 'enabled');
+                } else {
+                  localStorage.setItem('darkMode', 'disabled');
+                }
+            });
+              // Check for saved dark mode preference
+            if (localStorage.getItem('darkMode') === 'enabled') {
+                document.body.classList.add('dark-mode');
+            }
         };
 
-        //tooltip
         function showTooltip() {
             document.querySelector('.tooltip').style.display = 'block';
         }
@@ -339,15 +408,13 @@
             resultDiv.textContent = '';
             resultDiv.classList.remove('show');
             confidenceContainer.classList.add('hidden');
-            progressContainer.style.display = 'block'; // Show progress bar
+            progressContainer.style.display = 'block';
             progressBar.style.width = '0%';
 
             try {
                 const result = await clientInstance.predict("/predict", [sequence]);
                 console.log("Prediction result:", result);
 
-
-                // Animate progress (optional -  if the backend doesn't provide real-time updates)
                 let progress = 0;
                 const interval = setInterval(() => {
                     progress += 10;
@@ -355,20 +422,19 @@
                     if (progress >= 100) {
                         clearInterval(interval);
                         progressContainer.style.display = 'none';
-                        resultDiv.textContent = result.data[0].label; //show the label
-                        resultDiv.classList.remove('hidden'); //show
-                        resultDiv.classList.add('show');  //animation
+                        resultDiv.textContent = result.data[0].label;
+                        resultDiv.classList.remove('hidden');
+                        resultDiv.classList.add('show');
 
-                        //Show confidence.
                         displayConfidence(result.data[0].confidences);
 
                     }
-                }, 100); //adjust as needed for smoothness
+                }, 100);
 
             } catch (error) {
                 console.error("Error during prediction:", error);
                 showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
-                progressContainer.style.display = 'none'; // Hide progress bar on error
+                progressContainer.style.display = 'none';
 
             } finally {
                 predictBtn.disabled = false;
@@ -377,9 +443,8 @@
         }
 
 
-        //Function to handle displaying confidence
         function displayConfidence(confidences) {
-            // Find the confidence for the predicted label
+
             const predictedLabel = resultDiv.textContent;
             const confidenceEntry = confidences.find(c => c.label === predictedLabel);
             if(!confidenceEntry) return;
@@ -387,17 +452,15 @@
             const confidenceValue = confidenceEntry.confidence;
             confidenceBar.style.width = `${confidenceValue * 100}%`;
 
-
-            //change bar color based on confidence
             if (confidenceValue > 0.8) {
                 confidenceBar.style.backgroundColor = 'var(--success-color)';
             } else if (confidenceValue > 0.5) {
                 confidenceBar.style.backgroundColor = 'var(--warning-color)';
             } else {
-                confidenceBar.style.backgroundColor = '#e74c3c'; // Red for low confidence
+                confidenceBar.style.backgroundColor = '#e74c3c';
             }
 
-            confidenceContainer.classList.remove('hidden'); // Show confidence display
+            confidenceContainer.classList.remove('hidden');
         }
     </script>
 </body>
