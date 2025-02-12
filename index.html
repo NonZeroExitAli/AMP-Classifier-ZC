@@ -299,10 +299,9 @@
             font-weight: bold;
         }
 
-        /* Logos Container */
         .logos-container {
             display: flex;
-            justify-content: center; /* Center logos horizontally */
+            justify-content: center; 
             align-items: center; /* Center logos vertically */
             gap: 20px; /* Space between logos */
             margin-bottom: 1rem;
@@ -310,19 +309,37 @@
         }
 
         .logos-container img {
-            max-height: 50px; /* Adjust as needed */
-            max-width: 100%;   /* Ensure logos don't overflow their container */
-            height: auto;      /* Maintain aspect ratio */
+            width: 150px;  /* Set a specific width - adjust this! */
+            height: auto; /* Maintain aspect ratio */
+            max-width: 100%; /* Make it responsive*/
+        }
+          /* Footer Styles */
+        footer {
+            text-align: center;
+            padding: 20px;
+            background-color: var(--container-bg-color); /* Or any color you like */
+            border-top: 1px solid var(--border-color); /* Optional border */
+            font-size: 0.9rem;
+            color: var(--text-color); /* Use your existing text color */
+            margin-top: auto; /* Push footer to the bottom */
+            width: 100%;
+        }
+        footer p{
+             margin: 0.5rem 0;
+        }
+         .dark-mode footer {
+            background-color: var(--container-bg-color); /* Dark mode background */
+            color: var(--text-color);/* Dark mode text */
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <!-- Logos -->
+               <!-- Logos -->
         <div class="logos-container">
-            <img src="lab-logo.png" alt="Lab Logo">
-            <img src="university-logo.png" alt="University Logo">
+            <img src="lab-logo.png" alt="Lab Logo">  <!-- Make sure this path is correct -->
+            <img src="university-logo.png" alt="University Logo"> <!-- And this one -->
         </div>
 
         <h1>Bioinformatics and Computational biology Unit - Zewail City (BCBU-ZC) Antimicrobial Peptides Predictor</h1>
@@ -341,122 +358,131 @@
             </div>
         </div>
 
-    <div class="tab-content active" id="prediction">
-        <div class="input-group">
-            <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
-            <div class="character-count">
-                <span id="char-count">0</span>/100
+        <div class="tab-content active" id="prediction">
+            <div class="input-group">
+                <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
+                <div class="character-count">
+                    <span id="char-count">0</span>/100
+                </div>
+                <i class="info-icon" id="info-icon">ⓘ</i>
+                <div class="tooltip">
+                    Enter the amino acid sequence you want to classify. The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
+                </div>
             </div>
-            <i class="info-icon" id="info-icon">ⓘ</i>
-            <div class="tooltip">
-                Enter the amino acid sequence you want to classify. The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
+
+            <div class="error-message" id="error"></div>
+            <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
+
+            <div class="progress-container" id="progress-container">
+                <div class="progress-bar" id="progress-bar"></div>
+            </div>
+
+            <div class="result hidden" id="result"></div>
+            <div class="confidence-container hidden" id="confidence-container">
+                <span class="confidence-text">Confidence:</span>
+                <div class="confidence-bar-container">
+                    <div class="confidence-bar" id="confidence-bar"></div>
+                </div>
             </div>
         </div>
 
-        <div class="error-message" id="error"></div>
-        <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
+        <div class="tab-content" id="model">
+            <h2>Model Metrics</h2>
+            <p>Here are some performance metrics for our antimicrobial peptides classification model:</p>
+            <table class="metrics-table">
+                <thead>
+                    <tr>
+                        <th>Metric</th>
+                        <th>Value</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Accuracy</td>
+                        <td>0.963</td>
+                        <td>The overall correctness of a classification model by computing the ratio of correctly predicted outcomes to the total number of predictions.</td>
+                    </tr>
+                    <tr>
+                        <td>Precision</td>
+                        <td>0.964</td>
+                        <td>The proportion of positive identifications that were actually correct.</td>
+                    </tr>
+                    <tr>
+                        <td>Recall</td>
+                        <td>0.963</td>
+                        <td>The proportion of actual positives that were identified correctly.</td>
+                    </tr>
+                    <tr>
+                        <td>F1-Score</td>
+                        <td>0.963</td>
+                        <td>The harmonic mean of precision and recall.</td>
+                    </tr>
+                    <tr>
+                        <td>Validation Accuracy</td>
+                        <td>0.968</td>
+                        <td>The proportion of correctly classified instances in the validation dataset.</td>
+                    </tr>
+                </tbody>
+            </table>
+            <p>These are essential metrics for model evaluation.</p>
+            <h3>Sample Run</h3>
+            <p>You can use sequences of varying lengths, including both valid and invalid inputs, to demonstrate the model's output.</p>
+            <ul>
+                <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRAISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
+                <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
+                <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
+                <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - LHYQEVKWRKLGSYEHRLHLKPGRLAKHELEVFNGYFVHFPAPENMIPIG</li>
+                <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
 
-        <div class="progress-container" id="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
+            </ul>
         </div>
 
-        <div class="result hidden" id="result"></div>
-         <div class="confidence-container hidden" id="confidence-container">
-            <span class="confidence-text">Confidence:</span>
-            <div class="confidence-bar-container">
-                <div class="confidence-bar" id="confidence-bar"></div>
-            </div>
+        <div class="tab-content" id="about">
+            <h2>About</h2>
+            <h3>Model Selection Criteria</h3>
+            <p>
+            Our team evaluated 225 combinations of feature extraction and selection methods across three different models. 
+            The best-performing model was chosen based on the following criteria:
+            </p>
+            <ul>
+                <li>High accuracy, F1-score, and validation accuracy on a held-out test set.</li>
+                <li>Robustness to variations in sequence length.</li>
+                <li>Generalization ability to unseen peptide sequences.</li>
+            </ul>
+
+            <h3>Our Team</h3>
+            <ul>
+                <li>Ali Magdi - Combutational Biologist</li>
+                <li>Ahmed Amr - Combutational Biologist</li>
+                <li>Omar Loay - Molecular Biologist</li>
+                <li>Prof. Eman Badr - Full Professor and Director of BCBU</li>
+            </ul>
+
+            <h3>Acknowledgements</h3>
+            <p>
+                We would like to thank the following labs for their support:
+            </p>
+            <ul>
+                <li>Bioinformatics and Computational biology Unit at Zewail City.</li>
+                <li>The Centre for Genomics at Zewail City.</li>
+            </ul>
+
+            <h3>Contact</h3>
+            <p>
+                For questions or inquiries, please contact us at: <a href="mailto:s-ali.afifi@zewailcity.edu.eg">s-ali.afifi@zewailcity.edu.eg</a>
+            </p>
         </div>
     </div>
-
-    <div class="tab-content" id="model">
-        <h2>Model Metrics</h2>
-        <p>Here are some performance metrics for our antimicrobial peptides classification model:</p>
-        <table class="metrics-table">
-            <thead>
-                <tr>
-                    <th>Metric</th>
-                    <th>Value</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>Accuracy</td>
-                    <td>0.963</td>
-                    <td>The overall correctness of a classification model by computing the ratio of correctly predicted outcomes to the total number of predictions.</td>
-                </tr>
-                <tr>
-                    <td>Precision</td>
-                    <td>0.964</td>
-                    <td>The proportion of positive identifications that were actually correct.</td>
-                </tr>
-                <tr>
-                    <td>Recall</td>
-                    <td>0.963</td>
-                    <td>The proportion of actual positives that were identified correctly.</td>
-                </tr>
-                <tr>
-                    <td>F1-Score</td>
-                    <td>0.963</td>
-                    <td>The harmonic mean of precision and recall.</td>
-                </tr>
-                 <tr>
-                    <td>Validation Accuracy</td>
-                    <td>0.968</td>
-                    <td>The proportion of correctly classified instances in the validation dataset.</td>
-                </tr>
-            </tbody>
-        </table>
-        <p>These are essential metrics for model evaluation.</p>
-        <h3>Sample Run</h3>
-        <p>You can use sequences of varying lengths, including both valid and invalid inputs, to demonstrate the model's output.</p>
-         <ul>
-            <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRAISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
-            <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
-            <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
-            <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - LHYQEVKWRKLGSYEHRLHLKPGRLAKHELEVFNGYFVHFPAPENMIPIG</li>
-            <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
-
-        </ul>
-    </div>
-
-    <div class="tab-content" id="about">
-        <h2>About</h2>
-         <h3>Model Selection Criteria</h3>
-        <p>
-        Our team evaluated 225 combinations of feature extraction and selection methods across three different models. 
-        The best-performing model was chosen based on the following criteria:
-        </p>
-        <ul>
-            <li>High accuracy, F1-score, and validation accuracy on a held-out test set.</li>
-            <li>Robustness to variations in sequence length.</li>
-            <li>Generalization ability to unseen peptide sequences.</li>
-        </ul>
-
-        <h3>Our Team</h3>
-        <ul>
-            <li>Ali Magdi - Combutational Biologist</li>
-            <li>Ahmed Amr - Combutational Biologist</li>
-            <li>Omar Loay - Molecular Biologist</li>
-            <li>Prof. Eman Badr - Full Professor and Director of BCBU</li>
-        </ul>
-
-        <h3>Acknowledgements</h3>
-        <p>
-            We would like to thank the following labs for their support:
-        </p>
-        <ul>
-            <li>Bioinformatics and Computational biology Unit at Zewail City.</li>
-            <li>The Centre for Genomics at Zewail City.</li>
-        </ul>
-
-        <h3>Contact</h3>
-        <p>
-            For questions or inquiries, please contact us at: <a href="mailto:s-ali.afifi@zewailcity.edu.eg">s-ali.afifi@zewailcity.edu.eg</a>
-        </p>
-    </div>
-</div>
+    <!-- Footer -->
+    <footer>
+        <p>© 2025, Bioinformatics and Computational biology Unit, BCBU/p>
+        <address>
+         Bioinformatics and Computational biology Unit at Zewail City,<br>
+          Ahmed Zewail Street, Giza,<br>
+          Egypt
+        </address>
+    </footer>
 
 <script type="module">
     import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
