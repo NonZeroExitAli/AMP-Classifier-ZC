@@ -1,5 +1,4 @@
 
-/* General Styles */
 body {
     font-family: 'Arial', sans-serif;
     background: #f4f7fc;
@@ -8,7 +7,6 @@ body {
     color: #333;
 }
 
-/* Header */
 header {
     background: #3a86ff;
     padding: 15px;
@@ -22,7 +20,6 @@ header h1 {
     font-size: 1.8rem;
 }
 
-/* Navigation */
 nav {
     display: flex;
     justify-content: center;
@@ -44,7 +41,6 @@ nav a:hover, nav a.active {
     background: #0c2c9c;
 }
 
-/* Prediction Card */
 .prediction-card {
     width: 50%;
     margin: 30px auto;
@@ -54,7 +50,6 @@ nav a:hover, nav a.active {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-/* Input Box */
 .input-box {
     text-align: center;
 }
@@ -73,14 +68,12 @@ textarea:focus {
     outline: none;
 }
 
-/* Counter */
 .counter {
     font-size: 0.9rem;
     margin-top: 5px;
     color: #666;
 }
 
-/* Example Buttons */
 .example-sequences {
     margin-top: 15px;
 }
@@ -100,7 +93,6 @@ textarea:focus {
     background: #0c2c9c;
 }
 
-/* Predict Button */
 .predict-btn {
     background: #e63946;
     color: white;
@@ -117,7 +109,6 @@ textarea:focus {
     background: #b71c1c;
 }
 
-/* Result Box */
 .result-box {
     margin-top: 25px;
     padding: 15px;
@@ -125,8 +116,6 @@ textarea:focus {
     border-radius: 8px;
     text-align: center;
 }
-
-/* Probability Meter */
 .probability-meter {
     width: 80%;
     height: 15px;
