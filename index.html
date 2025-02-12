@@ -10,6 +10,7 @@
             --secondary-color: #3498db;
             --success-color: #27ae60;
             --warning-color: #e67e22;
+            --info-color: #3498db; /* For info bubbles */
         }
 
         body {
@@ -41,6 +42,7 @@
 
         .input-group {
             margin-bottom: 1.5rem;
+            position: relative; /* For absolute positioning of info icon */
         }
 
         #sequence {
@@ -98,6 +100,103 @@
             font-weight: bold;
             color: var(--primary-color);
         }
+
+
+        /* Info Icon and Tooltip Styles */
+        .info-icon {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            font-size: 1.2rem;
+            color: var(--info-color);
+            cursor: pointer;
+        }
+
+        .tooltip {
+            position: absolute;
+            top: 100%; /* Position below the info icon */
+            right: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 5px;
+            display: none; /* Hidden by default */
+            z-index: 10;  /* Ensure tooltip is above other elements */
+            width: 250px; /* Fixed width */
+            text-align: left;  /* Left-align text */
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .info-icon:hover + .tooltip,
+        .tooltip:hover {
+            display: block;
+        }
+
+        /* Progress Indicator Styles */
+        .progress-container {
+            width: 100%;
+            height: 8px; /* Thinner bar */
+            background-color: #ddd;
+            border-radius: 4px; /* Rounded corners */
+            margin-top: 1rem;
+            overflow: hidden; /* Ensure progress bar stays within bounds */
+            display: none; /* Initially hidden */
+        }
+
+        .progress-bar {
+            height: 100%;
+            width: 0;
+            background-color: var(--success-color);
+            transition: width 0.3s ease; /* Smooth transition */
+        }
+
+        /*Result animation*/
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result.show {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /*Confidence Score*/
+        .confidence-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 0.5rem;
+        }
+
+        .confidence-bar-container {
+            width: 80%; /* Wider bar */
+            height: 15px;
+            background-color: #eee;
+            border-radius: 7.5px; /* Rounded corners */
+            margin-left: 0.5rem;
+            overflow: hidden; /* Ensure the bar stays within bounds */
+        }
+
+        .confidence-bar {
+            height: 100%;
+            background-color: var(--success-color); /* Default color */
+            border-radius: 7.5px;
+            transition: width 0.3s ease, background-color 0.3s ease; /* Smooth transition */
+        }
+        .confidence-text{
+            margin-right: 10px;
+        }
+        .hidden {
+         display: none;
+        }
     </style>
 </head>
 <body>
@@ -109,11 +208,28 @@
             <div class="character-count">
                 <span id="char-count">0</span>/100
             </div>
+             <!-- Info Icon and Tooltip -->
+            <i class="info-icon" id="info-icon">ⓘ</i>
+            <div class="tooltip">
+                Enter the amino acid sequence you want to classify.  The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
+            </div>
         </div>
 
         <div class="error-message" id="error"></div>
         <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
-        <div class="result" id="result"></div>
+
+        <!-- Progress Indicator -->
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="result hidden" id="result"></div>
+         <div class="confidence-container hidden" id="confidence-container">
+            <span class="confidence-text">Confidence:</span>
+            <div class="confidence-bar-container">
+                <div class="confidence-bar" id="confidence-bar"></div>
+            </div>
+        </div>
     </div>
 
     <script type="module">
@@ -126,7 +242,12 @@
         const errorDiv = document.getElementById('error');
         const predictBtn = document.getElementById('predict-btn');
         const resultDiv = document.getElementById('result');
-        let clientInstance; 
+        const progressContainer = document.getElementById('progress-container');
+        const progressBar = document.getElementById('progress-bar');
+        const confidenceContainer = document.getElementById('confidence-container');
+        const confidenceBar = document.getElementById('confidence-bar');
+
+        let clientInstance;
 
         async function initClient() {
             try {
@@ -135,13 +256,25 @@
             } catch (error) {
                 console.error("Failed to initialize Gradio client:", error);
                 showError("Failed to connect to the classifier service.");
-                predictBtn.disabled = true; 
+                predictBtn.disabled = true;
             }
         }
 
         window.onload = function() {
-            initClient(); 
+            initClient();
+            //tooltip show when load the page
+            document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
+            document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
         };
+
+        //tooltip
+        function showTooltip() {
+            document.querySelector('.tooltip').style.display = 'block';
+        }
+
+        function hideTooltip() {
+            document.querySelector('.tooltip').style.display = 'none';
+        }
 
         sequenceInput.addEventListener('input', () => {
             charCount.textContent = sequenceInput.value.length;
@@ -150,7 +283,7 @@
 
        sequenceInput.addEventListener('paste', (e) => {
             let paste = (e.clipboardData || window.clipboardData).getData('text');
-            paste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, ''); 
+            paste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '');
             const currentText = sequenceInput.value;
             const selectionStart = sequenceInput.selectionStart;
             const selectionEnd = sequenceInput.selectionEnd;
@@ -165,7 +298,7 @@
           charCount.textContent = sequenceInput.value.length;
           validateInput();
           e.preventDefault();
-          
+
         });
 
 
@@ -193,7 +326,6 @@
             else clearError();
         }
 
-
         async function classifySequence() {
             const sequence = sequenceInput.value.trim().toUpperCase();
             if (sequence.length < 10 || sequence.length > 100) {
@@ -205,18 +337,67 @@
             predictBtn.disabled = true;
             predictBtn.textContent = 'Processing...';
             resultDiv.textContent = '';
+            resultDiv.classList.remove('show');
+            confidenceContainer.classList.add('hidden');
+            progressContainer.style.display = 'block'; // Show progress bar
+            progressBar.style.width = '0%';
 
             try {
                 const result = await clientInstance.predict("/predict", [sequence]);
                 console.log("Prediction result:", result);
-                resultDiv.textContent = result.data[0].label;  // Access the label correctly
+
+
+                // Animate progress (optional -  if the backend doesn't provide real-time updates)
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 10;
+                    progressBar.style.width = `${progress}%`;
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        progressContainer.style.display = 'none';
+                        resultDiv.textContent = result.data[0].label; //show the label
+                        resultDiv.classList.remove('hidden'); //show
+                        resultDiv.classList.add('show');  //animation
+
+                        //Show confidence.
+                        displayConfidence(result.data[0].confidences);
+
+                    }
+                }, 100); //adjust as needed for smoothness
+
             } catch (error) {
                 console.error("Error during prediction:", error);
                 showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+                progressContainer.style.display = 'none'; // Hide progress bar on error
+
             } finally {
                 predictBtn.disabled = false;
                 predictBtn.textContent = 'Classify Sequence';
             }
+        }
+
+
+        //Function to handle displaying confidence
+        function displayConfidence(confidences) {
+            // Find the confidence for the predicted label
+            const predictedLabel = resultDiv.textContent;
+            const confidenceEntry = confidences.find(c => c.label === predictedLabel);
+            if(!confidenceEntry) return;
+
+            const confidenceValue = confidenceEntry.confidence;
+            confidenceBar.style.width = `${confidenceValue * 100}%`;
+
+
+            //change bar color based on confidence
+            if (confidenceValue > 0.8) {
+                confidenceBar.style.backgroundColor = 'var(--success-color)';
+            } else if (confidenceValue > 0.5) {
+                confidenceBar.style.backgroundColor = 'var(--warning-color)';
+            } else {
+                confidenceBar.style.backgroundColor = '#e74c3c'; // Red for low confidence
+            }
+
+            confidenceContainer.classList.remove('hidden'); // Show confidence display
         }
     </script>
 </body>
