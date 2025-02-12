@@ -328,18 +328,321 @@
         <h1>Bioinformatics and Computational biology Unit - Zewail City (BCBU-ZC) Antimicrobial Peptides Predictor</h1>
 
         <!-- Tabs -->
-        <div class="tabs">
-            <div class="tab active" data-tab="prediction">
-                <i class="fas fa-search"></i> Prediction
+    <div class="tabs">
+        <div class="tab active" data-tab="prediction">Prediction</div>
+        <div class="tab" data-tab="model">Model</div>
+        <div class="tab" data-tab="about">About</div>
+    </div>
+
+    <div class="tab-content active" id="prediction">
+        <div class="input-group">
+            <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs)..." maxlength="100"></textarea>
+            <div class="character-count">
+                <span id="char-count">0</span>/100
             </div>
-            <div class="tab" data-tab="model">
-                <i class="fas fa-chart-line"></i> Model
-            </div>
-            <div class="tab" data-tab="about">
-                <i class="fas fa-info-circle"></i> About
+            <i class="info-icon" id="info-icon">ⓘ</i>
+            <div class="tooltip">
+                Enter the amino acid sequence you want to classify. The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
             </div>
         </div>
-        <!-- ... (rest of your content) ... -->
+
+        <div class="error-message" id="error"></div>
+        <button onclick="classifySequence()" id="predict-btn">Classify Sequence</button>
+
+        <div class="progress-container" id="progress-container">
+            <div class="progress-bar" id="progress-bar"></div>
+        </div>
+
+        <div class="result hidden" id="result"></div>
+         <div class="confidence-container hidden" id="confidence-container">
+            <span class="confidence-text">Confidence:</span>
+            <div class="confidence-bar-container">
+                <div class="confidence-bar" id="confidence-bar"></div>
+            </div>
+        </div>
     </div>
+
+    <div class="tab-content" id="model">
+        <h2>Model Metrics</h2>
+        <p>Here are some performance metrics for our antimicrobial peptides classification model:</p>
+        <table class="metrics-table">
+            <thead>
+                <tr>
+                    <th>Metric</th>
+                    <th>Value</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>Accuracy</td>
+                    <td>0.963</td>
+                    <td>The overall correctness of a classification model by computing the ratio of correctly predicted outcomes to the total number of predictions.</td>
+                </tr>
+                <tr>
+                    <td>Precision</td>
+                    <td>0.964</td>
+                    <td>The proportion of positive identifications that were actually correct.</td>
+                </tr>
+                <tr>
+                    <td>Recall</td>
+                    <td>0.963</td>
+                    <td>The proportion of actual positives that were identified correctly.</td>
+                </tr>
+                <tr>
+                    <td>F1-Score</td>
+                    <td>0.963</td>
+                    <td>The harmonic mean of precision and recall.</td>
+                </tr>
+                 <tr>
+                    <td>Validation Accuracy</td>
+                    <td>0.968</td>
+                    <td>The proportion of correctly classified instances in the validation dataset.</td>
+                </tr>
+            </tbody>
+        </table>
+        <p>These are essential metrics for model evaluation.</p>
+        <h3>Sample Run</h3>
+        <p>You can use sequences of varying lengths, including both valid and invalid inputs, to demonstrate the model's output.</p>
+         <ul>
+            <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRAISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
+            <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
+            <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
+            <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - LHYQEVKWRKLGSYEHRLHLKPGRLAKHELEVFNGYFVHFPAPENMIPIG</li>
+            <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
+
+        </ul>
+    </div>
+
+    <div class="tab-content" id="about">
+        <h2>About</h2>
+         <h3>Model Selection Criteria</h3>
+        <p>
+        Our team evaluated 225 combinations of feature extraction and selection methods across three different models. 
+        The best-performing model was chosen based on the following criteria:
+        </p>
+        <ul>
+            <li>High accuracy, F1-score, and validation accuracy on a held-out test set.</li>
+            <li>Robustness to variations in sequence length.</li>
+            <li>Generalization ability to unseen peptide sequences.</li>
+        </ul>
+
+        <h3>Our Team</h3>
+        <ul>
+            <li>Ali Magdi - Combutational Biologist</li>
+            <li>Ahmed Amr - Combutational Biologist</li>
+            <li>Omar Loay - Molecular Biologist</li>
+            <li>Prof. Eman Badr - Full Professor and Director of BCBU</li>
+        </ul>
+
+        <h3>Acknowledgements</h3>
+        <p>
+            We would like to thank the following labs for their support:
+        </p>
+        <ul>
+            <li>Bioinformatics and Computational biology Unit at Zewail City.</li>
+            <li>The Centre for Genomics at Zewail City.</li>
+        </ul>
+
+        <h3>Contact</h3>
+        <p>
+            For questions or inquiries, please contact us at: <a href="mailto:s-ali.afifi@zewailcity.edu.eg">s-ali.afifi@zewailcity.edu.eg</a>
+        </p>
+    </div>
+</div>
+
+<script type="module">
+    import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
+    window.gradio = { client };
+</script>
+   <script>
+    const sequenceInput = document.getElementById('sequence');
+    const charCount = document.getElementById('char-count');
+    const errorDiv = document.getElementById('error');
+    const predictBtn = document.getElementById('predict-btn');
+    const resultDiv = document.getElementById('result');
+    const progressContainer = document.getElementById('progress-container');
+    const progressBar = document.getElementById('progress-bar');
+    const confidenceContainer = document.getElementById('confidence-container');
+    const confidenceBar = document.getElementById('confidence-bar');
+    const darkModeToggle = document.getElementById('dark-mode-toggle');
+    const darkModeIcon = document.getElementById('dark-mode-icon'); // Get the icon span
+
+    // Tab switching logic
+    const tabs = document.querySelectorAll('.tab');
+    const tabContents = document.querySelectorAll('.tab-content');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            tab.classList.add('active');
+            document.getElementById(tab.dataset.tab).classList.add('active');
+        });
+    });
+
+
+
+    let clientInstance;
+
+    async function initClient() {
+        try {
+            clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier");
+            console.log("Gradio client initialized:", clientInstance);
+        } catch (error) {
+            console.error("Failed to initialize Gradio client:", error);
+            showError("Failed to connect to the classifier service.");
+            predictBtn.disabled = true;
+        }
+    }
+
+    window.onload = function() {
+        initClient();
+        document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
+        document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
+
+        // Dark Mode Toggle
+        darkModeToggle.addEventListener('click', () => {
+            const isDarkMode = document.body.classList.toggle('dark-mode');
+            if (isDarkMode) {
+                localStorage.setItem('darkMode', 'enabled');
+                darkModeIcon.innerHTML = '☀'; // Sun icon
+            } else {
+                localStorage.setItem('darkMode', 'disabled');
+                darkModeIcon.innerHTML = '☾'; // Moon icon
+            }
+        });
+         // Check for saved dark mode preference and set icon
+        if (localStorage.getItem('darkMode') === 'enabled') {
+            document.body.classList.add('dark-mode');
+            darkModeIcon.innerHTML = '☀'; // Sun icon
+        }
+    };
+
+    function showTooltip() {
+        document.querySelector('.tooltip').style.display = 'block';
+    }
+
+    function hideTooltip() {
+        document.querySelector('.tooltip').style.display = 'none';
+    }
+
+    sequenceInput.addEventListener('input', () => {
+        charCount.textContent = sequenceInput.value.length;
+        validateInput();
+    });
+
+    sequenceInput.addEventListener('paste', (e) => {
+        let paste = (e.clipboardData || window.clipboardData).getData('text');
+        paste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '');
+        const currentText = sequenceInput.value;
+        const selectionStart = sequenceInput.selectionStart;
+        const selectionEnd = sequenceInput.selectionEnd;
+        const newText = currentText.substring(0, selectionStart) + paste + currentText.substring(selectionEnd);
+
+        if (newText.length > 100) {
+            showError('Sequence cannot exceed 100 characters after pasting.');
+            e.preventDefault();
+            return;
+        }
+        sequenceInput.value = newText
+        charCount.textContent = sequenceInput.value.length;
+        validateInput();
+        e.preventDefault();
+
+    });
+
+
+    sequenceInput.addEventListener('keypress', (e) => {
+        if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
+            e.preventDefault();
+            showError('Only standard amino acid characters are allowed');
+        }
+    });
+
+    function showError(message) {
+        errorDiv.textContent = message;
+        errorDiv.style.display = 'block';
+        predictBtn.disabled = true;
+    }
+
+    function clearError() {
+        errorDiv.style.display = 'none';
+        predictBtn.disabled = false;
+    }
+
+    function validateInput() {
+        const length = sequenceInput.value.length;
+        if (length < 10 && length !=0) showError('Sequence must be at least 10 characters');
+        else clearError();
+    }
+
+    async function classifySequence() {
+        const sequence = sequenceInput.value.trim().toUpperCase();
+        if (sequence.length < 10 || sequence.length > 100) {
+            showError('Sequence length must be between 10 and 100.');
+            return;
+        }
+
+        clearError();
+        predictBtn.disabled = true;
+        predictBtn.textContent = 'Processing...';
+        resultDiv.textContent = '';
+        resultDiv.classList.remove('show');
+        confidenceContainer.classList.add('hidden');
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+
+        try {
+            const result = await clientInstance.predict("/predict", [sequence]);
+            console.log("Prediction result:", result);
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    progressContainer.style.display = 'none';
+                    resultDiv.textContent = result.data[0].label;
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.classList.add('show');
+
+                    displayConfidence(result.data[0].confidences);
+
+                }
+            }, 100);
+
+        } catch (error) {
+            console.error("Error during prediction:", error);
+            showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+            progressContainer.style.display = 'none';
+
+        } finally {
+            predictBtn.disabled = false;
+            predictBtn.textContent = 'Classify Sequence';
+        }
+    }
+
+    function displayConfidence(confidences) {
+        const predictedLabel = resultDiv.textContent;
+        const confidenceEntry = confidences.find(c => c.label === predictedLabel);
+        if(!confidenceEntry) return;
+
+        const confidenceValue = confidenceEntry.confidence;
+        confidenceBar.style.width = `${confidenceValue * 100}%`;
+
+        if (confidenceValue > 0.8) {
+            confidenceBar.style.backgroundColor = 'var(--success-color)';
+        } else if (confidenceValue > 0.5) {
+            confidenceBar.style.backgroundColor = 'var(--warning-color)';
+        } else {
+            confidenceBar.style.backgroundColor = '#e74c3c';
+        }
+
+        confidenceContainer.classList.remove('hidden');
+    }
+
+</script>
 </body>
 </html>
