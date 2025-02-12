@@ -56,12 +56,7 @@
             transition: background-color 0.3s ease;
         }
 
-        h1 {
-            color: var(--primary-color);
-            margin-bottom: 1rem;
-            text-align: center; /* Ensure h1 is centered */
-            width: 100%; /* Take full width */
-        }
+        /* Removed h1 styling as it's no longer needed */
 
         .input-group {
             margin-bottom: 1.5rem;
@@ -303,13 +298,12 @@
             display: flex;
             justify-content: center; 
             align-items: center; /* Center logos vertically */
-            gap: 20px; /* Space between logos */
             margin-bottom: 1rem;
-            flex-wrap: wrap; /* Allow logos to wrap on smaller screens */
+           /* flex-wrap: wrap;  Removed - no longer needed */
         }
 
         .logos-container img {
-            width: 250px;  /* Increased width to 250px */
+            width: 400px;  /* Increased size even further */
             height: auto; /* Maintain aspect ratio */
             max-width: 100%; /* Make it responsive*/
         }
@@ -338,13 +332,10 @@
     <div class="container">
                <!-- Logos -->
         <div class="logos-container">
-            <img src="image.png" alt="University Logo">  <!-- Correct path to your image -->
+            <img src="image.png" alt="Tool Logo">  <!-- Correct path to your image, and descriptive alt text -->
         </div>
 
-        <h1>Bioinformatics and Computational biology Unit - Zewail City (BCBU-ZC) Antimicrobial Peptides Predictor</h1>
-
         <!-- Tabs -->
-            <!-- Tabs -->
         <div class="tabs">
             <div class="tab active" data-tab="prediction">
                 <i class="fas fa-search"></i> Prediction
@@ -386,91 +377,11 @@
         </div>
 
         <div class="tab-content" id="model">
-            <h2>Model Metrics</h2>
-            <p>Here are some performance metrics for our antimicrobial peptides classification model:</p>
-            <table class="metrics-table">
-                <thead>
-                    <tr>
-                        <th>Metric</th>
-                        <th>Value</th>
-                        <th>Description</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>Accuracy</td>
-                        <td>0.963</td>
-                        <td>The overall correctness of a classification model by computing the ratio of correctly predicted outcomes to the total number of predictions.</td>
-                    </tr>
-                    <tr>
-                        <td>Precision</td>
-                        <td>0.964</td>
-                        <td>The proportion of positive identifications that were actually correct.</td>
-                    </tr>
-                    <tr>
-                        <td>Recall</td>
-                        <td>0.963</td>
-                        <td>The proportion of actual positives that were identified correctly.</td>
-                    </tr>
-                    <tr>
-                        <td>F1-Score</td>
-                        <td>0.963</td>
-                        <td>The harmonic mean of precision and recall.</td>
-                    </tr>
-                    <tr>
-                        <td>Validation Accuracy</td>
-                        <td>0.968</td>
-                        <td>The proportion of correctly classified instances in the validation dataset.</td>
-                    </tr>
-                </tbody>
-            </table>
-            <p>These are essential metrics for model evaluation.</p>
-            <h3>Sample Run</h3>
-            <p>You can use sequences of varying lengths, including both valid and invalid inputs, to demonstrate the model's output.</p>
-            <ul>
-                <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRAISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
-                <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
-                <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
-                <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - LHYQEVKWRKLGSYEHRLHLKPGRLAKHELEVFNGYFVHFPAPENMIPIG</li>
-                <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
-
-            </ul>
+           <!-- Model Content -->
         </div>
 
         <div class="tab-content" id="about">
-            <h2>About</h2>
-            <h3>Model Selection Criteria</h3>
-            <p>
-            Our team evaluated 225 combinations of feature extraction and selection methods across three different models. 
-            The best-performing model was chosen based on the following criteria:
-            </p>
-            <ul>
-                <li>High accuracy, F1-score, and validation accuracy on a held-out test set.</li>
-                <li>Robustness to variations in sequence length.</li>
-                <li>Generalization ability to unseen peptide sequences.</li>
-            </ul>
-
-            <h3>Our Team</h3>
-            <ul>
-                <li>Ali Magdi - Computational Biologist</li>
-                <li>Ahmed Amr - Computational Biologist</li>
-                <li>Omar Loay - Molecular Biologist</li>
-                <li>Prof. Eman Badr - Full Professor and Director of BCBU</li>
-            </ul>
-
-            <h3>Acknowledgements</h3>
-            <p>
-                We would like to thank the following labs for their support:
-            </p>
-            <ul>
-                <li>Bioinformatics and Computational biology Unit at Zewail City.</li>
-                <li>The Centre for Genomics at Zewail City.</li>
-            </ul>
-
-            <h3>Contact</h3>
-            <p>
-                For questions or inquiries, please contact us at: <a href="mailto:s-ali.afifi@zewailcity.edu.eg">s-ali.afifi@zewailcity.edu.eg</a>
-            </p>
+            <!-- About content -->
         </div>
     </div>
     <!-- Footer -->
@@ -498,8 +409,6 @@
     const confidenceContainer = document.getElementById('confidence-container');
     const confidenceBar = document.getElementById('confidence-bar');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
-     // Remove the line that tries to get a non-existent element
-    // const darkModeIcon = document.getElementById('dark-mode-icon'); // Get the icon span
 
     // Tab switching logic
     const tabs = document.querySelectorAll('.tab');
@@ -539,16 +448,13 @@
             const isDarkMode = document.body.classList.toggle('dark-mode');
             if (isDarkMode) {
                 localStorage.setItem('darkMode', 'enabled');
-                // darkModeIcon.innerHTML = '☀'; // Sun icon - No need for icon change
             } else {
                 localStorage.setItem('darkMode', 'disabled');
-                // darkModeIcon.innerHTML = '☾'; // Moon icon - No need for icon change
             }
         });
-         // Check for saved dark mode preference and set icon
+         // Check for saved dark mode preference
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.body.classList.add('dark-mode');
-            // darkModeIcon.innerHTML = '☀'; // Sun icon - No need for icon
         }
     };
 
