@@ -4,26 +4,22 @@ import time
 
 app = Flask(__name__)
 
-# 🔹 Load the trained model
-model = joblib.load("SVM.joblib")  # Ensure this file is in the correct directory
+model = joblib.load("SVM.joblib")  
 
 @app.route('/predict', methods=['POST'])
 def predict():
     data = request.get_json()
     sequence = data.get("sequence", "")
 
-    # 🔸 Validate input
     if not sequence or len(sequence) < 10 or len(sequence) > 100:
         return jsonify({"error": "Sequence length must be between 10 and 100."}), 400
 
-    # 🔹 Measure processing time
     start_time = time.time()
 
-    # 🔹 Predict using the loaded model
-    prediction = model.predict([sequence])[0]  # Assuming the model accepts a list
-    confidence = 85.5  # If your model provides confidence, replace this
+    prediction = model.predict([sequence])[0]  
+    confidence = 85.5 
 
-    processing_time = round((time.time() - start_time) * 1000, 2)  # In milliseconds
+    processing_time = round((time.time() - start_time) * 1000, 2) 
 
     return jsonify({
         "prediction": "AMP" if prediction == 1 else "non-AMP",
