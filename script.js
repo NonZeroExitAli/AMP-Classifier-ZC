@@ -8,7 +8,6 @@ async function predict() {
         return;
     }
 
-    // Show loading message
     resultDiv.innerText = "Processing...";
     timeDiv.innerText = "";
 
@@ -32,7 +31,6 @@ async function predict() {
             throw new Error("Invalid response from server");
         }
 
-        // Display results
         resultDiv.innerText = `Prediction: ${data.prediction} (Confidence: ${data.confidence || "N/A"}%)`;
         timeDiv.innerText = `Processing Time: ${(end - start).toFixed(2)} ms`;
 
