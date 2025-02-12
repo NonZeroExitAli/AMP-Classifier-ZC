@@ -181,7 +181,7 @@
             height: 100%;
             width: 0;
             background-color: var(--success-color);
-            transition: width 0.3s ease;
+            transition: width: 0.3s ease;
         }
 
         @keyframes fadeIn {
@@ -309,7 +309,7 @@
         }
 
         .logos-container img {
-            width: 150px;  /* Set a specific width - adjust this! */
+            width: 250px;  /* Increased width to 250px */
             height: auto; /* Maintain aspect ratio */
             max-width: 100%; /* Make it responsive*/
         }
@@ -338,9 +338,10 @@
     <div class="container">
                <!-- Logos -->
         <div class="logos-container">
-            <img src="image.png" alt="University Logo"> <!-- And this one -->
+            <img src="image.png" alt="University Logo">  <!-- Correct path to your image -->
         </div>
 
+        <h1>Bioinformatics and Computational biology Unit - Zewail City (BCBU-ZC) Antimicrobial Peptides Predictor</h1>
 
         <!-- Tabs -->
             <!-- Tabs -->
@@ -364,7 +365,7 @@
                 </div>
                 <i class="info-icon" id="info-icon">ⓘ</i>
                 <div class="tooltip">
-                    Enter the amino acid sequence you want to classify. The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
+                    Enter the amino acid sequence you want to classify.  The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
                 </div>
             </div>
 
@@ -497,7 +498,8 @@
     const confidenceContainer = document.getElementById('confidence-container');
     const confidenceBar = document.getElementById('confidence-bar');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const darkModeIcon = document.getElementById('dark-mode-icon'); // Get the icon span
+     // Remove the line that tries to get a non-existent element
+    // const darkModeIcon = document.getElementById('dark-mode-icon'); // Get the icon span
 
     // Tab switching logic
     const tabs = document.querySelectorAll('.tab');
@@ -532,21 +534,21 @@
         document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
         document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
 
-        // Dark Mode Toggle
+          // Dark Mode Toggle
         darkModeToggle.addEventListener('click', () => {
             const isDarkMode = document.body.classList.toggle('dark-mode');
             if (isDarkMode) {
                 localStorage.setItem('darkMode', 'enabled');
-                darkModeIcon.innerHTML = '☀'; // Sun icon
+                // darkModeIcon.innerHTML = '☀'; // Sun icon - No need for icon change
             } else {
                 localStorage.setItem('darkMode', 'disabled');
-                darkModeIcon.innerHTML = '☾'; // Moon icon
+                // darkModeIcon.innerHTML = '☾'; // Moon icon - No need for icon change
             }
         });
          // Check for saved dark mode preference and set icon
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.body.classList.add('dark-mode');
-            darkModeIcon.innerHTML = '☀'; // Sun icon
+            // darkModeIcon.innerHTML = '☀'; // Sun icon - No need for icon
         }
     };
 
