@@ -209,7 +209,7 @@
             try {
                 const result = await clientInstance.predict("/predict", [sequence]);
                 console.log("Prediction result:", result);
-                resultDiv.textContent = "Classification: " + result.data[0].label;  // Access the label correctly
+                resultDiv.textContent = result.data[0].label;  // Access the label correctly
             } catch (error) {
                 console.error("Error during prediction:", error);
                 showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
