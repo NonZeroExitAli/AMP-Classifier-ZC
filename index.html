@@ -211,7 +211,7 @@
             height: 100%;
             background-color: var(--success-color);
             border-radius: 7.5px;
-            transition: width 0.3s ease, background-color 0.3s ease;
+            transition: width 0.3s ease, background-color: 0.3s ease;
         }
 
         .confidence-text {
@@ -296,17 +296,18 @@
 
         .logos-container {
             display: flex;
-            justify-content: center; 
-            align-items: center; /* Center logos vertically */
+            justify-content: center;
+            align-items: center;
             margin-bottom: 1rem;
-           /* flex-wrap: wrap;  Removed - no longer needed */
         }
 
         .logos-container img {
-            width: 400px;  /* Increased size even further */
-            height: auto; /* Maintain aspect ratio */
-            max-width: 100%; /* Make it responsive*/
+           /* Use transform: scale() for relative resizing */
+            transform: scale(4); /* 4 times the original size */
+            max-width: 100%; /*  Responsive */
+            height: auto;     /* Maintain aspect ratio */
         }
+
           /* Footer Styles */
         footer {
             text-align: center;
@@ -399,7 +400,7 @@
     window.gradio = { client };
 </script>
    <script>
-    const sequenceInput = document.getElementById('sequence');
+   const sequenceInput = document.getElementById('sequence');
     const charCount = document.getElementById('char-count');
     const errorDiv = document.getElementById('error');
     const predictBtn = document.getElementById('predict-btn');
@@ -581,7 +582,6 @@
 
         confidenceContainer.classList.remove('hidden');
     }
-
 </script>
 </body>
 </html>
