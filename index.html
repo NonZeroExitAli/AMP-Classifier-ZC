@@ -6,6 +6,7 @@
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
+        /* (Your existing CSS styles - No changes needed here) */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -361,10 +362,11 @@
                 <div class="tooltip">
                     Enter the amino acid sequence you want to classify or upload a FASTA file. The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
                 </div>
+                 <button onclick="clearInput()" id="clear-btn">Clear Input</button>
             </div>
 
             <div class="error-message" id="error"></div>
-            <button onclick="classifySequence()" id="predict-btn">Analyze Sequence</button>
+            <button onclick="classifySequenceDebounced()" id="predict-btn">Analyze Sequence</button>
 
             <div class="progress-container" id="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
@@ -508,6 +510,7 @@
 
 
     let clientInstance;
+    let debounceTimer;
 
     async function initClient() {
         try {
@@ -547,56 +550,88 @@
     function hideTooltip() {
         document.querySelector('.tooltip').style.display = 'none';
     }
+     function clearInput() {
+        sequenceInput.value = '';
+        fileInput.value = ''; // Clear file input
+        charCount.textContent = '0';
+        clearError();
+        resultDiv.textContent = '';
+        resultDiv.classList.add('hidden');
+        confidenceContainer.classList.add('hidden');
+    }
 
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) return;
-    
+
         const allowedExtensions = ['.fasta', '.fa', '.fna'];
         const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-    
+
         if (!allowedExtensions.includes(fileExtension)) {
             showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
             fileInput.value = ''; // Clear the file input
             return;
         }
         clearError();  // Clear any previous errors
-    
+
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
                 const sequence = parseFASTA(e.target.result);
+                console.log("Parsed Sequence:", sequence); // Log the parsed sequence
+
                 if (sequence) {
-                    // Set the textarea value and trigger input event for validation and character count:
                     sequenceInput.value = sequence;
-                    sequenceInput.dispatchEvent(new Event('input')); // Trigger validation
-    
-                    // Automatically classify if valid after file upload:
-                    if (validateSequence(sequence)) {
-                        classifySequence();
-                    }
+                    sequenceInput.dispatchEvent(new Event('input')); //important
+
                 }
             } catch (error) {
+                console.error("Error in reader.onload:", error); // Log errors
                 showError(error.message);
-                fileInput.value = ''; // Clear the file input in case of error
+                fileInput.value = '';
             }
+        };
+          reader.onerror = function(error) {
+          console.error("FileReader error:", error);
+          showError("Error reading file.");
         };
         reader.readAsText(file);
     }
 
 
-    function parseFASTA(text) {
-        const lines = text.trim().split('\n');
-        if (lines.length < 2) {
-            throw new Error("Invalid FASTA format.  Must have a header line and a sequence line.");
-        }
-        if (!lines[0].startsWith('>')) {
-             throw new Error("Invalid FASTA format.  First line must be a header line starting with '>'.");
-        }
-        const sequence = lines.slice(1).join('').replace(/\s/g, '').toUpperCase();
+   function parseFASTA(text) {
+    const lines = text.trim().split('\n');
+    const sequences = [];
+    let currentSequence = '';
+    let hasHeader = false;
 
-        return sequence;
+    for (const line of lines) {
+        if (line.startsWith('>')) {
+            if (hasHeader && currentSequence) {
+                sequences.push(currentSequence);
+            }
+            currentSequence = '';
+            hasHeader = true;
+        } else if (hasHeader) {
+            currentSequence += line.trim().replace(/\s/g, '').toUpperCase();
+        }
     }
+
+    if (hasHeader && currentSequence) {
+        sequences.push(currentSequence);
+    }
+
+    if (sequences.length === 0) {
+        throw new Error("Invalid FASTA format. No valid sequences found.");
+    }
+     if (sequences.length > 1)
+      {
+        return sequences[0]; //returns the first sequence only, modify this if you want to send all sequences
+      }
+      else{
+        return sequences[0];
+      }
+}
 
     function validateSequence(sequence) {
         if (!sequence) {
@@ -622,9 +657,13 @@
         charCount.textContent = sequenceInput.value.length;
     }
 
-    sequenceInput.addEventListener('input', () => {
-      updateCharacterCount();
-      validateSequence(sequenceInput.value);
+     sequenceInput.addEventListener('input', () => {
+        updateCharacterCount();
+        if (!validateSequence(sequenceInput.value)) {
+             //showError is implicitly invoked.
+        } else {
+            clearError();
+        }
     });
 
 
@@ -663,8 +702,15 @@
         predictBtn.disabled = false;
     }
 
+    async function classifySequenceDebounced() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(classifySequence, 300); // 300ms delay
+    }
+
+
     async function classifySequence() {
         const sequence = sequenceInput.value.trim().toUpperCase();
+        console.log("classifySequence - sequence:", sequence); // Log
 
         if (!validateSequence(sequence)) {
             return;
@@ -681,7 +727,7 @@
 
         try {
             const result = await clientInstance.predict("/predict", [sequence]);
-            console.log("Prediction result:", result);
+            console.log("Prediction result:", result); // Log result
 
             let progress = 0;
             const interval = setInterval(() => {
@@ -699,12 +745,12 @@
             }, 100);
 
         } catch (error) {
-            console.error("Error during prediction:", error);
+            console.error("Error during prediction:", error); // Log error
             showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
             progressContainer.style.display = 'none';
         } finally {
             predictBtn.disabled = false;
-            predictBtn.textContent = 'Classify Sequence';
+            predictBtn.textContent = 'Analyze Sequence';
         }
     }
 
