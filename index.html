@@ -598,38 +598,59 @@
         return sequence;
     }
 
-    sequenceInput.addEventListener('input', () => {
+    function validateSequence(sequence) {
+        if (!sequence) {
+            clearError();
+            return true;
+        }
+
+        if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
+            showError('Invalid characters in sequence. Only standard amino acid characters are allowed.');
+            return false;
+        }
+
+        if (sequence.length < 10 || sequence.length > 100) {
+            showError('Sequence length must be between 10 and 100 characters.');
+            return false;
+        }
+
+        clearError();
+        return true;
+    }
+
+    function updateCharacterCount() {
         charCount.textContent = sequenceInput.value.length;
-        validateInput();
+    }
+
+    sequenceInput.addEventListener('input', () => {
+      updateCharacterCount();
+      validateSequence(sequenceInput.value);
     });
 
+
     sequenceInput.addEventListener('paste', (e) => {
-        let paste = (e.clipboardData || window.clipboardData).getData('text');
-        paste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '');
+        e.preventDefault();
+        const paste = (e.clipboardData || window.clipboardData).getData('text');
+        const cleanPaste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '');
         const currentText = sequenceInput.value;
         const selectionStart = sequenceInput.selectionStart;
         const selectionEnd = sequenceInput.selectionEnd;
-        const newText = currentText.substring(0, selectionStart) + paste + currentText.substring(selectionEnd);
+        const newText = currentText.substring(0, selectionStart) + cleanPaste + currentText.substring(selectionEnd);
 
-        if (newText.length > 100) {
-            showError('Sequence cannot exceed 100 characters after pasting.');
-            e.preventDefault();
-            return;
+        if (validateSequence(newText)) {
+            sequenceInput.value = newText;
+            updateCharacterCount();
         }
-        sequenceInput.value = newText
-        charCount.textContent = sequenceInput.value.length;
-        validateInput();
-        e.preventDefault();
-
     });
 
 
     sequenceInput.addEventListener('keypress', (e) => {
         if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
             e.preventDefault();
-            showError('Only standard amino acid characters are allowed');
+          showError('Only standard amino acid characters are allowed');
         }
     });
+
 
     function showError(message) {
         errorDiv.textContent = message;
@@ -641,69 +662,51 @@
         errorDiv.style.display = 'none';
         predictBtn.disabled = false;
     }
-        function validateInput() {
-        const length = sequenceInput.value.length;
-         if (length === 0 ) {
-             clearError();
-             return;
-         }
-        if (length < 10 ) {
-            showError('Sequence must be at least 10 characters');
-        }
-        else {
-            clearError();
-        }
-    }
 
     async function classifySequence() {
-    const sequence = sequenceInput.value.trim().toUpperCase();
-    if (sequence.length < 10 || sequence.length > 100) {
-        showError('Sequence length must be between 10 and 100.');
-        return;
+        const sequence = sequenceInput.value.trim().toUpperCase();
+
+        if (!validateSequence(sequence)) {
+            return;
+        }
+
+        clearError();
+        predictBtn.disabled = true;
+        predictBtn.textContent = 'Processing...';
+        resultDiv.textContent = '';
+        resultDiv.classList.remove('show');
+        confidenceContainer.classList.add('hidden');
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+
+        try {
+            const result = await clientInstance.predict("/predict", [sequence]);
+            console.log("Prediction result:", result);
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    progressContainer.style.display = 'none';
+                    resultDiv.textContent = result.data[0].label;
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.classList.add('show');
+
+                    displayConfidence(result.data[0].confidences);
+                }
+            }, 100);
+
+        } catch (error) {
+            console.error("Error during prediction:", error);
+            showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+            progressContainer.style.display = 'none';
+        } finally {
+            predictBtn.disabled = false;
+            predictBtn.textContent = 'Classify Sequence';
+        }
     }
-
-    if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
-        showError('Invalid characters in sequence. Only standard amino acid characters are allowed.');
-        return;
-    }
-
-    clearError();
-    predictBtn.disabled = true;
-    predictBtn.textContent = 'Processing...';
-    resultDiv.textContent = '';
-    resultDiv.classList.remove('show');
-    confidenceContainer.classList.add('hidden');
-    progressContainer.style.display = 'block';
-    progressBar.style.width = '0%';
-
-    try {
-        const result = await clientInstance.predict("/predict", [sequence]);
-        console.log("Prediction result:", result);
-
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            progressBar.style.width = `${progress}%`;
-            if (progress >= 100) {
-                clearInterval(interval);
-                progressContainer.style.display = 'none';
-                resultDiv.textContent = result.data[0].label;
-                resultDiv.classList.remove('hidden');
-                resultDiv.classList.add('show');
-
-                displayConfidence(result.data[0].confidences);
-            }
-        }, 100);
-
-    } catch (error) {
-        console.error("Error during prediction:", error);
-        showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
-        progressContainer.style.display = 'none';
-    } finally {
-        predictBtn.disabled = false;
-        predictBtn.textContent = 'Classify Sequence';
-    }
-}
 
     function displayConfidence(confidences) {
         const predictedLabel = resultDiv.textContent;
