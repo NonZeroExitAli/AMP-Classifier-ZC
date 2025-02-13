@@ -6,7 +6,7 @@
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* (Your existing CSS - No changes needed here, EXCEPT for the new .button-group) */
+        /* (Your existing CSS - No changes needed here, EXCEPT for button styling) */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -18,6 +18,11 @@
             --container-bg-color: white;
             --border-color: #ddd;
             --button-hover-bg: #2980b9;
+            /* --- ADDED: Custom colors for buttons --- */
+            --clear-button-bg: #e74c3c; /* Red */
+            --clear-button-hover-bg: #c0392b;
+            --analyze-button-bg: #3498db; /* Blue (same as secondary-color) */
+            --analyze-button-hover-bg: #2980b9;
         }
 
         .dark-mode {
@@ -28,6 +33,12 @@
             --button-hover-bg: #4CAF50;
             --primary-color: #bb86fc;
             --secondary-color: #03dac6;
+            /* --- ADDED: Custom colors for buttons in dark mode --- */
+            --clear-button-bg: #ff6b6b; /* Lighter Red */
+            --clear-button-hover-bg: #e74c3c;
+            --analyze-button-bg: #03dac6; /* Teal */
+            --analyze-button-hover-bg: #02b39e;
+
         }
 
         body {
@@ -85,8 +96,8 @@
             border-color: var(--secondary-color);
         }
 
+        /* --- MODIFIED: General button styles --- */
         button {
-            background-color: var(--secondary-color);
             color: white;
             border: none;
             padding: 0.8rem 2rem;
@@ -94,18 +105,33 @@
             cursor: pointer;
             font-size: 1rem;
             transition: transform 0.2s ease, background-color 0.3s ease;
-           /* width: 100%; Remove width: 100% */
             margin-top: 1rem;
         }
-        .button-group button{
-           margin: 0 0.5rem; /* Add some horizontal spacing between buttons */
-
+          .button-group button{
+           margin: 0 0.2rem; /* Reduce horizontal spacing */
         }
 
         button:hover {
-            background-color: var(--button-hover-bg);
             transform: translateY(-1px);
         }
+
+        /* --- ADDED: Specific button styles --- */
+        #clear-btn {
+            background-color: var(--clear-button-bg);
+        }
+
+        #clear-btn:hover {
+            background-color: var(--clear-button-hover-bg);
+        }
+
+        #predict-btn {
+            background-color: var(--analyze-button-bg);
+        }
+
+        #predict-btn:hover {
+            background-color: var(--analyze-button-hover-bg);
+        }
+
 
         .character-count {
             text-align: right;
@@ -338,11 +364,10 @@
         /* New styles for button group */
         .button-group {
             display: flex;
-            justify-content: space-between; /* Distribute space evenly */
-            align-items: center; /* Vertically center items */
-            width: 100%; /* Use full width */
+            justify-content: center; /* Center buttons horizontally */
+            align-items: center;
+            width: 100%;
         }
-
 
     </style>
 </head>
@@ -400,7 +425,7 @@
         </div>
 
         <div class="tab-content" id="model">
-            <h2>Model Metrics</h2>
+             <h2>Model Metrics</h2>
             <p>Here are some performance metrics for our antimicrobial peptides classification model:</p>
             <table class="metrics-table">
                 <thead>
@@ -452,7 +477,7 @@
         </div>
 
         <div class="tab-content" id="about">
-            <h2>About</h2>
+             <h2>About</h2>
             <h3>Model Selection Criteria</h3>
             <p>
             Our team evaluated 225 combinations of feature extraction and selection methods across three different models. 
@@ -580,53 +605,52 @@
     }
 
     function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) {
-            return;
-        }
+       const file = event.target.files[0];
+    if (!file) {
+        return;
+    }
 
-        const allowedExtensions = ['.fasta', '.fa', '.fna'];
+    const allowedExtensions = ['.fasta', '.fa', '.fna'];
     const fileExtension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
 
 
-        if (!allowedExtensions.includes(fileExtension)) {
-            showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-            fileInput.value = '';
-            return;
-        }
+    if (!allowedExtensions.includes(fileExtension)) {
+        showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
+        fileInput.value = '';
+        return;
+    }
 
-        clearError();
+    clearError();
 
-        const reader = new FileReader();
+    const reader = new FileReader();
 
-        reader.onload = function(e) {
-            try {
-                console.log("Raw File Content (e.target.result):", e.target.result); // Log raw content
-                const sequence = parseFASTA(e.target.result);
-                console.log("Parsed Sequence:", sequence);
+    reader.onload = function(e) {
+        try {
+            console.log("Raw File Content (e.target.result):", e.target.result);
+            const sequence = parseFASTA(e.target.result);
+            console.log("Parsed Sequence:", sequence);
 
-                if (sequence) {
-                    sequenceInput.value = sequence;
-                    sequenceInput.dispatchEvent(new Event('input'));
+            if (sequence) {
+                sequenceInput.value = sequence;
+                sequenceInput.dispatchEvent(new Event('input'));
 
-                    if (validateSequence(sequence)) {
-                        console.log("Sequence after validation:", sequence); // Log after validation
-                       // classifySequence(); // Removed direct call, debouncing handles it
-                    }
+                if (validateSequence(sequence)) {
+                    console.log("Sequence after validation:", sequence);
                 }
-            } catch (error) {
-                console.error("Error in reader.onload:", error);
-                showError(error.message);
-                fileInput.value = '';
             }
-        };
+        } catch (error) {
+            console.error("Error in reader.onload:", error);
+            showError(error.message);
+            fileInput.value = '';
+        }
+    };
 
-        reader.onerror = function(error) {
-            console.error("FileReader error:", error);
-            showError("Error reading file.");
-        };
+    reader.onerror = function(error) {
+        console.error("FileReader error:", error);
+        showError("Error reading file.");
+    };
 
-        reader.readAsText(file);
+    reader.readAsText(file);
     }
 
 
