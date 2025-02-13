@@ -6,7 +6,6 @@
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* (Your existing CSS - No changes needed here, EXCEPT for button styling) */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -18,10 +17,9 @@
             --container-bg-color: white;
             --border-color: #ddd;
             --button-hover-bg: #2980b9;
-            /* --- ADDED: Custom colors for buttons --- */
-            --clear-button-bg: #e74c3c; /* Red */
+            --clear-button-bg: #e74c3c; 
             --clear-button-hover-bg: #c0392b;
-            --analyze-button-bg: #3498db; /* Blue (same as secondary-color) */
+            --analyze-button-bg: #3498db; 
             --analyze-button-hover-bg: #2980b9;
         }
 
@@ -33,10 +31,9 @@
             --button-hover-bg: #4CAF50;
             --primary-color: #bb86fc;
             --secondary-color: #03dac6;
-            /* --- ADDED: Custom colors for buttons in dark mode --- */
-            --clear-button-bg: #ff6b6b; /* Lighter Red */
+            --clear-button-bg: #ff6b6b; 
             --clear-button-hover-bg: #e74c3c;
-            --analyze-button-bg: #03dac6; /* Teal */
+            --analyze-button-bg: #03dac6; 
             --analyze-button-hover-bg: #02b39e;
 
         }
@@ -108,14 +105,13 @@
             margin-top: 1rem;
         }
           .button-group button{
-           margin: 0 0.2rem; /* Reduce horizontal spacing */
+           margin: 0 0.2rem; 
         }
 
         button:hover {
             transform: translateY(-1px);
         }
 
-        /* --- ADDED: Specific button styles --- */
         #clear-btn {
             background-color: var(--clear-button-bg);
         }
@@ -361,10 +357,9 @@
             color: var(--text-color);
         }
 
-        /* New styles for button group */
         .button-group {
             display: flex;
-            justify-content: center; /* Center buttons horizontally */
+            justify-content: center;
             align-items: center;
             width: 100%;
         }
@@ -682,7 +677,7 @@
     }
      if (sequences.length > 1)
       {
-        return sequences[0]; //returns the first sequence only, modify this if you want to send all sequences
+        return sequences[0]; 
       }
       else{
         return sequences[0];
@@ -729,7 +724,7 @@ KLMNPQRSTVWYACDEFGHIK
     }
      sequenceInput.addEventListener('input', () => {
         updateCharacterCount();
-        validateSequence(sequenceInput.value); // Simplified validation
+        validateSequence(sequenceInput.value); 
     });
 
 
@@ -771,7 +766,7 @@ KLMNPQRSTVWYACDEFGHIK
 
       async function classifySequenceDebounced() {
         clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(classifySequence, 300); // 300ms delay
+        debounceTimer = setTimeout(classifySequence, 300);
     }
 
 
@@ -793,7 +788,7 @@ KLMNPQRSTVWYACDEFGHIK
     progressBar.style.width = '0%';
 
     try {
-        debugger; // Add debugger statement
+        debugger; 
         const result = await clientInstance.predict("/predict", [sequence]);
         console.log("Prediction result:", result);
 
