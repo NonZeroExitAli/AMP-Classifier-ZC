@@ -6,8 +6,8 @@
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-       /* (Your existing CSS - No changes needed) */
-              :root {
+        /* (Your existing CSS - No changes needed here, EXCEPT for the new .button-group) */
+        :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
             --success-color: #27ae60;
@@ -94,8 +94,12 @@
             cursor: pointer;
             font-size: 1rem;
             transition: transform 0.2s ease, background-color 0.3s ease;
-            width: 100%;
+           /* width: 100%; Remove width: 100% */
             margin-top: 1rem;
+        }
+        .button-group button{
+           margin: 0 0.5rem; /* Add some horizontal spacing between buttons */
+
         }
 
         button:hover {
@@ -330,6 +334,16 @@
             background-color: var(--container-bg-color);
             color: var(--text-color);
         }
+
+        /* New styles for button group */
+        .button-group {
+            display: flex;
+            justify-content: space-between; /* Distribute space evenly */
+            align-items: center; /* Vertically center items */
+            width: 100%; /* Use full width */
+        }
+
+
     </style>
 </head>
 <body>
@@ -360,13 +374,17 @@
                 </div>
                 <i class="info-icon" id="info-icon">ⓘ</i>
                 <div class="tooltip">
-                    Enter the amino acid sequence you want to classify or upload a FASTA file. The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
+                    Enter the amino acid sequence you want to classify or upload a FASTA file.  The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
                 </div>
-                 <button onclick="clearInput()" id="clear-btn">Clear Input</button>
-            </div>
+                </div>
+                 <div class="button-group">
+                    <button onclick="clearInput()" id="clear-btn">Clear Input</button>
+                    <button onclick="classifySequenceDebounced()" id="predict-btn">Analyze Sequence</button>
+                </div>
+
 
             <div class="error-message" id="error"></div>
-            <button onclick="classifySequenceDebounced()" id="predict-btn">Analyze Sequence</button>
+
 
             <div class="progress-container" id="progress-container">
                 <div class="progress-bar" id="progress-bar"></div>
@@ -562,53 +580,54 @@
     }
 
     function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (!file) {
-        return;
-    }
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
 
-    const allowedExtensions = ['.fasta', '.fa', '.fna'];
+        const allowedExtensions = ['.fasta', '.fa', '.fna'];
     const fileExtension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
 
-    if (!allowedExtensions.includes(fileExtension)) {
-        showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-        fileInput.value = '';
-        return;
-    }
 
-    clearError();
-
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-        try {
-            console.log("Raw File Content (e.target.result):", e.target.result); // Log raw content
-            const sequence = parseFASTA(e.target.result);
-            console.log("Parsed Sequence:", sequence);
-
-            if (sequence) {
-                sequenceInput.value = sequence;
-                sequenceInput.dispatchEvent(new Event('input'));
-
-                if (validateSequence(sequence)) {
-                    console.log("Sequence after validation:", sequence); // Log after validation
-                   // classifySequence(); // Removed direct call, debouncing handles it
-                }
-            }
-        } catch (error) {
-            console.error("Error in reader.onload:", error);
-            showError(error.message);
+        if (!allowedExtensions.includes(fileExtension)) {
+            showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
             fileInput.value = '';
+            return;
         }
-    };
 
-    reader.onerror = function(error) {
-        console.error("FileReader error:", error);
-        showError("Error reading file.");
-    };
+        clearError();
 
-    reader.readAsText(file);
-}
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                console.log("Raw File Content (e.target.result):", e.target.result); // Log raw content
+                const sequence = parseFASTA(e.target.result);
+                console.log("Parsed Sequence:", sequence);
+
+                if (sequence) {
+                    sequenceInput.value = sequence;
+                    sequenceInput.dispatchEvent(new Event('input'));
+
+                    if (validateSequence(sequence)) {
+                        console.log("Sequence after validation:", sequence); // Log after validation
+                       // classifySequence(); // Removed direct call, debouncing handles it
+                    }
+                }
+            } catch (error) {
+                console.error("Error in reader.onload:", error);
+                showError(error.message);
+                fileInput.value = '';
+            }
+        };
+
+        reader.onerror = function(error) {
+            console.error("FileReader error:", error);
+            showError("Error reading file.");
+        };
+
+        reader.readAsText(file);
+    }
 
 
 
@@ -684,11 +703,11 @@ KLMNPQRSTVWYACDEFGHIK
     function updateCharacterCount() {
         charCount.textContent = sequenceInput.value.length;
     }
-
-    sequenceInput.addEventListener('input', () => {
+     sequenceInput.addEventListener('input', () => {
         updateCharacterCount();
         validateSequence(sequenceInput.value); // Simplified validation
     });
+
 
 
     sequenceInput.addEventListener('paste', (e) => {
