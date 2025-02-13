@@ -6,8 +6,8 @@
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <style>
-        /* (Your existing CSS styles - No changes needed here) */
-        :root {
+       /* (Your existing CSS - No changes needed) */
+              :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
             --success-color: #27ae60;
@@ -237,7 +237,7 @@
             z-index: 20;
             font-size: 1.5rem;
             color: var(--secondary-color);
-            transition: color 0.3s ease;
+            transition: color: 0.3s ease;
         }
 
         .dark-mode .dark-mode-toggle {
@@ -482,6 +482,7 @@
     import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
     window.gradio = { client };
 </script>
+
 <script>
     const sequenceInput = document.getElementById('sequence');
     const charCount = document.getElementById('char-count');
@@ -539,7 +540,7 @@
         if (localStorage.getItem('darkMode') === 'enabled') {
             document.body.classList.add('dark-mode');
         }
-
+        testParseFASTA();
         fileInput.addEventListener('change', handleFileSelect);
     };
 
@@ -561,42 +562,54 @@
     }
 
     function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) return;
-
-        const allowedExtensions = ['.fasta', '.fa', '.fna'];
-        const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
-
-        if (!allowedExtensions.includes(fileExtension)) {
-            showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-            fileInput.value = ''; // Clear the file input
-            return;
-        }
-        clearError();  // Clear any previous errors
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            try {
-                const sequence = parseFASTA(e.target.result);
-                console.log("Parsed Sequence:", sequence); // Log the parsed sequence
-
-                if (sequence) {
-                    sequenceInput.value = sequence;
-                    sequenceInput.dispatchEvent(new Event('input')); //important
-
-                }
-            } catch (error) {
-                console.error("Error in reader.onload:", error); // Log errors
-                showError(error.message);
-                fileInput.value = '';
-            }
-        };
-          reader.onerror = function(error) {
-          console.error("FileReader error:", error);
-          showError("Error reading file.");
-        };
-        reader.readAsText(file);
+    const file = event.target.files[0];
+    if (!file) {
+        return;
     }
+
+    const allowedExtensions = ['.fasta', '.fa', '.fna'];
+    const fileExtension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
+
+    if (!allowedExtensions.includes(fileExtension)) {
+        showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
+        fileInput.value = '';
+        return;
+    }
+
+    clearError();
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            console.log("Raw File Content (e.target.result):", e.target.result); // Log raw content
+            const sequence = parseFASTA(e.target.result);
+            console.log("Parsed Sequence:", sequence);
+
+            if (sequence) {
+                sequenceInput.value = sequence;
+                sequenceInput.dispatchEvent(new Event('input'));
+
+                if (validateSequence(sequence)) {
+                    console.log("Sequence after validation:", sequence); // Log after validation
+                   // classifySequence(); // Removed direct call, debouncing handles it
+                }
+            }
+        } catch (error) {
+            console.error("Error in reader.onload:", error);
+            showError(error.message);
+            fileInput.value = '';
+        }
+    };
+
+    reader.onerror = function(error) {
+        console.error("FileReader error:", error);
+        showError("Error reading file.");
+    };
+
+    reader.readAsText(file);
+}
+
 
 
    function parseFASTA(text) {
@@ -632,7 +645,22 @@
         return sequences[0];
       }
 }
+  function testParseFASTA() {
+        const testFASTA = `
+>TestHeader
+ACDEFGHIKLMNPQRSTVWY
+>AnotherHeader
+KLMNPQRSTVWYACDEFGHIK
+`;
+        try{
+            const parsedSequence = parseFASTA(testFASTA);
+            console.log("parseFASTA Test Result:", parsedSequence);
+        }
+        catch (error){
+            console.error(error);
+        }
 
+    }
     function validateSequence(sequence) {
         if (!sequence) {
             clearError();
@@ -657,13 +685,9 @@
         charCount.textContent = sequenceInput.value.length;
     }
 
-     sequenceInput.addEventListener('input', () => {
+    sequenceInput.addEventListener('input', () => {
         updateCharacterCount();
-        if (!validateSequence(sequenceInput.value)) {
-             //showError is implicitly invoked.
-        } else {
-            clearError();
-        }
+        validateSequence(sequenceInput.value); // Simplified validation
     });
 
 
@@ -702,57 +726,58 @@
         predictBtn.disabled = false;
     }
 
-    async function classifySequenceDebounced() {
+      async function classifySequenceDebounced() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(classifySequence, 300); // 300ms delay
     }
 
 
-    async function classifySequence() {
-        const sequence = sequenceInput.value.trim().toUpperCase();
-        console.log("classifySequence - sequence:", sequence); // Log
+   async function classifySequence() {
+    const sequence = sequenceInput.value.trim().toUpperCase();
+    console.log("classifySequence - sequence:", sequence);
 
-        if (!validateSequence(sequence)) {
-            return;
-        }
-
-        clearError();
-        predictBtn.disabled = true;
-        predictBtn.textContent = 'Processing...';
-        resultDiv.textContent = '';
-        resultDiv.classList.remove('show');
-        confidenceContainer.classList.add('hidden');
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-
-        try {
-            const result = await clientInstance.predict("/predict", [sequence]);
-            console.log("Prediction result:", result); // Log result
-
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                progressBar.style.width = `${progress}%`;
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    progressContainer.style.display = 'none';
-                    resultDiv.textContent = result.data[0].label;
-                    resultDiv.classList.remove('hidden');
-                    resultDiv.classList.add('show');
-
-                    displayConfidence(result.data[0].confidences);
-                }
-            }, 100);
-
-        } catch (error) {
-            console.error("Error during prediction:", error); // Log error
-            showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
-            progressContainer.style.display = 'none';
-        } finally {
-            predictBtn.disabled = false;
-            predictBtn.textContent = 'Analyze Sequence';
-        }
+    if (!validateSequence(sequence)) {
+        return;
     }
+
+    clearError();
+    predictBtn.disabled = true;
+    predictBtn.textContent = 'Processing...';
+    resultDiv.textContent = '';
+    resultDiv.classList.remove('show');
+    confidenceContainer.classList.add('hidden');
+    progressContainer.style.display = 'block';
+    progressBar.style.width = '0%';
+
+    try {
+        debugger; // Add debugger statement
+        const result = await clientInstance.predict("/predict", [sequence]);
+        console.log("Prediction result:", result);
+
+        let progress = 0;
+        const interval = setInterval(() => {
+            progress += 10;
+            progressBar.style.width = `${progress}%`;
+            if (progress >= 100) {
+                clearInterval(interval);
+                progressContainer.style.display = 'none';
+                resultDiv.textContent = result.data[0].label;
+                resultDiv.classList.remove('hidden');
+                resultDiv.classList.add('show');
+
+                displayConfidence(result.data[0].confidences);
+            }
+        }, 100);
+    } catch (error) {
+        console.error("Error during prediction:", error);
+        showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+        progressContainer.style.display = 'none';
+    } finally {
+        predictBtn.disabled = false;
+        predictBtn.textContent = 'Analyze Sequence';
+    }
+}
+
 
     function displayConfidence(confidences) {
         const predictedLabel = resultDiv.textContent;
