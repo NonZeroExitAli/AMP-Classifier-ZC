@@ -549,39 +549,39 @@
     }
 
     function handleFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) {
-        return;
-      }
-
-      const allowedExtensions = ['.fasta', '.fa', '.fna'];
-      const fileName = file.name;
-      const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
-
-      if (!allowedExtensions.includes(fileExtension)) {
-        showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-        fileInput.value = '';
-        return;
-      }
-      clearError();
-
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        const text = e.target.result;
-        try {
-          const sequence = parseFASTA(text);
-          if (sequence) {
-            sequenceInput.value = sequence;
-            updateCharacterCount();
-          }
-        } catch (error) {
-          showError(error.message);
-          fileInput.value = '';
-
+        const file = event.target.files[0];
+        if (!file) return;
+    
+        const allowedExtensions = ['.fasta', '.fa', '.fna'];
+        const fileExtension = file.name.substring(file.name.lastIndexOf('.')).toLowerCase();
+    
+        if (!allowedExtensions.includes(fileExtension)) {
+            showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
+            fileInput.value = ''; // Clear the file input
+            return;
         }
-
-      };
-      reader.readAsText(file);
+        clearError();  // Clear any previous errors
+    
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            try {
+                const sequence = parseFASTA(e.target.result);
+                if (sequence) {
+                    // Set the textarea value and trigger input event for validation and character count:
+                    sequenceInput.value = sequence;
+                    sequenceInput.dispatchEvent(new Event('input')); // Trigger validation
+    
+                    // Automatically classify if valid after file upload:
+                    if (validateSequence(sequence)) {
+                        classifySequence();
+                    }
+                }
+            } catch (error) {
+                showError(error.message);
+                fileInput.value = ''; // Clear the file input in case of error
+            }
+        };
+        reader.readAsText(file);
     }
 
 
