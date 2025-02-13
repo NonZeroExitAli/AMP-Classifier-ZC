@@ -549,65 +549,49 @@
     }
 
     function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) {
-            return;
-        }
+            const file = event.target.files[0];
+            if (!file) return;
 
-        const allowedExtensions = ['.fasta', '.fa', '.fna'];
-        const fileName = file.name;
-        const fileExtension = fileName.substring(fileName.lastIndexOf('.')).toLowerCase();
-
-        if (!allowedExtensions.includes(fileExtension)) {
-            showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-            fileInput.value = '';
-            return;
-        }
-        clearError();
-
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const text = e.target.result;
-            try {
-                const sequence = parseFASTA(text);
-                if (sequence) {
-                     sequenceInput.value = sequence;
-                     charCount.textContent = sequence.length;
-                     validateInput();
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const text = e.target.result;
+                try {
+                    const sequence = parseFASTA(text);
+                    sequenceInput.value = sequence;
+                    charCount.textContent = sequence.length;
+                    validateInput();
+                    clearError(); // Clear any previous errors
+                } catch (error) {
+                    showError(error.message);
+                    fileInput.value = ''; // Clear the file input
                 }
-            } catch (error) {
-                showError(error.message);
-                fileInput.value = '';
+            };
+            reader.readAsText(file);
+        }
 
+
+        function parseFASTA(text) {
+            const lines = text.trim().split('\n');
+            let sequence = "";
+            for (const line of lines) {
+                if (!line.startsWith('>')) { // If it's not a header line
+                    sequence += line.replace(/\s/g, '').toUpperCase(); // Remove whitespace, uppercase
+                }
             }
 
-        };
-        reader.readAsText(file);
-    }
+            if (sequence.length === 0) {
+                throw new Error("No sequence found in the FASTA file.");
+            }
 
+            if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
+                throw new Error('Invalid characters in sequence. Only standard amino acid characters are allowed.');
+            }
 
-    function parseFASTA(text) {
-        const lines = text.trim().split('\n');
-        if (lines.length < 2) {
-            throw new Error("Invalid FASTA format.  Must have a header line and a sequence line.");
+            if (sequence.length < 10 || sequence.length > 100) {
+                throw new Error("Sequence length must be between 10 and 100 characters.");
+            }
+            return sequence;
         }
-        if (!lines[0].startsWith('>')) {
-             throw new Error("Invalid FASTA format.  First line must be a header line starting with '>'.");
-        }
-        const header = lines[0];
-        const sequence = lines.slice(1).join('').replace(/\s/g, '').toUpperCase();
-
-        if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
-            throw new Error('Invalid characters in sequence. Only standard amino acid characters are allowed.');
-        }
-
-
-        if (sequence.length < 10 || sequence.length > 100) {
-            throw new Error("Sequence length must be between 10 and 100 characters.");
-        }
-
-        return sequence;
-    }
 
     sequenceInput.addEventListener('input', () => {
         charCount.textContent = sequenceInput.value.length;
