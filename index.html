@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BCBU-ZC AMP Classifier</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
         :root {
             --primary-color: #2c3e50;
@@ -17,9 +18,9 @@
             --container-bg-color: white;
             --border-color: #ddd;
             --button-hover-bg: #2980b9;
-            --clear-button-bg: #e74c3c; 
+            --clear-button-bg: #e74c3c;
             --clear-button-hover-bg: #c0392b;
-            --analyze-button-bg: #3498db; 
+            --analyze-button-bg: #3498db;
             --analyze-button-hover-bg: #2980b9;
         }
 
@@ -31,9 +32,9 @@
             --button-hover-bg: #4CAF50;
             --primary-color: #bb86fc;
             --secondary-color: #03dac6;
-            --clear-button-bg: #ff6b6b; 
+            --clear-button-bg: #ff6b6b;
             --clear-button-hover-bg: #e74c3c;
-            --analyze-button-bg: #03dac6; 
+            --analyze-button-bg: #03dac6;
             --analyze-button-hover-bg: #02b39e;
 
         }
@@ -105,7 +106,7 @@
             margin-top: 1rem;
         }
           .button-group button{
-           margin: 0 0.2rem; 
+           margin: 0 0.2rem;
         }
 
         button:hover {
@@ -367,6 +368,9 @@
     </style>
 </head>
 <body>
+    <button id="dark-mode-toggle" title="Toggle dark mode">
+        <i class="fas fa-moon"></i>
+    </button>
 
     <div class="container">
         <div class="logos-container">
@@ -475,7 +479,7 @@
              <h2>About</h2>
             <h3>Model Selection Criteria</h3>
             <p>
-            Our team evaluated 225 combinations of feature extraction and selection methods across three different models. 
+            Our team evaluated 225 combinations of feature extraction and selection methods across three different models.
             The best-performing model was chosen based on the following criteria:
             </p>
             <ul>
@@ -519,23 +523,50 @@
 <script type="module">
     import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
     window.gradio = { client };
-</script>
 
-<script>
-    const sequenceInput = document.getElementById('sequence');
-    const charCount = document.getElementById('char-count');
-    const errorDiv = document.getElementById('error');
-    const predictBtn = document.getElementById('predict-btn');
-    const resultDiv = document.getElementById('result');
-    const progressContainer = document.getElementById('progress-container');
-    const progressBar = document.getElementById('progress-bar');
-    const confidenceContainer = document.getElementById('confidence-container');
-    const confidenceBar = document.getElementById('confidence-bar');
-    const darkModeToggle = document.getElementById('dark-mode-toggle');
-    const fileInput = document.getElementById('file-input');
 
-    const tabs = document.querySelectorAll('.tab');
-    const tabContents = document.querySelectorAll('.tab-content');
+// Import the client
+// Make it globally available
+
+// --- All JavaScript from previous responses, fully included here ---
+
+const sequenceInput = document.getElementById('sequence');
+const charCount = document.getElementById('char-count');
+const errorDiv = document.getElementById('error');
+const predictBtn = document.getElementById('predict-btn');
+const resultDiv = document.getElementById('result');
+const progressContainer = document.getElementById('progress-container');
+const progressBar = document.getElementById('progress-bar');
+const confidenceContainer = document.getElementById('confidence-container');
+const confidenceBar = document.getElementById('confidence-bar');
+const fileInput = document.getElementById('file-input');
+const tabs = document.querySelectorAll('.tab');
+const tabContents = document.querySelectorAll('.tab-content');
+const darkModeToggle = document.getElementById('dark-mode-toggle');
+
+
+let clientInstance;
+let debounceTimer;
+
+
+async function initClient() {
+    try {
+        clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier");
+        console.log("Gradio client initialized:", clientInstance);
+    } catch (error) {
+        console.error("Failed to initialize Gradio client:", error);
+        showError("Failed to connect to the classifier service.");
+        predictBtn.disabled = true;
+    }
+}
+
+
+window.onload = function() {
+    initClient();
+    document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
+    document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
+    fileInput.addEventListener('change', handleFileSelect);
+
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -547,60 +578,43 @@
     });
 
 
+      // Dark Mode Toggle
+    darkModeToggle.addEventListener('click', () => {
+        document.body.classList.toggle('dark-mode');
+        // Store the user's preference in local storage
+        localStorage.setItem('darkMode', document.body.classList.contains('dark-mode') ? 'enabled' : 'disabled');
+    });
 
-    let clientInstance;
-    let debounceTimer;
-
-    async function initClient() {
-        try {
-            clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier");
-            console.log("Gradio client initialized:", clientInstance);
-        } catch (error) {
-            console.error("Failed to initialize Gradio client:", error);
-            showError("Failed to connect to the classifier service.");
-            predictBtn.disabled = true;
-        }
+    // Check local storage for dark mode preference on page load
+    const darkModeStatus = localStorage.getItem('darkMode');
+    if (darkModeStatus === 'enabled') {
+        document.body.classList.add('dark-mode');
     }
 
-    window.onload = function() {
-        initClient();
-        document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
-        document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
+};
 
-        darkModeToggle.addEventListener('click', () => {
-            const isDarkMode = document.body.classList.toggle('dark-mode');
-            if (isDarkMode) {
-                localStorage.setItem('darkMode', 'enabled');
-            } else {
-                localStorage.setItem('darkMode', 'disabled');
-            }
-        });
-        if (localStorage.getItem('darkMode') === 'enabled') {
-            document.body.classList.add('dark-mode');
-        }
-        testParseFASTA();
-        fileInput.addEventListener('change', handleFileSelect);
-    };
 
-    function showTooltip() {
-        document.querySelector('.tooltip').style.display = 'block';
-    }
+function showTooltip() {
+    document.querySelector('.tooltip').style.display = 'block';
+}
 
-    function hideTooltip() {
-        document.querySelector('.tooltip').style.display = 'none';
-    }
-     function clearInput() {
-        sequenceInput.value = '';
-        fileInput.value = ''; // Clear file input
-        charCount.textContent = '0';
-        clearError();
-        resultDiv.textContent = '';
-        resultDiv.classList.add('hidden');
-        confidenceContainer.classList.add('hidden');
-    }
+function hideTooltip() {
+    document.querySelector('.tooltip').style.display = 'none';
+}
 
-    function handleFileSelect(event) {
-       const file = event.target.files[0];
+function clearInput() {
+    sequenceInput.value = '';
+    fileInput.value = '';
+    charCount.textContent = '0';
+    clearError();
+    resultDiv.textContent = '';
+    resultDiv.classList.add('hidden');
+    confidenceContainer.classList.add('hidden');
+}
+
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
     if (!file) {
         return;
     }
@@ -609,7 +623,7 @@
     const fileExtension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
 
 
-    if (!allowedExtensions.includes(fileExtension)) {
+    if (!allowedExtensions.includes('.' + fileExtension)) {
         showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
         fileInput.value = '';
         return;
@@ -621,36 +635,28 @@
 
     reader.onload = function(e) {
         try {
-            console.log("Raw File Content (e.target.result):", e.target.result);
             const sequence = parseFASTA(e.target.result);
-            console.log("Parsed Sequence:", sequence);
 
             if (sequence) {
                 sequenceInput.value = sequence;
                 sequenceInput.dispatchEvent(new Event('input'));
-
-                if (validateSequence(sequence)) {
-                    console.log("Sequence after validation:", sequence);
-                }
             }
         } catch (error) {
-            console.error("Error in reader.onload:", error);
             showError(error.message);
             fileInput.value = '';
         }
     };
 
-    reader.onerror = function(error) {
-        console.error("FileReader error:", error);
+    reader.onerror = function() {
         showError("Error reading file.");
+        fileInput.value = '';
     };
 
     reader.readAsText(file);
-    }
+}
 
 
-
-   function parseFASTA(text) {
+function parseFASTA(text) {
     const lines = text.trim().split('\n');
     const sequences = [];
     let currentSequence = '';
@@ -673,106 +679,135 @@
     }
 
     if (sequences.length === 0) {
-        throw new Error("Invalid FASTA format. No valid sequences found.");
+        throw new Error("Invalid FASTA format. No sequences found.");
     }
-     if (sequences.length > 1)
+    if (sequences.length > 1)
       {
-        return sequences[0]; 
+        return sequences[0];
       }
       else{
         return sequences[0];
       }
 }
-  function testParseFASTA() {
-        const testFASTA = `
->TestHeader
-ACDEFGHIKLMNPQRSTVWY
->AnotherHeader
-KLMNPQRSTVWYACDEFGHIK
-`;
-        try{
-            const parsedSequence = parseFASTA(testFASTA);
-            console.log("parseFASTA Test Result:", parsedSequence);
-        }
-        catch (error){
-            console.error(error);
-        }
 
-    }
-    function validateSequence(sequence) {
-        if (!sequence) {
-            clearError();
-            return true;
-        }
 
-        if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
-            showError('Invalid characters in sequence. Only standard amino acid characters are allowed.');
-            return false;
-        }
-
-        if (sequence.length < 10 || sequence.length > 100) {
-            showError('Sequence length must be between 10 and 100 characters.');
-            return false;
-        }
-
+function validateSequence(sequence) {
+    if (!sequence) {
         clearError();
         return true;
     }
 
-    function updateCharacterCount() {
-        charCount.textContent = sequenceInput.value.length;
+    if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
+        showError('Invalid characters in sequence. Only standard amino acid characters are allowed.');
+        return false;
     }
-     sequenceInput.addEventListener('input', () => {
+
+    if (sequence.length < 10 || sequence.length > 100) {
+        showError('Sequence length must be between 10 and 100 characters.');
+        return false;
+    }
+
+    clearError();
+    return true;
+}
+
+
+function updateCharacterCount() {
+    charCount.textContent = sequenceInput.value.length;
+}
+
+
+sequenceInput.addEventListener('input', () => {
+    updateCharacterCount();
+    validateSequence(sequenceInput.value);
+});
+
+
+sequenceInput.addEventListener('paste', (e) => {
+    e.preventDefault();
+    const paste = (e.clipboardData || window.clipboardData).getData('text');
+    const cleanPaste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '');
+    const currentText = sequenceInput.value;
+    const selectionStart = sequenceInput.selectionStart;
+    const selectionEnd = sequenceInput.selectionEnd;
+    const newText = currentText.substring(0, selectionStart) + cleanPaste + currentText.substring(selectionEnd);
+
+    if (validateSequence(newText)) {
+        sequenceInput.value = newText;
         updateCharacterCount();
-        validateSequence(sequenceInput.value); 
-    });
+    }
+});
 
 
+sequenceInput.addEventListener('keypress', (e) => {
 
-    sequenceInput.addEventListener('paste', (e) => {
+    if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
+
         e.preventDefault();
-        const paste = (e.clipboardData || window.clipboardData).getData('text');
-        const cleanPaste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '');
-        const currentText = sequenceInput.value;
-        const selectionStart = sequenceInput.selectionStart;
-        const selectionEnd = sequenceInput.selectionEnd;
-        const newText = currentText.substring(0, selectionStart) + cleanPaste + currentText.substring(selectionEnd);
-
-        if (validateSequence(newText)) {
-            sequenceInput.value = newText;
-            updateCharacterCount();
-        }
-    });
+        showError('Only standard amino acid characters are allowed.');
+    }
+});
 
 
-    sequenceInput.addEventListener('keypress', (e) => {
-        if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
-            e.preventDefault();
-          showError('Only standard amino acid characters are allowed');
-        }
-    });
+function showError(message) {
+    errorDiv.textContent = message;
+    errorDiv.style.display = 'block';
+    predictBtn.disabled = true;
+}
 
 
-    function showError(message) {
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
-        predictBtn.disabled = true;
+function clearError() {
+    errorDiv.style.display = 'none';
+    predictBtn.disabled = false;
+}
+
+
+async function classifySequenceDebounced() {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(classifySequence, 300);
+}
+
+async function generatePDFReport(sequence, prediction, confidence) {
+        const doc = new jsPDF();
+
+        // Add title and logo (if you have a logo image URL)
+        doc.setFontSize(20);
+        doc.text("AMP Classification Report", 105, 20, { align: 'center' });
+        // Example: doc.addImage("logo.png", "PNG", 10, 10, 30, 15);
+
+        // Add sequence information
+        doc.setFontSize(12);
+        doc.text("Input Sequence:", 20, 40);
+        doc.setFontSize(10);  // Smaller font for the sequence itself to avoid wrapping issues
+        doc.text(sequence, 20, 50);
+
+        // Add prediction and confidence
+        doc.setFontSize(12);
+        doc.text("Prediction:", 20, 70);
+        doc.text(prediction, 20, 80);
+        doc.text("Confidence:", 20, 90);
+        doc.text(`${(confidence * 100).toFixed(2)}%`, 20, 100);
+
+
+        // Placeholder for explainability (replace with actual explainability data when available)
+        doc.setFontSize(12);
+        doc.text("Explainability:", 20, 120);
+        doc.setFontSize(10);
+        doc.text("Explainability details will be added here in the future.", 20, 130);
+
+
+        // Footer (optional)
+        doc.setFontSize(8);
+        doc.text("© 2025, Bioinformatics and Computational biology Unit, BCBU", 105, 285, { align: 'center' });
+
+        // Save or open the PDF
+        doc.save("amp_classification_report.pdf");
+        // or: window.open(doc.output('bloburl')); // To open in new tab
     }
 
-    function clearError() {
-        errorDiv.style.display = 'none';
-        predictBtn.disabled = false;
-    }
 
-      async function classifySequenceDebounced() {
-        clearTimeout(debounceTimer);
-        debounceTimer = setTimeout(classifySequence, 300);
-    }
-
-
-   async function classifySequence() {
+async function classifySequence() {
     const sequence = sequenceInput.value.trim().toUpperCase();
-    console.log("classifySequence - sequence:", sequence);
 
     if (!validateSequence(sequence)) {
         return;
@@ -788,7 +823,6 @@ KLMNPQRSTVWYACDEFGHIK
     progressBar.style.width = '0%';
 
     try {
-        debugger; 
         const result = await clientInstance.predict("/predict", [sequence]);
         console.log("Prediction result:", result);
 
@@ -799,16 +833,23 @@ KLMNPQRSTVWYACDEFGHIK
             if (progress >= 100) {
                 clearInterval(interval);
                 progressContainer.style.display = 'none';
-                resultDiv.textContent = result.data[0].label;
+
+                const prediction = result.data[0].label;
+                const confidence = result.data[0].confidences.find(c => c.label === prediction).confidence;
+
+                resultDiv.textContent = prediction;
                 resultDiv.classList.remove('hidden');
                 resultDiv.classList.add('show');
 
                 displayConfidence(result.data[0].confidences);
+                generatePDFReport(sequence, prediction, confidence);
             }
         }, 100);
+
+
     } catch (error) {
         console.error("Error during prediction:", error);
-        showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+        showError("Failed to get a response from the classifier: " + (error.message || "Unknown error"));
         progressContainer.style.display = 'none';
     } finally {
         predictBtn.disabled = false;
@@ -817,24 +858,25 @@ KLMNPQRSTVWYACDEFGHIK
 }
 
 
-    function displayConfidence(confidences) {
-        const predictedLabel = resultDiv.textContent;
-        const confidenceEntry = confidences.find(c => c.label === predictedLabel);
-        if(!confidenceEntry) return;
+function displayConfidence(confidences) {
+    const predictedLabel = resultDiv.textContent;
+    const confidenceEntry = confidences.find(c => c.label === predictedLabel);
+    if (!confidenceEntry) return;
 
-        const confidenceValue = confidenceEntry.confidence;
-        confidenceBar.style.width = `${confidenceValue * 100}%`;
+    const confidenceValue = confidenceEntry.confidence;
+    confidenceBar.style.width = `${confidenceValue * 100}%`;
 
-        if (confidenceValue > 0.8) {
-            confidenceBar.style.backgroundColor = 'var(--success-color)';
-        } else if (confidenceValue > 0.5) {
-            confidenceBar.style.backgroundColor = 'var(--warning-color)';
-        } else {
-            confidenceBar.style.backgroundColor = '#e74c3c';
-        }
-
-        confidenceContainer.classList.remove('hidden');
+    if (confidenceValue > 0.8) {
+        confidenceBar.style.backgroundColor = 'var(--success-color)';
+    } else if (confidenceValue > 0.5) {
+        confidenceBar.style.backgroundColor = 'var(--warning-color)';
+    } else {
+        confidenceBar.style.backgroundColor = '#e74c3c';
     }
+
+    confidenceContainer.classList.remove('hidden');
+}
+
 
 </script>
 </body>
