@@ -599,92 +599,105 @@
         resultDiv.textContent = '';
         resultDiv.classList.add('hidden');
         confidenceContainer.classList.add('hidden');
+        // Remove any existing download link
+        const existingLink = resultDiv.querySelector('a');
+        if (existingLink) {
+            resultDiv.removeChild(existingLink);
+        }
     }
 
     function handleFileSelect(event) {
-       const file = event.target.files[0];
-    if (!file) {
-        return;
-    }
-
-    const allowedExtensions = ['.fasta', '.fa', '.fna'];
-    const fileExtension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
-
-
-    if (!allowedExtensions.includes(fileExtension)) {
-        showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-        fileInput.value = '';
-        return;
-    }
-
-    clearError();
-
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-        try {
-            console.log("Raw File Content (e.target.result):", e.target.result);
-            const sequence = parseFASTA(e.target.result);
-            console.log("Parsed Sequence:", sequence);
-
-            if (sequence) {
-                sequenceInput.value = sequence;
-                sequenceInput.dispatchEvent(new Event('input'));
-
-                if (validateSequence(sequence)) {
-                    console.log("Sequence after validation:", sequence);
-                }
-            }
-        } catch (error) {
-            console.error("Error in reader.onload:", error);
-            showError(error.message);
-            fileInput.value = '';
+        const file = event.target.files[0];
+        if (!file) {
+            return;
         }
-    };
 
-    reader.onerror = function(error) {
-        console.error("FileReader error:", error);
-        showError("Error reading file.");
-    };
+        const allowedExtensions = ['.fasta', '.fa', '.fna'];
+        const fileExtension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
 
-    reader.readAsText(file);
+        if (!allowedExtensions.includes(fileExtension)) {
+            showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
+            fileInput.value = '';
+            return;
+        }
+
+        clearError();
+
+        const reader = new FileReader();
+
+        reader.onload = function(e) {
+            try {
+                console.log("Raw File Content (e.target.result):", e.target.result);
+                const sequence = parseFASTA(e.target.result);
+                console.log("Parsed Sequence:", sequence);
+
+                if (sequence) {
+                    sequenceInput.value = sequence;
+                    console.log("Textarea value set to:", sequenceInput.value); // ADDED LOGGING
+
+                    // Directly update character count and validate after setting value
+                    updateCharacterCount();
+                    validateSequence(sequence);
+
+
+                    if (validateSequence(sequence)) {
+                        console.log("Sequence after validation:", sequence);
+                    }
+                } else {
+                    showError("No sequence found in FASTA file."); // Handle case where parseFASTA returns null/empty
+                    fileInput.value = '';
+                }
+            } catch (error) {
+                console.error("Error in reader.onload:", error);
+                showError(error.message);
+                fileInput.value = '';
+            }
+        };
+
+        reader.onerror = function(error) {
+            console.error("FileReader error:", error);
+            showError("Error reading file.");
+        };
+
+        reader.readAsText(file);
     }
 
 
 
    function parseFASTA(text) {
-    const lines = text.trim().split('\n');
-    const sequences = [];
-    let currentSequence = '';
-    let hasHeader = false;
+        const lines = text.trim().split(/[\r\n]+/); // Split by both \r and \n and handle multiple empty lines
+        const sequences = [];
+        let currentSequence = '';
+        let hasHeader = false;
 
-    for (const line of lines) {
-        if (line.startsWith('>')) {
-            if (hasHeader && currentSequence) {
-                sequences.push(currentSequence);
+        for (const line of lines) {
+            const trimmedLine = line.trim(); // Trim each line individually
+            if (trimmedLine.startsWith('>')) {
+                if (hasHeader && currentSequence) {
+                    sequences.push(currentSequence);
+                }
+                currentSequence = '';
+                hasHeader = true;
+            } else if (hasHeader && trimmedLine) { // Check if line is not empty after trim
+                currentSequence += trimmedLine.replace(/\s/g, '').toUpperCase(); // Remove all whitespace and uppercase
             }
-            currentSequence = '';
-            hasHeader = true;
-        } else if (hasHeader) {
-            currentSequence += line.trim().replace(/\s/g, '').toUpperCase();
         }
-    }
 
-    if (hasHeader && currentSequence) {
-        sequences.push(currentSequence);
-    }
+        if (hasHeader && currentSequence) {
+            sequences.push(currentSequence);
+        }
 
-    if (sequences.length === 0) {
-        throw new Error("Invalid FASTA format. No valid sequences found.");
+        if (sequences.length === 0) {
+            throw new Error("Invalid FASTA format. No valid sequences found.");
+        }
+         if (sequences.length > 1)
+          {
+            return sequences[0];
+          }
+          else{
+            return sequences[0];
+          }
     }
-     if (sequences.length > 1)
-      {
-        return sequences[0];
-      }
-      else{
-        return sequences[0];
-      }
-}
   function testParseFASTA() {
         const testFASTA = `
 >TestHeader
@@ -788,6 +801,13 @@ KLMNPQRSTVWYACDEFGHIK
     progressContainer.style.display = 'block';
     progressBar.style.width = '0%';
 
+    // Remove any existing download link before new prediction
+    const existingLink = resultDiv.querySelector('a');
+    if (existingLink) {
+        resultDiv.removeChild(existingLink);
+    }
+
+
     try {
         const result = await clientInstance.predict("/predict", [sequence]);
         console.log("Prediction result:", result);
@@ -803,8 +823,18 @@ KLMNPQRSTVWYACDEFGHIK
                 resultDiv.classList.remove('hidden');
                 resultDiv.classList.add('show');
 
-                const confidenceValue = displayConfidence(result.data[0].confidences); // Get confidence value
-                generatePDFReport(sequence, resultDiv.textContent, confidenceValue); // Generate PDF report
+                const confidenceValue = displayConfidence(result.data[0].confidences);
+                const pdfUrl = generatePDFReport(sequence, resultDiv.textContent, confidenceValue); // Get PDF URL
+
+                // Create and append the download link
+                const downloadLink = document.createElement('a');
+                downloadLink.href = pdfUrl;
+                downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0,10)}.pdf`;
+                downloadLink.textContent = 'Download PDF Report';
+                downloadLink.style.display = 'block'; // Make it a block element for better spacing
+                downloadLink.style.marginTop = '10px'; // Add some spacing
+
+                resultDiv.appendChild(downloadLink); // Append link to result div
             }
         }, 100);
     } catch (error) {
@@ -839,7 +869,7 @@ KLMNPQRSTVWYACDEFGHIK
     }
 
     function generatePDFReport(sequence, prediction, confidence) {
-        const { jsPDF } = window.jspdf; // Access jsPDF from the window object
+        const { jsPDF } = window.jspdf;
         const pdf = new jsPDF();
 
         pdf.setFontSize(20);
@@ -849,11 +879,17 @@ KLMNPQRSTVWYACDEFGHIK
         pdf.text(`Sequence: ${sequence}`, 20, 40);
         pdf.text(`Prediction: ${prediction}`, 20, 50);
         pdf.text(`Confidence: ${(confidence * 100).toFixed(2)}%`, 20, 60);
-        pdf.text("Explainability: (Template - Will be added later)", 20, 70); // Placeholder for explainability
+        pdf.text("Explainability: (Template - Will be added later)", 20, 70);
 
-        pdf.save(`AMP_Classifier_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+        const pdfBlob = pdf.output('blob'); // Get PDF as Blob
+        const pdfUrl = URL.createObjectURL(pdfBlob); // Create URL for the Blob
+
+        return pdfUrl; // Return the PDF URL
     }
 
 </script>
+<button class="dark-mode-toggle" id="dark-mode-toggle">
+    <i class="fas fa-moon"></i>
+</button>
 </body>
 </html>
