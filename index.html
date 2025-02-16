@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> <!----- ADD JSPDF LIBRARY ------>
     <style>
+        /* ... (rest of your CSS styles - no changes here) ... */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -17,9 +19,9 @@
             --container-bg-color: white;
             --border-color: #ddd;
             --button-hover-bg: #2980b9;
-            --clear-button-bg: #e74c3c; 
+            --clear-button-bg: #e74c3c;
             --clear-button-hover-bg: #c0392b;
-            --analyze-button-bg: #3498db; 
+            --analyze-button-bg: #3498db;
             --analyze-button-hover-bg: #2980b9;
         }
 
@@ -31,9 +33,9 @@
             --button-hover-bg: #4CAF50;
             --primary-color: #bb86fc;
             --secondary-color: #03dac6;
-            --clear-button-bg: #ff6b6b; 
+            --clear-button-bg: #ff6b6b;
             --clear-button-hover-bg: #e74c3c;
-            --analyze-button-bg: #03dac6; 
+            --analyze-button-bg: #03dac6;
             --analyze-button-hover-bg: #02b39e;
 
         }
@@ -105,7 +107,7 @@
             margin-top: 1rem;
         }
           .button-group button{
-           margin: 0 0.2rem; 
+           margin: 0 0.2rem;
         }
 
         button:hover {
@@ -475,7 +477,7 @@
              <h2>About</h2>
             <h3>Model Selection Criteria</h3>
             <p>
-            Our team evaluated 225 combinations of feature extraction and selection methods across three different models. 
+            Our team evaluated 225 combinations of feature extraction and selection methods across three different models.
             The best-performing model was chosen based on the following criteria:
             </p>
             <ul>
@@ -677,7 +679,7 @@
     }
      if (sequences.length > 1)
       {
-        return sequences[0]; 
+        return sequences[0];
       }
       else{
         return sequences[0];
@@ -724,7 +726,7 @@ KLMNPQRSTVWYACDEFGHIK
     }
      sequenceInput.addEventListener('input', () => {
         updateCharacterCount();
-        validateSequence(sequenceInput.value); 
+        validateSequence(sequenceInput.value);
     });
 
 
@@ -769,7 +771,6 @@ KLMNPQRSTVWYACDEFGHIK
         debounceTimer = setTimeout(classifySequence, 300);
     }
 
-
    async function classifySequence() {
     const sequence = sequenceInput.value.trim().toUpperCase();
     console.log("classifySequence - sequence:", sequence);
@@ -788,7 +789,6 @@ KLMNPQRSTVWYACDEFGHIK
     progressBar.style.width = '0%';
 
     try {
-        debugger; 
         const result = await clientInstance.predict("/predict", [sequence]);
         console.log("Prediction result:", result);
 
@@ -803,7 +803,8 @@ KLMNPQRSTVWYACDEFGHIK
                 resultDiv.classList.remove('hidden');
                 resultDiv.classList.add('show');
 
-                displayConfidence(result.data[0].confidences);
+                const confidenceValue = displayConfidence(result.data[0].confidences); // Get confidence value
+                generatePDFReport(sequence, resultDiv.textContent, confidenceValue); // Generate PDF report
             }
         }, 100);
     } catch (error) {
@@ -820,7 +821,7 @@ KLMNPQRSTVWYACDEFGHIK
     function displayConfidence(confidences) {
         const predictedLabel = resultDiv.textContent;
         const confidenceEntry = confidences.find(c => c.label === predictedLabel);
-        if(!confidenceEntry) return;
+        if(!confidenceEntry) return 0; // Return 0 if no confidence entry found
 
         const confidenceValue = confidenceEntry.confidence;
         confidenceBar.style.width = `${confidenceValue * 100}%`;
@@ -834,6 +835,23 @@ KLMNPQRSTVWYACDEFGHIK
         }
 
         confidenceContainer.classList.remove('hidden');
+        return confidenceValue; // Return confidence value
+    }
+
+    function generatePDFReport(sequence, prediction, confidence) {
+        const { jsPDF } = window.jspdf; // Access jsPDF from the window object
+        const pdf = new jsPDF();
+
+        pdf.setFontSize(20);
+        pdf.text("AMP Classifier Report", 105, 20, { align: "center" });
+
+        pdf.setFontSize(12);
+        pdf.text(`Sequence: ${sequence}`, 20, 40);
+        pdf.text(`Prediction: ${prediction}`, 20, 50);
+        pdf.text(`Confidence: ${(confidence * 100).toFixed(2)}%`, 20, 60);
+        pdf.text("Explainability: (Template - Will be added later)", 20, 70); // Placeholder for explainability
+
+        pdf.save(`AMP_Classifier_Report_${new Date().toISOString().slice(0,10)}.pdf`);
     }
 
 </script>
