@@ -5,8 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> <!----- ADD JSPDF LIBRARY ------>
     <style>
+        /* ... (your existing CSS styles - no changes needed) ... */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -29,7 +30,7 @@
             --text-color: #eee;
             --container-bg-color: #222;
             --border-color: #444;
-            --button-hover-bg: #4CAF50;
+            --button-hover-bg: #4CAF50; /* Corrected hover color for dark mode buttons for better visibility*/
             --primary-color: #bb86fc;
             --secondary-color: #03dac6;
             --clear-button-bg: #ff6b6b;
@@ -402,6 +403,7 @@
                     <div class="confidence-bar" id="confidence-bar"></div>
                 </div>
             </div>
+              <!-- Download link (initially hidden) -->
             <a id="download-link" style="display: none; margin-top: 10px;">Download PDF Report</a>
         </div>
 
@@ -518,7 +520,8 @@
     const confidenceContainer = document.getElementById('confidence-container');
     const confidenceBar = document.getElementById('confidence-bar');
     const fileInput = document.getElementById('file-input');
-    const downloadLink = document.getElementById('download-link'); 
+    const downloadLink = document.getElementById('download-link'); // Get the download link
+
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
 
@@ -566,13 +569,13 @@
     }
      function clearInput() {
         sequenceInput.value = '';
-        fileInput.value = '';
+        fileInput.value = ''; // Clear file input
         charCount.textContent = '0';
         clearError();
         resultDiv.textContent = '';
         resultDiv.classList.add('hidden');
         confidenceContainer.classList.add('hidden');
-        downloadLink.style.display = 'none'; 
+        downloadLink.style.display = 'none'; // Hide download link
 
     }
 
@@ -602,16 +605,16 @@
             const sequence = parseFASTA(e.target.result);
             if (sequence) {
                 sequenceInput.value = sequence;
-                updateCharacterCount(); 
-                validateSequence(sequence); 
+                updateCharacterCount();  // Update character count immediately
+                validateSequence(sequence); // and validate.
             } else {
-                showError("No sequence found in FASTA file."); 
+                showError("No sequence found in FASTA file."); // Handle case where parseFASTA returns null/empty
                 fileInput.value = '';
             }
         } catch (error) {
             console.error("Error in reader.onload:", error);
-            showError(error.message);  
-            fileInput.value = ''; 
+            showError(error.message);  // Show the error message from parseFASTA
+            fileInput.value = ''; // Clear the file input on error
         }
     };
 
@@ -626,20 +629,21 @@
 
 
    function parseFASTA(text) {
-        const lines = text.trim().split(/[\r\n]+/); 
+        const lines = text.trim().split(/[\r\n]+/); // Split by both \r and \n and handle multiple empty lines
+        const sequences = [];
         let currentSequence = '';
         let hasHeader = false;
 
         for (const line of lines) {
-            const trimmedLine = line.trim(); 
+            const trimmedLine = line.trim(); // Trim each line individually
             if (trimmedLine.startsWith('>')) {
                 if (hasHeader && currentSequence) {
                     sequences.push(currentSequence);
                 }
                 currentSequence = '';
                 hasHeader = true;
-            } else if (hasHeader && trimmedLine) { 
-                currentSequence += trimmedLine.replace(/\s/g, '').toUpperCase(); 
+            } else if (hasHeader && trimmedLine) { // Check if line is not empty after trim
+                currentSequence += trimmedLine.replace(/\s/g, '').toUpperCase(); // Remove all whitespace and uppercase
             }
         }
 
@@ -760,7 +764,7 @@ KLMNPQRSTVWYACDEFGHIK
         confidenceContainer.classList.add('hidden');
         progressContainer.style.display = 'block';
         progressBar.style.width = '0%';
-        downloadLink.style.display = 'none'; 
+        downloadLink.style.display = 'none'; // Hide download link initially
 
 
         try {
@@ -779,9 +783,10 @@ KLMNPQRSTVWYACDEFGHIK
                     resultDiv.classList.add('show');
 
                     const confidenceValue = displayConfidence(result.data[0].confidences);
-           
+                    // Generate and set the download link.  Crucially, do this *after*
+                    // the prediction result and confidence are available.
                     generatePDFReport(sequence, resultDiv.textContent, confidenceValue);
-                    downloadLink.style.display = 'block'; 
+                    downloadLink.style.display = 'block'; // Show download link here after PDF is generated.
                 }
             }, 100);
         } catch (error) {
@@ -799,7 +804,7 @@ KLMNPQRSTVWYACDEFGHIK
     function displayConfidence(confidences) {
         const predictedLabel = resultDiv.textContent;
         const confidenceEntry = confidences.find(c => c.label === predictedLabel);
-        if(!confidenceEntry) return 0; 
+        if(!confidenceEntry) return 0; // Return 0 if no confidence entry found
 
         const confidenceValue = confidenceEntry.confidence;
         confidenceBar.style.width = `${confidenceValue * 100}%`;
@@ -813,7 +818,7 @@ KLMNPQRSTVWYACDEFGHIK
         }
 
         confidenceContainer.classList.remove('hidden');
-        return confidenceValue;
+        return confidenceValue; // Return confidence value
     }
 
     function generatePDFReport(sequence, prediction, confidence) {
@@ -832,6 +837,7 @@ KLMNPQRSTVWYACDEFGHIK
         const pdfBlob = pdf.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
+        // Set the href and download attributes for the download link
         downloadLink.href = pdfUrl;
         downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0,10)}.pdf`;
     }
