@@ -7,7 +7,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> <!----- ADD JSPDF LIBRARY ------>
     <style>
-        /* ... (rest of your CSS styles - no changes here) ... */
+        /* ... (your existing CSS styles - no changes needed) ... */
         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
@@ -419,6 +419,8 @@
                     <div class="confidence-bar" id="confidence-bar"></div>
                 </div>
             </div>
+              <!-- Download link (initially hidden) -->
+            <a id="download-link" style="display: none; margin-top: 10px;">Download PDF Report</a>
         </div>
 
         <div class="tab-content" id="model">
@@ -535,6 +537,7 @@
     const confidenceBar = document.getElementById('confidence-bar');
     const darkModeToggle = document.getElementById('dark-mode-toggle');
     const fileInput = document.getElementById('file-input');
+    const downloadLink = document.getElementById('download-link'); // Get the download link
 
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -599,69 +602,57 @@
         resultDiv.textContent = '';
         resultDiv.classList.add('hidden');
         confidenceContainer.classList.add('hidden');
-        // Remove any existing download link
-        const existingLink = resultDiv.querySelector('a');
-        if (existingLink) {
-            resultDiv.removeChild(existingLink);
-        }
+        downloadLink.style.display = 'none'; // Hide download link
+
     }
 
     function handleFileSelect(event) {
-        const file = event.target.files[0];
-        if (!file) {
-            return;
-        }
-
-        const allowedExtensions = ['.fasta', '.fa', '.fna'];
-        const fileExtension = file.name.substring(file.name.lastIndexOf('.') + 1).toLowerCase();
-
-        if (!allowedExtensions.includes(fileExtension)) {
-            showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-            fileInput.value = '';
-            return;
-        }
-
-        clearError();
-
-        const reader = new FileReader();
-
-        reader.onload = function(e) {
-            try {
-                console.log("Raw File Content (e.target.result):", e.target.result);
-                const sequence = parseFASTA(e.target.result);
-                console.log("Parsed Sequence:", sequence);
-
-                if (sequence) {
-                    sequenceInput.value = sequence;
-                    console.log("Textarea value set to:", sequenceInput.value); // ADDED LOGGING
-
-                    // Directly update character count and validate after setting value
-                    updateCharacterCount();
-                    validateSequence(sequence);
-
-
-                    if (validateSequence(sequence)) {
-                        console.log("Sequence after validation:", sequence);
-                    }
-                } else {
-                    showError("No sequence found in FASTA file."); // Handle case where parseFASTA returns null/empty
-                    fileInput.value = '';
-                }
-            } catch (error) {
-                console.error("Error in reader.onload:", error);
-                showError(error.message);
-                fileInput.value = '';
-            }
-        };
-
-        reader.onerror = function(error) {
-            console.error("FileReader error:", error);
-            showError("Error reading file.");
-        };
-
-        reader.readAsText(file);
+    const file = event.target.files[0];
+    if (!file) {
+        return;
     }
 
+    const allowedExtensions = ['.fasta', '.fa', '.fna'];
+    const fileName = file.name.toLowerCase();
+    const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+
+
+    if (!isValidExtension) {
+        showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
+        fileInput.value = '';
+        return;
+    }
+
+    clearError();
+
+    const reader = new FileReader();
+
+    reader.onload = function(e) {
+        try {
+            const sequence = parseFASTA(e.target.result);
+            if (sequence) {
+                sequenceInput.value = sequence;
+                updateCharacterCount();  // Update character count immediately
+                validateSequence(sequence); // and validate.
+            } else {
+                showError("No sequence found in FASTA file."); // Handle case where parseFASTA returns null/empty
+                fileInput.value = '';
+            }
+        } catch (error) {
+            console.error("Error in reader.onload:", error);
+            showError(error.message);  // Show the error message from parseFASTA
+            fileInput.value = ''; // Clear the file input on error
+        }
+    };
+
+    reader.onerror = function(error) {
+        console.error("FileReader error:", error);
+        showError("Error reading file.");
+        fileInput.value = '';
+    };
+
+    reader.readAsText(file);
+}
 
 
    function parseFASTA(text) {
@@ -784,68 +775,57 @@ KLMNPQRSTVWYACDEFGHIK
         debounceTimer = setTimeout(classifySequence, 300);
     }
 
-   async function classifySequence() {
-    const sequence = sequenceInput.value.trim().toUpperCase();
-    console.log("classifySequence - sequence:", sequence);
+    async function classifySequence() {
+        const sequence = sequenceInput.value.trim().toUpperCase();
+        console.log("classifySequence - sequence:", sequence);
 
-    if (!validateSequence(sequence)) {
-        return;
+        if (!validateSequence(sequence)) {
+            return;
+        }
+
+        clearError();
+        predictBtn.disabled = true;
+        predictBtn.textContent = 'Processing...';
+        resultDiv.textContent = '';
+        resultDiv.classList.remove('show');
+        confidenceContainer.classList.add('hidden');
+        progressContainer.style.display = 'block';
+        progressBar.style.width = '0%';
+        downloadLink.style.display = 'none'; // Hide download link initially
+
+
+        try {
+            const result = await clientInstance.predict("/predict", [sequence]);
+            console.log("Prediction result:", result);
+
+            let progress = 0;
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = `${progress}%`;
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    progressContainer.style.display = 'none';
+                    resultDiv.textContent = result.data[0].label;
+                    resultDiv.classList.remove('hidden');
+                    resultDiv.classList.add('show');
+
+                    const confidenceValue = displayConfidence(result.data[0].confidences);
+                    // Generate and set the download link.  Crucially, do this *after*
+                    // the prediction result and confidence are available.
+                    generatePDFReport(sequence, resultDiv.textContent, confidenceValue);
+
+                }
+            }, 100);
+        } catch (error) {
+            console.error("Error during prediction:", error);
+            showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+            progressContainer.style.display = 'none';
+        } finally {
+            predictBtn.disabled = false;
+            predictBtn.textContent = 'Analyze Sequence';
+        }
     }
 
-    clearError();
-    predictBtn.disabled = true;
-    predictBtn.textContent = 'Processing...';
-    resultDiv.textContent = '';
-    resultDiv.classList.remove('show');
-    confidenceContainer.classList.add('hidden');
-    progressContainer.style.display = 'block';
-    progressBar.style.width = '0%';
-
-    // Remove any existing download link before new prediction
-    const existingLink = resultDiv.querySelector('a');
-    if (existingLink) {
-        resultDiv.removeChild(existingLink);
-    }
-
-
-    try {
-        const result = await clientInstance.predict("/predict", [sequence]);
-        console.log("Prediction result:", result);
-
-        let progress = 0;
-        const interval = setInterval(() => {
-            progress += 10;
-            progressBar.style.width = `${progress}%`;
-            if (progress >= 100) {
-                clearInterval(interval);
-                progressContainer.style.display = 'none';
-                resultDiv.textContent = result.data[0].label;
-                resultDiv.classList.remove('hidden');
-                resultDiv.classList.add('show');
-
-                const confidenceValue = displayConfidence(result.data[0].confidences);
-                const pdfUrl = generatePDFReport(sequence, resultDiv.textContent, confidenceValue); // Get PDF URL
-
-                // Create and append the download link
-                const downloadLink = document.createElement('a');
-                downloadLink.href = pdfUrl;
-                downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0,10)}.pdf`;
-                downloadLink.textContent = 'Download PDF Report';
-                downloadLink.style.display = 'block'; // Make it a block element for better spacing
-                downloadLink.style.marginTop = '10px'; // Add some spacing
-
-                resultDiv.appendChild(downloadLink); // Append link to result div
-            }
-        }, 100);
-    } catch (error) {
-        console.error("Error during prediction:", error);
-        showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
-        progressContainer.style.display = 'none';
-    } finally {
-        predictBtn.disabled = false;
-        predictBtn.textContent = 'Analyze Sequence';
-    }
-}
 
 
     function displayConfidence(confidences) {
@@ -881,10 +861,13 @@ KLMNPQRSTVWYACDEFGHIK
         pdf.text(`Confidence: ${(confidence * 100).toFixed(2)}%`, 20, 60);
         pdf.text("Explainability: (Template - Will be added later)", 20, 70);
 
-        const pdfBlob = pdf.output('blob'); // Get PDF as Blob
-        const pdfUrl = URL.createObjectURL(pdfBlob); // Create URL for the Blob
+        const pdfBlob = pdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
 
-        return pdfUrl; // Return the PDF URL
+        // Set the href and download attributes for the download link
+        downloadLink.href = pdfUrl;
+        downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0,10)}.pdf`;
+        downloadLink.style.display = 'block';  // Show the link
     }
 
 </script>
