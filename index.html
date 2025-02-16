@@ -521,14 +521,11 @@
     </footer>
 
 <script type="module">
-    import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
-    window.gradio = { client };
+import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
+window.gradio = { client };
 
-
-// Import the client
-// Make it globally available
-
-// --- All JavaScript from previous responses, fully included here ---
+// --- JavaScript code (including jsPDF) as before ---
+let pdfBlobURL; // Store the PDF Blob URL globally
 
 const sequenceInput = document.getElementById('sequence');
 const charCount = document.getElementById('char-count');
@@ -610,6 +607,10 @@ function clearInput() {
     resultDiv.textContent = '';
     resultDiv.classList.add('hidden');
     confidenceContainer.classList.add('hidden');
+      // Remove download link if it exists
+    if (resultDiv.querySelector('a')) {
+        resultDiv.removeChild(resultDiv.querySelector('a'));
+    }
 }
 
 
@@ -768,8 +769,7 @@ async function classifySequenceDebounced() {
 }
 
 async function generatePDFReport(sequence, prediction, confidence) {
-        const doc = new jsPDF();
-
+    const doc = new jsPDF();
         // Add title and logo (if you have a logo image URL)
         doc.setFontSize(20);
         doc.text("AMP Classification Report", 105, 20, { align: 'center' });
@@ -800,9 +800,23 @@ async function generatePDFReport(sequence, prediction, confidence) {
         doc.setFontSize(8);
         doc.text("© 2025, Bioinformatics and Computational biology Unit, BCBU", 105, 285, { align: 'center' });
 
-        // Save or open the PDF
-        doc.save("amp_classification_report.pdf");
-        // or: window.open(doc.output('bloburl')); // To open in new tab
+         const pdfBlob = doc.output('blob');  // Get PDF as Blob
+
+    // Revoke the old URL if it exists to prevent memory leaks
+    if (pdfBlobURL) {
+        URL.revokeObjectURL(pdfBlobURL);
+    }
+
+    // Generate new Blob URL
+    pdfBlobURL = URL.createObjectURL(pdfBlob);
+
+    // Add a link to download the PDF
+    const downloadLink = document.createElement('a');
+    downloadLink.href = pdfBlobURL;
+    downloadLink.download = "amp_classification_report.pdf";
+    downloadLink.textContent = "Download PDF Report";
+    resultDiv.appendChild(document.createElement('br')); // Add a line break
+    resultDiv.appendChild(downloadLink);
     }
 
 
@@ -817,6 +831,10 @@ async function classifySequence() {
     predictBtn.disabled = true;
     predictBtn.textContent = 'Processing...';
     resultDiv.textContent = '';
+    // Remove download link if it exists
+    if (resultDiv.querySelector('a')) {
+        resultDiv.removeChild(resultDiv.querySelector('a'));
+    }
     resultDiv.classList.remove('show');
     confidenceContainer.classList.add('hidden');
     progressContainer.style.display = 'block';
@@ -851,6 +869,10 @@ async function classifySequence() {
         console.error("Error during prediction:", error);
         showError("Failed to get a response from the classifier: " + (error.message || "Unknown error"));
         progressContainer.style.display = 'none';
+         // Remove download link if it exists
+        if (resultDiv.querySelector('a')) {
+            resultDiv.removeChild(resultDiv.querySelector('a'));
+        }
     } finally {
         predictBtn.disabled = false;
         predictBtn.textContent = 'Analyze Sequence';
