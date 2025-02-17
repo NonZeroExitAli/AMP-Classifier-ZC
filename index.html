@@ -318,9 +318,9 @@
         }
         .logos-container img {
 
-            transform: scale(1.083);
-            max-width: 100%;
-            height: auto;
+            transform: scale(0.8); /* Adjust the scale as needed */
+            max-width: 100%;  /* Ensure the logo doesn't exceed its container */
+            height: auto;     /* Maintain aspect ratio */
         }
 
         footer {
@@ -346,6 +346,15 @@
             justify-content: center;
             align-items: center;
             width: 100%;
+        }
+
+        #download-link {
+          color: var(--secondary-color);
+          text-decoration: none; /* Remove underline */
+          font-weight: bold;
+        }
+        #download-link:hover{
+            text-decoration: underline;
         }
 
     </style>
@@ -395,7 +404,7 @@
             </div>
 
             <div class="result hidden" id="result"></div>
-              <a id="download-link" style="display: none; margin-top: 10px;">Download PDF Report</a>
+              <a id="download-link" style="display: none; margin-top: 10px;">Detailed Report</a>
         </div>
 
         <div class="tab-content" id="model">
@@ -780,7 +789,7 @@
 
         const imgData = getBase64Image(document.querySelector('.logos-container img'));
           if (imgData) {
-            pdf.addImage(imgData, 'PNG', 15, 22, 40, 20);
+            pdf.addImage(imgData, 'PNG', 25, 22, 30, 15); 
         }
 
         pdf.setFontSize(16);
@@ -821,7 +830,6 @@
 
         downloadLink.href = pdfUrl;
         downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
-        downloadLink.click();
     }
 
     function getBase64Image(img) {
