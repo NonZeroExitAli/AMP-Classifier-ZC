@@ -5,10 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script> <!----- ADD JSPDF LIBRARY ------>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <style>
-        /* ... (your existing CSS styles - no changes needed) ... */
-        :root {
+         :root {
             --primary-color: #2c3e50;
             --secondary-color: #3498db;
             --success-color: #27ae60;
@@ -30,7 +29,7 @@
             --text-color: #eee;
             --container-bg-color: #222;
             --border-color: #444;
-            --button-hover-bg: #4CAF50; /* Corrected hover color for dark mode buttons for better visibility*/
+            --button-hover-bg: #4CAF50;
             --primary-color: #bb86fc;
             --secondary-color: #03dac6;
             --clear-button-bg: #ff6b6b;
@@ -95,7 +94,6 @@
             border-color: var(--secondary-color);
         }
 
-        /* --- MODIFIED: General button styles --- */
         button {
             color: white;
             border: none;
@@ -244,7 +242,7 @@
             height: 100%;
             background-color: var(--success-color);
             border-radius: 7.5px;
-            transition: width: 0.3s ease, background-color 0.3s ease;
+            transition: width: 0.3s ease, background-color: 0.3s ease;
         }
 
         .confidence-text {
@@ -271,7 +269,7 @@
             border-radius: 5px 5px 0 0;
             background-color: transparent;
             color: var(--text-color);
-            transition: border-color 0.3s ease, background-color 0.3s ease;
+            transition: border-color 0.3s ease, background-color: 0.3s ease;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -397,14 +395,7 @@
             </div>
 
             <div class="result hidden" id="result"></div>
-            <div class="confidence-container hidden" id="confidence-container">
-                <span class="confidence-text">Confidence:</span>
-                <div class="confidence-bar-container">
-                    <div class="confidence-bar" id="confidence-bar"></div>
-                </div>
-            </div>
-              <!-- Download link (initially hidden) -->
-            <a id="download-link" style="display: none; margin-top: 10px;">Download PDF Report</a>
+              <a id="download-link" style="display: none; margin-top: 10px;">Download PDF Report</a>
         </div>
 
         <div class="tab-content" id="model">
@@ -517,10 +508,8 @@
     const resultDiv = document.getElementById('result');
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
-    const confidenceContainer = document.getElementById('confidence-container');
-    const confidenceBar = document.getElementById('confidence-bar');
     const fileInput = document.getElementById('file-input');
-    const downloadLink = document.getElementById('download-link'); // Get the download link
+    const downloadLink = document.getElementById('download-link');
 
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -534,15 +523,12 @@
         });
     });
 
-
-
     let clientInstance;
     let debounceTimer;
 
     async function initClient() {
         try {
             clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier");
-            console.log("Gradio client initialized:", clientInstance);
         } catch (error) {
             console.error("Failed to initialize Gradio client:", error);
             showError("Failed to connect to the classifier service.");
@@ -554,9 +540,6 @@
         initClient();
         document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
         document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
-
-
-        testParseFASTA();
         fileInput.addEventListener('change', handleFileSelect);
     };
 
@@ -567,83 +550,81 @@
     function hideTooltip() {
         document.querySelector('.tooltip').style.display = 'none';
     }
+
      function clearInput() {
         sequenceInput.value = '';
-        fileInput.value = ''; // Clear file input
+        fileInput.value = '';
         charCount.textContent = '0';
         clearError();
         resultDiv.textContent = '';
         resultDiv.classList.add('hidden');
-        confidenceContainer.classList.add('hidden');
-        downloadLink.style.display = 'none'; // Hide download link
-
+        downloadLink.style.display = 'none';
     }
 
     function handleFileSelect(event) {
-    const file = event.target.files[0];
-    if (!file) {
-        return;
-    }
+        const file = event.target.files[0];
+        if (!file) {
+            return;
+        }
 
-    const allowedExtensions = ['.fasta', '.fa', '.fna'];
-    const fileName = file.name.toLowerCase();
-    const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
+        const allowedExtensions = ['.fasta', '.fa', '.fna'];
+        const fileName = file.name.toLowerCase();
+        const isValidExtension = allowedExtensions.some(ext => fileName.endsWith(ext));
 
+        if (!isValidExtension) {
+            showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
+            fileInput.value = '';
+            return;
+        }
 
-    if (!isValidExtension) {
-        showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-        fileInput.value = '';
-        return;
-    }
+        clearError();
 
-    clearError();
+        const reader = new FileReader();
 
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-        try {
-            const sequence = parseFASTA(e.target.result);
-            if (sequence) {
-                sequenceInput.value = sequence;
-                updateCharacterCount();  // Update character count immediately
-                validateSequence(sequence); // and validate.
-            } else {
-                showError("No sequence found in FASTA file."); // Handle case where parseFASTA returns null/empty
+        reader.onload = function(e) {
+            try {
+                const sequence = parseFASTA(e.target.result);
+                if (sequence) {
+                    sequenceInput.value = sequence;
+                    updateCharacterCount();
+                    validateSequence(sequence);
+                } else {
+                    showError("No sequence found in FASTA file.");
+                    fileInput.value = '';
+                }
+            } catch (error) {
+                console.error("Error in reader.onload:", error);
+                showError(error.message);
                 fileInput.value = '';
             }
-        } catch (error) {
-            console.error("Error in reader.onload:", error);
-            showError(error.message);  // Show the error message from parseFASTA
-            fileInput.value = ''; // Clear the file input on error
-        }
-    };
+        };
 
-    reader.onerror = function(error) {
-        console.error("FileReader error:", error);
-        showError("Error reading file.");
-        fileInput.value = '';
-    };
+        reader.onerror = function(error) {
+            console.error("FileReader error:", error);
+            showError("Error reading file.");
+            fileInput.value = '';
+        };
 
-    reader.readAsText(file);
-}
+        reader.readAsText(file);
+    }
 
 
-   function parseFASTA(text) {
-        const lines = text.trim().split(/[\r\n]+/); // Split by both \r and \n and handle multiple empty lines
+    function parseFASTA(text) {
+        const lines = text.trim().split(/[\r\n]+/);
         const sequences = [];
         let currentSequence = '';
         let hasHeader = false;
 
         for (const line of lines) {
-            const trimmedLine = line.trim(); // Trim each line individually
+            const trimmedLine = line.trim();
             if (trimmedLine.startsWith('>')) {
                 if (hasHeader && currentSequence) {
                     sequences.push(currentSequence);
                 }
                 currentSequence = '';
                 hasHeader = true;
-            } else if (hasHeader && trimmedLine) { // Check if line is not empty after trim
-                currentSequence += trimmedLine.replace(/\s/g, '').toUpperCase(); // Remove all whitespace and uppercase
+            } else if (hasHeader && trimmedLine) {
+                currentSequence += trimmedLine.replace(/\s/g, '').toUpperCase();
             }
         }
 
@@ -654,30 +635,14 @@
         if (sequences.length === 0) {
             throw new Error("Invalid FASTA format. No valid sequences found.");
         }
-         if (sequences.length > 1)
-          {
+        if (sequences.length > 1) {
+            console.warn("Multiple sequences found in FASTA file.  Using only the first sequence.");
             return sequences[0];
-          }
-          else{
+        } else {
             return sequences[0];
-          }
+        }
     }
-  function testParseFASTA() {
-        const testFASTA = `
->TestHeader
-ACDEFGHIKLMNPQRSTVWY
->AnotherHeader
-KLMNPQRSTVWYACDEFGHIK
-`;
-        try{
-            const parsedSequence = parseFASTA(testFASTA);
-            console.log("parseFASTA Test Result:", parsedSequence);
-        }
-        catch (error){
-            console.error(error);
-        }
 
-    }
     function validateSequence(sequence) {
         if (!sequence) {
             clearError();
@@ -701,12 +666,11 @@ KLMNPQRSTVWYACDEFGHIK
     function updateCharacterCount() {
         charCount.textContent = sequenceInput.value.length;
     }
-     sequenceInput.addEventListener('input', () => {
+
+    sequenceInput.addEventListener('input', () => {
         updateCharacterCount();
         validateSequence(sequenceInput.value);
     });
-
-
 
     sequenceInput.addEventListener('paste', (e) => {
         e.preventDefault();
@@ -723,14 +687,12 @@ KLMNPQRSTVWYACDEFGHIK
         }
     });
 
-
     sequenceInput.addEventListener('keypress', (e) => {
         if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
             e.preventDefault();
-          showError('Only standard amino acid characters are allowed');
+            showError('Only standard amino acid characters are allowed');
         }
     });
-
 
     function showError(message) {
         errorDiv.textContent = message;
@@ -743,14 +705,13 @@ KLMNPQRSTVWYACDEFGHIK
         predictBtn.disabled = false;
     }
 
-      async function classifySequenceDebounced() {
+    async function classifySequenceDebounced() {
         clearTimeout(debounceTimer);
         debounceTimer = setTimeout(classifySequence, 300);
     }
 
     async function classifySequence() {
         const sequence = sequenceInput.value.trim().toUpperCase();
-        console.log("classifySequence - sequence:", sequence);
 
         if (!validateSequence(sequence)) {
             return;
@@ -760,17 +721,17 @@ KLMNPQRSTVWYACDEFGHIK
         predictBtn.disabled = true;
         predictBtn.textContent = 'Processing...';
         resultDiv.textContent = '';
-        resultDiv.classList.remove('show');
-        confidenceContainer.classList.add('hidden');
+        resultDiv.classList.add('hidden');
         progressContainer.style.display = 'block';
         progressBar.style.width = '0%';
-        downloadLink.style.display = 'none'; // Hide download link initially
-
+        downloadLink.style.display = 'none';
 
         try {
-            const result = await clientInstance.predict("/predict", [sequence]);
-            console.log("Prediction result:", result);
+            const predictionResult = await clientInstance.predict("/predict", [sequence]);
 
+            if (!predictionResult || !predictionResult.data || !predictionResult.data[0]) {
+                throw new Error("Invalid prediction result from server.");
+            }
             let progress = 0;
             const interval = setInterval(() => {
                 progress += 10;
@@ -778,20 +739,20 @@ KLMNPQRSTVWYACDEFGHIK
                 if (progress >= 100) {
                     clearInterval(interval);
                     progressContainer.style.display = 'none';
-                    resultDiv.textContent = result.data[0].label;
+                    resultDiv.textContent = predictionResult.data[0].label;
                     resultDiv.classList.remove('hidden');
                     resultDiv.classList.add('show');
 
-                    const confidenceValue = displayConfidence(result.data[0].confidences);
-                    // Generate and set the download link.  Crucially, do this *after*
-                    // the prediction result and confidence are available.
-                    generatePDFReport(sequence, resultDiv.textContent, confidenceValue);
-                    downloadLink.style.display = 'block'; // Show download link here after PDF is generated.
+                    generatePDFReport(sequence, predictionResult.data[0].label, 0.75);
+                    downloadLink.style.display = 'block';
+
                 }
-            }, 100);
+             }, 100);
+
+
         } catch (error) {
             console.error("Error during prediction:", error);
-            showError("Failed to get response from classifier: " + (error.message || "Unknown error"));
+            showError("Failed: " + (error.message || "Unknown error"));
             progressContainer.style.display = 'none';
         } finally {
             predictBtn.disabled = false;
@@ -800,46 +761,87 @@ KLMNPQRSTVWYACDEFGHIK
     }
 
 
-
-    function displayConfidence(confidences) {
-        const predictedLabel = resultDiv.textContent;
-        const confidenceEntry = confidences.find(c => c.label === predictedLabel);
-        if(!confidenceEntry) return 0; // Return 0 if no confidence entry found
-
-        const confidenceValue = confidenceEntry.confidence;
-        confidenceBar.style.width = `${confidenceValue * 100}%`;
-
-        if (confidenceValue > 0.8) {
-            confidenceBar.style.backgroundColor = 'var(--success-color)';
-        } else if (confidenceValue > 0.5) {
-            confidenceBar.style.backgroundColor = 'var(--warning-color)';
-        } else {
-            confidenceBar.style.backgroundColor = '#e74c3c';
-        }
-
-        confidenceContainer.classList.remove('hidden');
-        return confidenceValue; // Return confidence value
-    }
-
     function generatePDFReport(sequence, prediction, confidence) {
-        const { jsPDF } = window.jspdf;
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            console.error("jsPDF is not loaded correctly.");
+            return;
+        }
+        const jsPDF = window.jspdf.jsPDF;
         const pdf = new jsPDF();
 
-        pdf.setFontSize(20);
-        pdf.text("AMP Classifier Report", 105, 20, { align: "center" });
+        if (!sequence || !prediction) {
+            console.error("Cannot generate PDF: Missing data.", { sequence, prediction });
+            return;
+        }
 
+        pdf.setFontSize(22);
+        pdf.setTextColor('#2c3e50');
+        pdf.text("AMP Classification Report", 105, 20, { align: "center" });
+
+        const imgData = getBase64Image(document.querySelector('.logos-container img'));
+          if (imgData) {
+            pdf.addImage(imgData, 'PNG', 15, 22, 40, 20);
+        }
+
+        pdf.setFontSize(16);
+        pdf.text("Input Sequence:", 20, 55);
         pdf.setFontSize(12);
-        pdf.text(`Sequence: ${sequence}`, 20, 40);
-        pdf.text(`Prediction: ${prediction}`, 20, 50);
-        pdf.text(`Confidence: ${(confidence * 100).toFixed(2)}%`, 20, 60);
-        pdf.text("Explainability: (Template - Will be added later)", 20, 70);
+        pdf.setTextColor('#333333');
+
+        const maxWidth = 170;
+        const sequenceLines = pdf.splitTextToSize(sequence, maxWidth);
+        pdf.text(sequenceLines, 20, 65);
+
+        let yPos = 65 + (sequenceLines.length * pdf.getLineHeight()) + 10;
+
+        pdf.setFontSize(16);
+        pdf.setTextColor('#2c3e50');
+        pdf.text("Prediction:", 20, yPos);
+        pdf.setFontSize(14);
+        pdf.setTextColor('#27ae60');
+        if (prediction.includes('(Non-AMP)')) {
+             pdf.setTextColor('#e74c3c');
+         }
+        pdf.text(prediction, 20, yPos + 10);
+
+        yPos += 20;
+
+        pdf.setFontSize(14);
+        pdf.setTextColor('#2c3e50');
+        pdf.text(`Confidence: ${(confidence * 100).toFixed(2)}% (Placeholder)`, 20, yPos);
+        yPos += 10;
+        pdf.text("Explainability: (To be added later)", 20, yPos);
+
+        pdf.setFontSize(10);
+        pdf.setTextColor('#7f8c8d');
+        pdf.text("Generated by BCBU-ZC AMP Classifier", 105, 285, { align: "center" });
 
         const pdfBlob = pdf.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
 
-        // Set the href and download attributes for the download link
         downloadLink.href = pdfUrl;
-        downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0,10)}.pdf`;
+        downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
+        downloadLink.click();
+    }
+
+    function getBase64Image(img) {
+        if (!img) {
+            console.error("Image element not found");
+            return null;
+        }
+        try{
+            const canvas = document.createElement("canvas");
+            canvas.width = img.width;
+            canvas.height = img.height;
+            const ctx = canvas.getContext("2d");
+            ctx.drawImage(img, 0, 0);
+            const dataURL = canvas.toDataURL("image/png");
+            return dataURL;
+        }
+        catch (error){
+            console.error("Error converting image to base64:", error);
+            return null
+        }
     }
 
 </script>
