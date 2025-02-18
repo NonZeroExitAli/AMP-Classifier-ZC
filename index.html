@@ -540,7 +540,7 @@
             clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier");
         } catch (error) {
             console.error("Failed to initialize Gradio client:", error);
-            showError("Failed to connect to the classifier service.");
+            showError("Failed to connect to the classifier service. Please change your network ant try again");
             predictBtn.disabled = true;
         }
     }
