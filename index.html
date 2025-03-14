@@ -261,7 +261,7 @@
             border-radius: 5px 5px 0 0;
             background-color: transparent;
             color: var(--text-color);
-            transition: border-color 0.3s ease, background-color: 0.3s ease;
+            transition: border-color 0.3s ease, background-color 0.3s ease;
             display: flex;
             align-items: center;
             gap: 0.5rem;
@@ -386,6 +386,19 @@
           line-height: 1.7;  /* Increase line height for readability */
         }
 
+        /* Style for SHAP Plot Container (adjust as needed) */
+        #shap-plot-container {
+            width: 100%;
+            min-height: 300px; /* Adjust height as needed */
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            margin-top: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow-x: auto; /* Enable horizontal scrolling if plot is wide */
+        }
+
     </style>
 </head>
 <body>
@@ -400,7 +413,7 @@
                 <i class="fas fa-search"></i> Prediction
             </div>
             <div class="tab" data-tab="model">
-                <i class="fas fa-chart-line"></i> Model
+                <i class="fas fa-chart-line"></i> Model Metrics & Interpretability
             </div>
             <div class="tab" data-tab="about">
                 <i class="fas fa-info-circle"></i> About
@@ -480,7 +493,30 @@
                     </tr>
                 </tbody>
             </table>
-             <p>These metrics demonstrate the high performance of our model in classifying antimicrobial peptides. However, it's important to note that no model is perfect, and these results should be considered in context.</p>
+
+            <h2 style="margin-top: 2rem;">Model Interpretability</h2>
+            <p>To understand how our model makes predictions, we use SHAP (SHapley Additive exPlanations) values. SHAP values help to explain the output of the model by assessing the contribution of each feature to the prediction.</p>
+
+            <h3>SHAP Plot</h3>
+            <p>The SHAP plot below visualizes the features that most significantly influence the model's prediction for a given sequence. Positive SHAP values contribute to the sequence being classified as AMP, while negative values contribute to Non-AMP classification.</p>
+
+            <div id="shap-plot-container">
+                <p><i>SHAP plot will be displayed here after analysis.</i></p>
+                <!-- SHAP plot will be dynamically inserted here by JavaScript -->
+            </div>
+
+            <h3>Biological Impact of AMP Classification</h3>
+            <p>The classification of a sequence as an Antimicrobial Peptide (AMP) is often driven by several key biological and physicochemical properties encoded in the amino acid sequence. These properties allow AMPs to interact with and disrupt microbial membranes, leading to antimicrobial activity. Key factors include:</p>
+            <ul>
+                <li><strong>Positive Charge:</strong> AMPs are typically cationic, enriched in positively charged amino acids like Lysine (K) and Arginine (R). This positive charge facilitates electrostatic interactions with the negatively charged microbial cell membranes (rich in phospholipids like phosphatidylglycerol and cardiolipin).</li>
+                <li><strong>Hydrophobicity:</strong> A balanced hydrophobicity is crucial. Hydrophobic residues (like Leucine (L), Isoleucine (I), Valine (V), Phenylalanine (F), Tryptophan (W)) help AMPs to insert into the lipid bilayer of microbial membranes. However, excessive hydrophobicity can lead to toxicity and poor solubility.</li>
+                <li><strong>Amphipathicity:</strong> Many effective AMPs are amphipathic, meaning they have spatially separated hydrophobic and hydrophilic regions. This structural property is essential for membrane interaction and pore formation.  The hydrophobic face interacts with the lipid core, while the hydrophilic face interacts with the aqueous environment and polar head groups.</li>
+                <li><strong>Sequence Motifs and Patterns:</strong> Certain amino acid sequence motifs or patterns can be indicative of AMP activity.  For example, repeating patterns of hydrophobic and hydrophilic residues, or specific amino acid combinations known to be associated with membrane disruption.</li>
+                <li><strong>Secondary Structure:</strong>  AMPs can adopt various secondary structures upon membrane interaction, such as alpha-helices, beta-sheets, or extended structures.  These structures can be crucial for their mechanism of action, particularly in membrane pore formation.</li>
+            </ul>
+            <p>The model likely learns to recognize these patterns and properties within the amino acid sequence to predict its AMP potential. The SHAP plot can help to pinpoint which specific amino acid residues or sequence regions are most influential in driving the model's AMP classification, potentially highlighting regions that contribute to these key biological properties.</p>
+
+            <p><i>Note: The SHAP plot and detailed interpretability features are under development and will be enhanced in future versions.</i></p>
 
             <h3>Sample Run</h3>
              <p>You can test the model with various sequences to understand its behavior.  Here are a few examples:</p>
@@ -492,6 +528,8 @@
                 <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
 
             </ul>
+
+
         </div>
 
         <div class="tab-content" id="about">
@@ -594,6 +632,7 @@
     const progressBar = document.getElementById('progress-bar');
     const fileInput = document.getElementById('file-input');
     const downloadLink = document.getElementById('download-link');
+    const shapPlotContainer = document.getElementById('shap-plot-container'); // Get the SHAP plot container
 
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -643,6 +682,7 @@
         resultDiv.textContent = '';
         resultDiv.classList.add('hidden');
         downloadLink.style.display = 'none';
+        shapPlotContainer.innerHTML = '<p><i>SHAP plot will be displayed here after analysis.</i></p>'; // Clear SHAP plot
     }
 
     function handleFileSelect(event) {
@@ -809,8 +849,10 @@
         progressContainer.style.display = 'block';
         progressBar.style.width = '0%';
         downloadLink.style.display = 'none';
+        shapPlotContainer.innerHTML = '<p><i>Generating SHAP plot...</i></p>'; // Indicate SHAP plot generation
 
         try {
+            // Assuming the backend now returns SHAP plot data as part of predictionResult
             const predictionResult = await clientInstance.predict("/predict", [sequence]);
 
             if (!predictionResult || !predictionResult.data || !predictionResult.data[0]) {
@@ -830,6 +872,18 @@
                     generatePDFReport(sequence, predictionResult.data[0].label, 0.75);
                     downloadLink.style.display = 'block';
 
+                    // --- SHAP Plot Integration (Example - Adapt based on backend response) ---
+                    if (predictionResult.data[0].shap_plot_base64) { // Assuming backend returns SHAP plot as base64 encoded image
+                        const shapPlotImg = document.createElement('img');
+                        shapPlotImg.src = `data:image/png;base64,${predictionResult.data[0].shap_plot_base64}`;
+                        shapPlotImg.alt = 'SHAP Plot';
+                        shapPlotContainer.innerHTML = ''; // Clear "Generating..." message
+                        shapPlotContainer.appendChild(shapPlotImg);
+                    } else {
+                        shapPlotContainer.innerHTML = '<p><i>SHAP plot not available for this prediction.</i></p>'; // Handle case where SHAP plot is not returned
+                    }
+                    // --- End SHAP Plot Integration ---
+
                 }
              }, 100);
 
@@ -838,6 +892,7 @@
             console.error("Error during prediction:", error);
             showError("Failed: " + (error.message || "Unknown error"));
             progressContainer.style.display = 'none';
+            shapPlotContainer.innerHTML = '<p><i>Error generating SHAP plot.</i></p>'; // Handle SHAP plot error
         } finally {
             predictBtn.disabled = false;
             predictBtn.textContent = 'Analyze Sequence';
