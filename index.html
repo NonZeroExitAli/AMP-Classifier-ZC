@@ -398,6 +398,11 @@
             align-items: center;
             overflow-x: auto; /* Enable horizontal scrolling if plot is wide */
         }
+         #shap-plot-container img{
+            max-width: 100%; /* Make sure image doesn't exceed container width */
+            height: auto;    /* Maintain aspect ratio */
+            display: block;   /* Prevent extra space below image */
+        }
 
     </style>
 </head>
@@ -498,25 +503,119 @@
             <p>To understand how our model makes predictions, we use SHAP (SHapley Additive exPlanations) values. SHAP values help to explain the output of the model by assessing the contribution of each feature to the prediction.</p>
 
             <h3>SHAP Plot</h3>
-            <p>The SHAP plot below visualizes the features that most significantly influence the model's prediction for a given sequence. Positive SHAP values contribute to the sequence being classified as AMP, while negative values contribute to Non-AMP classification.</p>
+            <p>The SHAP plot below visualizes the features that most significantly influence the model's prediction. Positive SHAP values contribute to the sequence being classified as AMP, while negative values contribute to Non-AMP classification.</p>
 
             <div id="shap-plot-container">
-                <p><i>SHAP plot will be displayed here after analysis.</i></p>
-                <!-- SHAP plot will be dynamically inserted here by JavaScript -->
+                <img src="shap.png" alt="SHAP Plot" >
             </div>
 
-            <h3>Biological Impact of AMP Classification</h3>
-            <p>The classification of a sequence as an Antimicrobial Peptide (AMP) is often driven by several key biological and physicochemical properties encoded in the amino acid sequence. These properties allow AMPs to interact with and disrupt microbial membranes, leading to antimicrobial activity. Key factors include:</p>
-            <ul>
-                <li><strong>Positive Charge:</strong> AMPs are typically cationic, enriched in positively charged amino acids like Lysine (K) and Arginine (R). This positive charge facilitates electrostatic interactions with the negatively charged microbial cell membranes (rich in phospholipids like phosphatidylglycerol and cardiolipin).</li>
-                <li><strong>Hydrophobicity:</strong> A balanced hydrophobicity is crucial. Hydrophobic residues (like Leucine (L), Isoleucine (I), Valine (V), Phenylalanine (F), Tryptophan (W)) help AMPs to insert into the lipid bilayer of microbial membranes. However, excessive hydrophobicity can lead to toxicity and poor solubility.</li>
-                <li><strong>Amphipathicity:</strong> Many effective AMPs are amphipathic, meaning they have spatially separated hydrophobic and hydrophilic regions. This structural property is essential for membrane interaction and pore formation.  The hydrophobic face interacts with the lipid core, while the hydrophilic face interacts with the aqueous environment and polar head groups.</li>
-                <li><strong>Sequence Motifs and Patterns:</strong> Certain amino acid sequence motifs or patterns can be indicative of AMP activity.  For example, repeating patterns of hydrophobic and hydrophilic residues, or specific amino acid combinations known to be associated with membrane disruption.</li>
-                <li><strong>Secondary Structure:</strong>  AMPs can adopt various secondary structures upon membrane interaction, such as alpha-helices, beta-sheets, or extended structures.  These structures can be crucial for their mechanism of action, particularly in membrane pore formation.</li>
-            </ul>
-            <p>The model likely learns to recognize these patterns and properties within the amino acid sequence to predict its AMP potential. The SHAP plot can help to pinpoint which specific amino acid residues or sequence regions are most influential in driving the model's AMP classification, potentially highlighting regions that contribute to these key biological properties.</p>
+            <h3>Interpretation of SHAP Plot</h3>
+             <p>Based on the SHAP plot, the model's predictions for Antimicrobial Peptides (AMPs) are influenced by a combination of sequence-based, structural, and biophysical features. Here’s a breakdown of the key features and their biological implications:</p>
 
-            <p><i>Note: The SHAP plot and detailed interpretability features are under development and will be enhanced in future versions.</i></p>
+            <h4>A. Sequence-Based Features</h4>
+            <h5>APAAC13 & APAAC5 (Amphiphilic Pseudo-Amino Acid Composition)</h5>
+            <ul>
+                <li><strong>Description:</strong> These features encode hydrophobicity, charge, and side-chain properties, reflecting the amphiphilic nature of the peptide.</li>
+                <li><strong>Interpretation:</strong> Higher APAAC values have a positive SHAP impact, indicating they are predictive of AMP activity. This suggests that the model values amphiphilic sequences, which are crucial for disrupting bacterial membranes.</li>
+            </ul>
+
+            <h5>Amino Acid Composition (M, C)</h5>
+            <ul>
+                <li><strong>M (Methionine):</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Methionine is often associated with structural stability in peptides.</li>
+                        <li><strong>Interpretation:</strong>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
+                    </ul>
+                </li>
+                <li><strong>C (Cysteine):</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Cysteine is known for forming disulfide bonds, which can stabilize AMP structures like defensins.</li>
+                        <li><strong>Interpretation:</strong> High cysteine content appears to have a positive SHAP impact. This could be because disulfide-stabilized AMPs often exhibit enhanced antimicrobial action.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>B. Structural and Biophysical Features</h4>
+            <ul>
+                <li><strong>HydrophobicityD3001:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Represents the overall hydrophobicity of the peptide sequence.</li>
+                        <li><strong>Interpretation:</strong> Hydrophobicity is shown to be a critical feature. More hydrophobic peptides are strongly favored for AMP classification, aligning with the understanding that hydrophobicity is essential for membrane insertion and disruption.</li>
+                    </ul>
+                </li>
+                <li><strong>PolarityD1001:</strong>
+                    <ul>
+                        <li><strong>Description:</strong>  Measures the polarity of the peptide sequence.</li>
+                        <li><strong>Interpretation:</strong>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
+                    </ul>
+                </li>
+                <li><strong>Solvent Accessibility (SolventAccessibilityD3001):</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Reflects how exposed the residues are to the solvent (water).</li>
+                        <li><strong>Interpretation:</strong> Solvent-accessible residues positively contribute to AMP prediction. This might indicate that exposed residues facilitate interaction with bacterial membranes or the surrounding environment.</li>
+                    </ul>
+                </li>
+                <li><strong>Charge (ChargeD2001):</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Represents the net charge of the peptide.</li>
+                        <li><strong>Interpretation:</strong> Charge is a significant positive predictor. Most AMPs are cationic, enabling them to interact with negatively charged bacterial membranes. Higher charge, as indicated by positive SHAP values, typically enhances antimicrobial potency.</li>
+                    </ul>
+                </li>
+                <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
+                        <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
+                    </ul>
+                </li>
+            </ul>
+
+            <h4>C. Geary Autocorrelation Features</h4>
+            <p>Geary autocorrelation descriptors reflect spatial properties of peptides, encoding information about the distribution of physicochemical properties along the sequence.</p>
+            <ul>
+                <li><strong>GearyAuto_Hydrophobicity30:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Encodes the clustering of hydrophobic residues within a spatial lag of 30.</li>
+                        <li><strong>Interpretation:</strong> Higher values of hydrophobicity autocorrelation are positively associated with AMP prediction. This likely reflects the importance of hydrophobic clustering in forming amphipathic structures, such as α-helices, which are common and effective in AMPs.</li>
+                    </ul>
+                </li>
+                <li><strong>GearyAuto_Steric30 & GearyAuto_Steric29:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Reflect peptide backbone flexibility and steric properties at spatial lags of 30 and 29.</li>
+                        <li><strong>Interpretation:</strong>  These features have a positive SHAP impact, suggesting that a certain degree of peptide backbone flexibility may be beneficial for AMP action. Flexibility could enhance the peptide's ability to interact with and adapt to diverse bacterial membrane structures.</li>
+                    </ul>
+                </li>
+                <li><strong>GearyAuto_ResidueASA30:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
+                        <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
+                    </ul>
+                </li>
+            </ul>
+
+
+            <h3>Biological Implications for AMP Design</h3>
+            <p>The feature importance highlighted by the SHAP plot underscores that AMP activity is highly dependent on a combination of hydrophobicity, charge, amphiphilicity, and structural properties. This understanding can be directly applied in several ways:</p>
+
+            <h4>Designing New AMPs</h4>
+            <ul>
+                <li><strong>Enhance Hydrophobicity and Charge:</strong> When designing novel AMP sequences, prioritize the inclusion of hydrophobic and positively charged amino acids. However, maintain a balance to ensure amphiphilicity and avoid excessive toxicity.</li>
+                <li><strong>Optimize Amphiphilicity:</strong> Design sequences that spatially segregate hydrophobic and hydrophilic residues. This can be achieved by strategically placing residue types to create distinct faces within the peptide structure.</li>
+                <li><strong>Promote Secondary Structure Formation:</strong> Incorporate amino acids that favor the formation of stable secondary structures, such as alpha-helices or beta-sheets, as these structures can enhance stability and membrane-disrupting capabilities.</li>
+            </ul>
+
+            <h4>Optimizing Existing AMPs</h4>
+            <ul>
+                <li><strong>Tune Solubility via Polar Residues:</strong> For AMPs with high hydrophobicity that suffer from poor solubility or increased toxicity, consider modifying polar residues to improve solubility without drastically reducing membrane interaction.</li>
+                <li><strong>Adjust Charge for Selectivity:</strong> Modify the net charge to potentially improve selectivity towards bacterial membranes over host cell membranes, reducing toxicity while maintaining antimicrobial activity.</li>
+            </ul>
+
+            <h4>Enhancing Predictive Models</h4>
+            <ul>
+                <li><strong>Incorporate Secondary Structure Predictors:</strong> To improve predictive accuracy, integrate features that directly predict or represent the secondary structure propensity of peptide sequences.</li>
+                <li><strong>Test Steric and Electronic Property Modifications:</strong> Further explore the impact of steric and electronic properties by testing modifications that fine-tune these characteristics and observing the effects on both predicted and experimental AMP activity.</li>
+            </ul>
+            <p>By considering these biological implications derived from the model's feature importance, researchers can more effectively design, optimize, and predict the activity of antimicrobial peptides, potentially accelerating the development of new therapeutics.</p>
+
 
             <h3>Sample Run</h3>
              <p>You can test the model with various sequences to understand its behavior.  Here are a few examples:</p>
