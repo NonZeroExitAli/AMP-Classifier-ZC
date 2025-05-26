@@ -593,7 +593,7 @@
                 <li><strong>M (Methionine):</strong>
                     <ul>
                         <li><strong>Description:</strong> Methionine is often associated with structural stability in peptides.</li>
-                        <li><strong>Interpretation:</strong>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
+                        <li><strong>Interpretation:</b>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
                     </ul>
                 </li>
                 <li><strong>C (Cysteine):</b>
@@ -691,7 +691,7 @@
             <ul>
                 <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRAISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
                 <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
-                <li><strong>Test 3:</b> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
+                <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
                 <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
                 <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
 
@@ -893,7 +893,7 @@
         charCount.textContent = '0';
         clearError();
         downloadLink.style.display = 'none';
-        shapPlotContainer.innerHTML = '<img src="shap.png" alt="SHAP Plot">'; // Reset SHAP plot to default img
+        shapPlotContainer.innerHTML = '<img src="image.png" alt="SHAP Plot">'; // Reset SHAP plot to default img
 
         micCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
@@ -1077,7 +1077,7 @@
             }
         });
         downloadLink.style.display = 'none'; // Hide previous report
-        shapPlotContainer.innerHTML = '<img src="shap.png" alt="SHAP Plot">'; // Reset SHAP plot
+        shapPlotContainer.innerHTML = '<img src="image.png" alt="SHAP Plot">'; // Reset SHAP plot (assuming image.png is your default logo)
     }
 
     async function classifySequenceDebounced() {
@@ -1129,7 +1129,8 @@
 
 
             if (!ampResponse || !ampResponse.data || !ampResponse.data[0] || ampResponse.data[0].error) {
-                throw new Error("Invalid AMP prediction result from server: " + (ampResponse.data[0].error || "Unknown error"));
+                // If there's an error from the backend, use its error message
+                throw new Error("AMP Classification failed: " + (ampResponse.data[0].error || "Unknown error from backend."));
             }
             ampPredictionLabel = ampResponse.data[0].label;
             ampPredictionConfidence = ampResponse.data[0].confidence;
@@ -1150,7 +1151,7 @@
 
                 // Check for errors in MIC response and format result
                 if (!micResponse || !micResponse.data || micResponse.data.length === 0 || String(micResponse.data[0]).startsWith("Error:")) {
-                    micPredictionResults.push({ target: displayName, value: `Prediction Error: ${micResponse.data[0] || 'Unknown'}` });
+                    micPredictionResults.push({ target: displayName, value: `Prediction Error: ${String(micResponse.data[0]) || 'Unknown'}` });
                 } else {
                     micPredictionResults.push({ target: displayName, value: `${micResponse.data[0]} µM` });
                 }
