@@ -510,7 +510,7 @@
 
             <div class="button-group">
                 <button onclick="clearInput()" id="clear-btn">Clear Input</button>
-                <button onclick="classifySequenceDebounced()" id="predict-btn">Analyze Sequence</button>
+                <button onclick="classifySequenceDebounced()" id="predict-btn" disabled>Analyze Sequence</button> <!-- Added disabled attribute -->
             </div>
 
 
@@ -596,9 +596,9 @@
                         <li><strong>Interpretation:</strong>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
                     </ul>
                 </li>
-                <li><strong>C (Cysteine):</strong>
+                <li><strong>C (Cysteine):</b>
                     <ul>
-                        <li><strong>Description:</b> Cysteine is known for forming disulfide bonds, which can stabilize AMP structures like defensins.</li>
+                        <li><strong>Description:</strong> Cysteine is known for forming disulfide bonds, which can stabilize AMP structures like defensins.</li>
                         <li><strong>Interpretation:</strong> High cysteine content appears to have a positive SHAP impact. This could be because disulfide-stabilized AMPs often exhibit enhanced antimicrobial action.</li>
                     </ul>
                 </li>
@@ -655,7 +655,7 @@
                 </li>
                 <li><strong>GearyAuto_ResidueASA30:</strong>
                     <ul>
-                        <li><strong>Description:</strong> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
+                        <li><strong>Description:</b> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
                         <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
                     </ul>
                 </li>
@@ -708,7 +708,7 @@
             <p>Our team rigorously evaluated 225 combinations of feature extraction and selection methods across three distinct machine learning models. The final model was selected based on the following criteria:</p>
             <ul>
                 <li><strong>High Accuracy, F1-score, and Validation Accuracy:</strong> The model achieved excellent performance metrics on a held-out test set, demonstrating its ability to generalize to unseen data.</li>
-                <li><strong>Robustness to Sequence Length Variations:</strong> The model performs consistently well on sequences of varying lengths, within the specified range (10-100 amino acids).</li>
+                <li><strong>Robustness to Sequence Length Variations:</b> The model performs consistently well on sequences of varying lengths, within the specified range (10-100 amino acids).</li>
                 <li><strong>Generalization Ability:</strong> The model was trained and evaluated on diverse datasets to ensure its ability to classify a broad range of AMP sequences.</li>
             </ul>
 
@@ -830,25 +830,43 @@
         });
     });
 
-    let clientInstance;
+    let clientInstance = null; // Initialize to null
     let debounceTimer;
 
-    async function initClient() {
+    // --- NEW: Function to safely initialize client ---
+    async function initializeGradioClient() {
+        console.log("Attempting to initialize Gradio client...");
+        predictBtn.disabled = true; // Disable button while trying to connect
         try {
+            // Check if window.gradio and window.gradio.client are available
+            if (typeof window.gradio === 'undefined' || typeof window.gradio.client === 'undefined') {
+                console.warn("window.gradio.client not available yet. Retrying in 500ms...");
+                setTimeout(initializeGradioClient, 500); // Retry after a short delay
+                return;
+            }
+
             // Point this to your Gradio app's URL.
             // If running locally, it's typically "http://127.0.0.1:7860/"
             // If deployed on Hugging Face Spaces, it's the Space URL (e.g., "your-username/your-space-name").
             clientInstance = await window.gradio.client("http://127.0.0.1:7860/");
-            console.log("Gradio client initialized successfully.");
+            
+            if (clientInstance) {
+                console.log("Gradio client initialized successfully.");
+                predictBtn.disabled = false; // Enable the button only when client is ready
+                clearError(); // Clear any previous connection errors
+            } else {
+                throw new Error("Gradio client instance is null after initialization.");
+            }
         } catch (error) {
             console.error("Failed to initialize Gradio client:", error);
             showError("Failed to connect to the classifier service. Please check your network and try again.");
-            predictBtn.disabled = true;
+            predictBtn.disabled = true; // Keep disabled on persistent error
+            clientInstance = null; // Ensure it's null on failure
         }
     }
 
     window.onload = function() {
-        initClient();
+        initializeGradioClient(); // Call the robust initialization function
         document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
         document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
         fileInput.addEventListener('change', handleFileSelect);
@@ -858,7 +876,6 @@
         });
 
         sequenceInput.addEventListener('input', toggleMICOptions);
-
         toggleMICOptions(); // Initial check for MIC options state
     };
 
@@ -885,6 +902,10 @@
         predictBtn.textContent = 'Analyze Sequence';
 
         toggleMICOptions(); // Re-evaluate MIC options state
+        // Re-disable button if client is not ready (e.g., if init failed earlier)
+        if (!clientInstance) {
+            predictBtn.disabled = true;
+        }
     }
 
     function handleFileSelect(event) {
@@ -1028,7 +1049,10 @@
 
     function clearError() {
         errorDiv.style.display = 'none';
-        predictBtn.disabled = false;
+        // Only enable if clientInstance is ready
+        if (clientInstance) {
+            predictBtn.disabled = false;
+        }
     }
 
     function toggleMICOptions() {
@@ -1068,7 +1092,15 @@
             return;
         }
 
-        clearError();
+        // --- Crucial check: Ensure clientInstance is ready BEFORE calling predict ---
+        if (!clientInstance) {
+            showError("Classifier service is not ready. Please wait a moment and try again, or check console for errors.");
+            predictBtn.disabled = true; // Ensure button stays disabled if not ready
+            return;
+        }
+        // --- End crucial check ---
+
+        clearError(); // Clear error after this point, as client is confirmed to be ready
         predictBtn.disabled = true;
         predictBtn.textContent = 'Processing...';
         downloadLink.style.display = 'none';
@@ -1081,7 +1113,6 @@
         let micPredictionResults = [];
         let shapPlotBase64 = null;
         
-        // Calculate total steps for progress bar
         let totalPredictionSteps = 1; // Always perform AMP classification
         if (selectedMICBacteria.length > 0) {
             totalPredictionSteps += selectedMICBacteria.length; // Add steps for each MIC prediction
@@ -1090,9 +1121,11 @@
 
         try {
             // --- 1. Perform AMP classification (always) ---
+            console.log("Calling /predict for AMP classification...");
             const ampResponse = await clientInstance.predict("/predict", [sequence]);
             completedSteps++;
             progressBar.style.width = `${(completedSteps / totalPredictionSteps) * 100}%`;
+            console.log("AMP prediction response:", ampResponse);
 
 
             if (!ampResponse || !ampResponse.data || !ampResponse.data[0] || ampResponse.data[0].error) {
@@ -1108,9 +1141,12 @@
             // --- 2. Perform MIC predictions (if selected) ---
             for (const bacterium of selectedMICBacteria) {
                 const displayName = bacteriumDisplayNames[bacterium] || bacterium;
+                console.log(`Calling /predict_mic for ${displayName}...`);
                 const micResponse = await clientInstance.predict("/predict_mic", [sequence, bacterium]);
                 completedSteps++;
                 progressBar.style.width = `${(completedSteps / totalPredictionSteps) * 100}%`;
+                console.log(`MIC prediction response for ${displayName}:`, micResponse);
+
 
                 if (!micResponse || !micResponse.data || micResponse.data.length === 0 || String(micResponse.data[0]).startsWith("Error:")) {
                     micPredictionResults.push({ target: displayName, value: `Prediction Error: ${micResponse.data[0] || 'Unknown'}` });
@@ -1147,7 +1183,7 @@
             progressContainer.style.display = 'none';
             shapPlotContainer.innerHTML = '<p><i>Error generating SHAP plot.</i></p>';
         } finally {
-            predictBtn.disabled = false;
+            predictBtn.disabled = false; // Re-enable the button in finally block
             predictBtn.textContent = 'Analyze Sequence';
         }
     }
