@@ -148,13 +148,11 @@
         }
 
 
-        .result {
-            margin-top: 1.5rem;
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: var(--primary-color);
-            text-align: center;
+        /* The .result and .mic-result divs are now explicitly hidden via !important */
+        #result, #mic-result {
+            display: none !important;
         }
+
 
         .info-icon {
             position: absolute;
@@ -204,14 +202,6 @@
             transition: width: 0.3s ease;
         }
 
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result.show {
-            animation: fadeIn 0.5s ease forwards;
-        }
 
         .confidence-container {
             display: flex;
@@ -404,6 +394,56 @@
             display: block;   /* Prevent extra space below image */
         }
 
+        /* Styles for MIC Prediction Group */
+        .mic-options-group {
+            margin-top: 1.5rem;
+            padding: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            background-color: var(--container-bg-color);
+            text-align: left;
+            transition: opacity 0.3s ease, background-color 0.3s ease;
+        }
+
+        .mic-options-group.disabled {
+            opacity: 0.5;
+            pointer-events: none; /* Disable clicks */
+            background-color: #f5f5f5; /* Lighter background for disabled */
+        }
+        .dark-mode .mic-options-group.disabled {
+            background-color: #333; /* Darker background for disabled in dark mode */
+        }
+
+
+        .mic-options-group h3 {
+            margin-top: 0;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .mic-checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .mic-checkbox-item {
+            display: flex;
+            align-items: center;
+        }
+
+        .mic-checkbox-item input[type="checkbox"] {
+            margin-right: 0.5rem;
+            accent-color: var(--secondary-color);
+        }
+
+        .mic-checkbox-item label {
+            cursor: pointer;
+            color: var(--text-color);
+        }
     </style>
 </head>
 <body>
@@ -430,7 +470,7 @@
 
         <div class="tab-content active" id="prediction">
            <h2>AMP Classification</h2>
-            <p>Enter an amino acid sequence (between 10 and 100 valid amino acids) or upload a FASTA file to classify it as either an Antimicrobial Peptide (AMP) or a Non-Antimicrobial Peptide (Non-AMP).</p>
+            <p>Enter an amino acid sequence (between 10 and 100 valid amino acids) or upload a FASTA file to classify it as either an Antimicrobial Peptide (AMP) or a Non-Antimicrobial Peptide (Non-AMP). The results will be provided in a detailed downloadable report.</p>
             <div class="input-group">
                 <input type="file" id="file-input" accept=".fasta,.fa,.fna">
                 <textarea id="sequence" placeholder="Enter amino acid sequence (10-100 Valid AAs) or upload a FASTA file..." maxlength="100"></textarea>
@@ -441,11 +481,37 @@
                 <div class="tooltip">
                     Enter the amino acid sequence you want to classify or upload a FASTA file. The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
                 </div>
+            </div>
+
+            <!-- MIC Prediction Section -->
+            <div class="mic-options-group disabled" id="mic-options-group">
+                <h3>Optional: Predict Minimum Inhibitory Concentration (MIC)</h3>
+                <p>Select one or more bacterial targets to predict the MIC value of your peptide against them. If selected, these results will also be included in the detailed downloadable report.</p>
+                <div class="mic-checkbox-group">
+                    <div class="mic-checkbox-item">
+                        <input type="checkbox" name="mic_target" value="e_coli" id="mic_e_coli">
+                        <label for="mic_e_coli">E. coli</label>
+                    </div>
+                    <div class="mic-checkbox-item">
+                        <input type="checkbox" name="mic_target" value="a_hydrophila" id="mic_a_hydrophila">
+                        <label for="mic_a_hydrophila">A. hydrophila</label>
+                    </div>
+                    <div class="mic-checkbox-item">
+                        <input type="checkbox" name="mic_target" value="s_aureus" id="mic_s_aureus">
+                        <label for="mic_s_aureus">S. aureus</label>
+                    </div>
+                    <div class="mic-checkbox-item">
+                        <input type="checkbox" name="mic_target" value="k_pneumoniae" id="mic_k_pneumoniae">
+                        <label for="mic_k_pneumoniae">K. pneumoniae</label>
+                    </div>
                 </div>
-                 <div class="button-group">
-                    <button onclick="clearInput()" id="clear-btn">Clear Input</button>
-                    <button onclick="classifySequenceDebounced()" id="predict-btn">Analyze Sequence</button>
-                </div>
+            </div>
+            <!-- End MIC Prediction Section -->
+
+            <div class="button-group">
+                <button onclick="clearInput()" id="clear-btn">Clear Input</button>
+                <button onclick="classifySequenceDebounced()" id="predict-btn">Analyze Sequence</button>
+            </div>
 
 
             <div class="error-message" id="error"></div>
@@ -455,8 +521,11 @@
                 <div class="progress-bar" id="progress-bar"></div>
             </div>
 
+            <!-- These divs are kept for potential future use or to avoid breaking references, but will not be displayed -->
             <div class="result hidden" id="result"></div>
-              <a id="download-link" style="display: none; margin-top: 10px;">Detailed Report</a>
+            <div class="mic-result hidden" id="mic-result"></div>
+
+            <a id="download-link" style="display: none; margin-top: 10px;">Detailed Report</a>
         </div>
 
         <div class="tab-content" id="model">
@@ -529,7 +598,7 @@
                 </li>
                 <li><strong>C (Cysteine):</strong>
                     <ul>
-                        <li><strong>Description:</strong> Cysteine is known for forming disulfide bonds, which can stabilize AMP structures like defensins.</li>
+                        <li><strong>Description:</b> Cysteine is known for forming disulfide bonds, which can stabilize AMP structures like defensins.</li>
                         <li><strong>Interpretation:</strong> High cysteine content appears to have a positive SHAP impact. This could be because disulfide-stabilized AMPs often exhibit enhanced antimicrobial action.</li>
                     </ul>
                 </li>
@@ -574,7 +643,7 @@
             <ul>
                 <li><strong>GearyAuto_Hydrophobicity30:</strong>
                     <ul>
-                        <li><strong>Description:</strong> Encodes the clustering of hydrophobic residues within a spatial lag of 30.</li>
+                        <li><strong>Description:</b> Encodes the clustering of hydrophobic residues within a spatial lag of 30.</li>
                         <li><strong>Interpretation:</strong> Higher values of hydrophobicity autocorrelation are positively associated with AMP prediction. This likely reflects the importance of hydrophobic clustering in forming amphipathic structures, such as α-helices, which are common and effective in AMPs.</li>
                     </ul>
                 </li>
@@ -612,7 +681,7 @@
             <h4>Enhancing Predictive Models</h4>
             <ul>
                 <li><strong>Incorporate Secondary Structure Predictors:</strong> To improve predictive accuracy, integrate features that directly predict or represent the secondary structure propensity of peptide sequences.</li>
-                <li><strong>Test Steric and Electronic Property Modifications:</strong> Further explore the impact of steric and electronic properties by testing modifications that fine-tune these characteristics and observing the effects on both predicted and experimental AMP activity.</li>
+                <li><strong>Test Steric and Electronic Property Modifications:</b> Further explore the impact of steric and electronic properties by testing modifications that fine-tune these characteristics and observing the effects on both predicted and experimental AMP activity.</li>
             </ul>
             <p>By considering these biological implications derived from the model's feature importance, researchers can more effectively design, optimize, and predict the activity of antimicrobial peptides, potentially accelerating the development of new therapeutics.</p>
 
@@ -677,7 +746,7 @@
 
             <h3>Step 2: Input the Sequence</h3>
             <ul>
-                <li><strong>Direct Input:</strong> Type or paste your sequence into the text area provided.</li>
+                <li><strong>Direct Input:</strong> Type or paste your sequence into the text area provided. As you type, the MIC prediction options will become available.</li>
                 <li><strong>FASTA File Upload:</strong> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
                 <li>The character count will update as you type or upload a sequence.</li>
             </ul>
@@ -685,18 +754,19 @@
             <h3>Step 3: Analyze the Sequence</h3>
             <ul>
                 <li>Click the "Analyze Sequence" button.</li>
+                <li>The tool will classify the peptide as AMP or Non-AMP. If you selected any MIC targets, it will also predict their values.</li>
                 <li>A progress bar will appear, indicating that the analysis is underway.</li>
             </ul>
 
             <h3>Step 4: View the Results</h3>
             <ul>
-                <li>Once the analysis is complete, the prediction (AMP or Non-AMP) will be displayed.</li>
-                <li>You can download a detailed report in PDF format by clicking the "Detailed Report" link.</li>
+                <li>Once the analysis is complete, a "Detailed Report" link will appear below the input area. Click this link to download a PDF containing all the prediction results.</li>
+                <li>The SHAP plot, showing feature importance, will be displayed on the page.</li>
             </ul>
 
             <h3>Step 5: Clear the Input</h3>
             <ul>
-                 <li>To analyze another sequence, click the "Clear Input" button. This will reset the input fields and results.</li>
+                 <li>To analyze another sequence, click the "Clear Input" button. This will reset the input fields, hide the download link, and disable the MIC prediction options.</li>
             </ul>
              <h3>Troubleshooting</h3>
                 <ul>
@@ -726,12 +796,27 @@
     const charCount = document.getElementById('char-count');
     const errorDiv = document.getElementById('error');
     const predictBtn = document.getElementById('predict-btn');
+    // Result divs are kept in HTML but not used for display in JS
     const resultDiv = document.getElementById('result');
+    const micResultDiv = document.getElementById('mic-result');
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
     const fileInput = document.getElementById('file-input');
     const downloadLink = document.getElementById('download-link');
-    const shapPlotContainer = document.getElementById('shap-plot-container'); // Get the SHAP plot container
+    const shapPlotContainer = document.getElementById('shap-plot-container');
+
+    // MIC related elements
+    const micOptionsGroup = document.getElementById('mic-options-group');
+    const micCheckboxes = document.querySelectorAll('input[name="mic_target"]');
+    let selectedMICBacteria = []; // Stores an array of selected bacterium values (e.g., ['e_coli', 's_aureus'])
+
+    // Helper to map values to display names (consistent with backend MIC keys)
+    const bacteriumDisplayNames = {
+        'e_coli': 'E. coli',
+        'a_hydrophila': 'A. hydrophila',
+        's_aureus': 'S. aureus',
+        'k_pneumoniae': 'K. pneumoniae'
+    };
 
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -750,10 +835,14 @@
 
     async function initClient() {
         try {
-            clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier");
+            // Point this to your Gradio app's URL.
+            // If running locally, it's typically "http://127.0.0.1:7860/"
+            // If deployed on Hugging Face Spaces, it's the Space URL (e.g., "your-username/your-space-name").
+            clientInstance = await window.gradio.client("http://127.0.0.1:7860/");
+            console.log("Gradio client initialized successfully.");
         } catch (error) {
             console.error("Failed to initialize Gradio client:", error);
-            showError("Failed to connect to the classifier service. Please change your network ant try again");
+            showError("Failed to connect to the classifier service. Please check your network and try again.");
             predictBtn.disabled = true;
         }
     }
@@ -763,6 +852,14 @@
         document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
         document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
         fileInput.addEventListener('change', handleFileSelect);
+
+        micCheckboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', handleMICSelection);
+        });
+
+        sequenceInput.addEventListener('input', toggleMICOptions);
+
+        toggleMICOptions(); // Initial check for MIC options state
     };
 
     function showTooltip() {
@@ -773,15 +870,21 @@
         document.querySelector('.tooltip').style.display = 'none';
     }
 
-     function clearInput() {
+    function clearInput() {
         sequenceInput.value = '';
         fileInput.value = '';
         charCount.textContent = '0';
         clearError();
-        resultDiv.textContent = '';
-        resultDiv.classList.add('hidden');
         downloadLink.style.display = 'none';
-        shapPlotContainer.innerHTML = '<p><i>SHAP plot will be displayed here after analysis.</i></p>'; // Clear SHAP plot
+        shapPlotContainer.innerHTML = '<img src="shap.png" alt="SHAP Plot">'; // Reset SHAP plot to default img
+
+        micCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+        });
+        selectedMICBacteria = []; // Reset selected bacteria array
+        predictBtn.textContent = 'Analyze Sequence';
+
+        toggleMICOptions(); // Re-evaluate MIC options state
     }
 
     function handleFileSelect(event) {
@@ -811,6 +914,7 @@
                     sequenceInput.value = sequence;
                     updateCharacterCount();
                     validateSequence(sequence);
+                    toggleMICOptions(); // Update MIC options after file load
                 } else {
                     showError("No sequence found in FASTA file.");
                     fileInput.value = '';
@@ -830,7 +934,6 @@
 
         reader.readAsText(file);
     }
-
 
     function parseFASTA(text) {
         const lines = text.trim().split(/[\r\n]+/);
@@ -859,7 +962,7 @@
             throw new Error("Invalid FASTA format. No valid sequences found.");
         }
         if (sequences.length > 1) {
-            console.warn("Multiple sequences found in FASTA file.  Using only the first sequence.");
+            console.warn("Multiple sequences found in FASTA file. Using only the first sequence.");
             return sequences[0];
         } else {
             return sequences[0];
@@ -911,7 +1014,7 @@
     });
 
     sequenceInput.addEventListener('keypress', (e) => {
-        if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
+        if (e.key.length === 1 && !/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
             e.preventDefault();
             showError('Only standard amino acid characters are allowed');
         }
@@ -926,6 +1029,31 @@
     function clearError() {
         errorDiv.style.display = 'none';
         predictBtn.disabled = false;
+    }
+
+    function toggleMICOptions() {
+        const sequence = sequenceInput.value.trim();
+        const isValid = sequence.length >= 10 && sequence.length <= 100 && !/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence);
+        if (isValid) {
+            micOptionsGroup.classList.remove('disabled');
+        } else {
+            micOptionsGroup.classList.add('disabled');
+            micCheckboxes.forEach(checkbox => {
+                checkbox.checked = false;
+            });
+            selectedMICBacteria = [];
+        }
+    }
+
+    function handleMICSelection() {
+        selectedMICBacteria = [];
+        micCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                selectedMICBacteria.push(checkbox.value);
+            }
+        });
+        downloadLink.style.display = 'none'; // Hide previous report
+        shapPlotContainer.innerHTML = '<img src="shap.png" alt="SHAP Plot">'; // Reset SHAP plot
     }
 
     async function classifySequenceDebounced() {
@@ -943,63 +1071,88 @@
         clearError();
         predictBtn.disabled = true;
         predictBtn.textContent = 'Processing...';
-        resultDiv.textContent = '';
-        resultDiv.classList.add('hidden');
+        downloadLink.style.display = 'none';
         progressContainer.style.display = 'block';
         progressBar.style.width = '0%';
-        downloadLink.style.display = 'none';
-        shapPlotContainer.innerHTML = '<p><i>Generating SHAP plot...</i></p>'; // Indicate SHAP plot generation
+        shapPlotContainer.innerHTML = '<p><i>Generating SHAP plot...</i></p>';
+
+        let ampPredictionLabel = '';
+        let ampPredictionConfidence = null;
+        let micPredictionResults = [];
+        let shapPlotBase64 = null;
+        
+        // Calculate total steps for progress bar
+        let totalPredictionSteps = 1; // Always perform AMP classification
+        if (selectedMICBacteria.length > 0) {
+            totalPredictionSteps += selectedMICBacteria.length; // Add steps for each MIC prediction
+        }
+        let completedSteps = 0;
 
         try {
-            // Assuming the backend now returns SHAP plot data as part of predictionResult
-            const predictionResult = await clientInstance.predict("/predict", [sequence]);
+            // --- 1. Perform AMP classification (always) ---
+            const ampResponse = await clientInstance.predict("/predict", [sequence]);
+            completedSteps++;
+            progressBar.style.width = `${(completedSteps / totalPredictionSteps) * 100}%`;
 
-            if (!predictionResult || !predictionResult.data || !predictionResult.data[0]) {
-                throw new Error("Invalid prediction result from server.");
+
+            if (!ampResponse || !ampResponse.data || !ampResponse.data[0] || ampResponse.data[0].error) {
+                throw new Error("Invalid AMP prediction result from server: " + (ampResponse.data[0].error || "Unknown error"));
             }
-            let progress = 0;
-            const interval = setInterval(() => {
-                progress += 10;
-                progressBar.style.width = `${progress}%`;
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    progressContainer.style.display = 'none';
-                    resultDiv.textContent = predictionResult.data[0].label;
-                    resultDiv.classList.remove('hidden');
-                    resultDiv.classList.add('show');
+            ampPredictionLabel = ampResponse.data[0].label;
+            ampPredictionConfidence = ampResponse.data[0].confidence;
 
-                    generatePDFReport(sequence, predictionResult.data[0].label, 0.75);
-                    downloadLink.style.display = 'block';
+            if (ampResponse.data[0].shap_plot_base64) {
+                shapPlotBase64 = ampResponse.data[0].shap_plot_base64;
+            }
 
-                    // --- SHAP Plot Integration (Example - Adapt based on backend response) ---
-                    if (predictionResult.data[0].shap_plot_base64) { // Assuming backend returns SHAP plot as base64 encoded image
-                        const shapPlotImg = document.createElement('img');
-                        shapPlotImg.src = `data:image/png;base64,${predictionResult.data[0].shap_plot_base64}`;
-                        shapPlotImg.alt = 'SHAP Plot';
-                        shapPlotContainer.innerHTML = ''; // Clear "Generating..." message
-                        shapPlotContainer.appendChild(shapPlotImg);
-                    } else {
-                        shapPlotContainer.innerHTML = '<p><i>SHAP plot not available for this prediction.</i></p>'; // Handle case where SHAP plot is not returned
-                    }
-                    // --- End SHAP Plot Integration ---
+            // --- 2. Perform MIC predictions (if selected) ---
+            for (const bacterium of selectedMICBacteria) {
+                const displayName = bacteriumDisplayNames[bacterium] || bacterium;
+                const micResponse = await clientInstance.predict("/predict_mic", [sequence, bacterium]);
+                completedSteps++;
+                progressBar.style.width = `${(completedSteps / totalPredictionSteps) * 100}%`;
 
+                if (!micResponse || !micResponse.data || micResponse.data.length === 0 || String(micResponse.data[0]).startsWith("Error:")) {
+                    micPredictionResults.push({ target: displayName, value: `Prediction Error: ${micResponse.data[0] || 'Unknown'}` });
+                } else {
+                    micPredictionResults.push({ target: displayName, value: `${micResponse.data[0]} µM` });
                 }
-             }, 100);
+            }
+            
+            // Ensure progress bar reaches 100% and then hides
+            progressBar.style.width = '100%';
+            setTimeout(() => {
+                progressContainer.style.display = 'none';
+            }, 300); // Small delay to show 100%
 
+
+            // Generate PDF report with all available data
+            generatePDFReport(sequence, ampPredictionLabel, ampPredictionConfidence, micPredictionResults);
+            downloadLink.style.display = 'block'; // Make download link visible
+
+            // Display SHAP plot (only from AMP classification)
+            if (shapPlotBase64) {
+                const shapPlotImg = document.createElement('img');
+                shapPlotImg.src = `data:image/png;base64,${shapPlotBase64}`;
+                shapPlotImg.alt = 'SHAP Plot';
+                shapPlotContainer.innerHTML = '';
+                shapPlotContainer.appendChild(shapPlotImg);
+            } else {
+                shapPlotContainer.innerHTML = '<p><i>SHAP plot not available for this prediction.</i></p>';
+            }
 
         } catch (error) {
             console.error("Error during prediction:", error);
             showError("Failed: " + (error.message || "Unknown error"));
             progressContainer.style.display = 'none';
-            shapPlotContainer.innerHTML = '<p><i>Error generating SHAP plot.</i></p>'; // Handle SHAP plot error
+            shapPlotContainer.innerHTML = '<p><i>Error generating SHAP plot.</i></p>';
         } finally {
             predictBtn.disabled = false;
             predictBtn.textContent = 'Analyze Sequence';
         }
     }
 
-
-    function generatePDFReport(sequence, prediction, confidence) {
+    function generatePDFReport(sequence, ampLabel, ampConfidence, micResults) {
         if (!window.jspdf || !window.jspdf.jsPDF) {
             console.error("jsPDF is not loaded correctly.");
             return;
@@ -1007,52 +1160,70 @@
         const jsPDF = window.jspdf.jsPDF;
         const pdf = new jsPDF();
 
-        if (!sequence || !prediction) {
-            console.error("Cannot generate PDF: Missing data.", { sequence, prediction });
+        if (!sequence || !ampLabel) {
+            console.error("Cannot generate PDF: Missing core data.", { sequence, ampLabel });
             return;
         }
 
         pdf.setFontSize(22);
         pdf.setTextColor(44, 62, 80); // Dark Blue-Gray
-        pdf.text("AMP Classification Report", 105, 20, { align: "center" });
+        pdf.text("Peptide Analysis Report", 105, 20, { align: "center" });
 
         const imgData = getBase64Image(document.querySelector('.logos-container img'));
           if (imgData) {
             pdf.addImage(imgData, 'PNG', 25, 22, 30, 15);
         }
 
+        let yPos = 55;
+
         pdf.setFontSize(16);
         pdf.setTextColor(0, 77, 64); // Dark Teal (from --primary-color)
-        pdf.text("Input Sequence:", 20, 55);
+        pdf.text("Input Sequence:", 20, yPos);
         pdf.setFontSize(12);
         pdf.setTextColor(51, 51, 51); // Dark Gray (from --text-color)
 
         const maxWidth = 170;
         const sequenceLines = pdf.splitTextToSize(sequence, maxWidth);
-        pdf.text(sequenceLines, 20, 65);
+        pdf.text(sequenceLines, 20, yPos + 10);
+        yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10;
 
-        let yPos = 65 + (sequenceLines.length * pdf.getLineHeight()) + 10;
-
+        // AMP Classification Result
         pdf.setFontSize(16);
         pdf.setTextColor(0, 77, 64); // Dark Teal
-        pdf.text("Prediction:", 20, yPos);
+        pdf.text("AMP Classification:", 20, yPos);
         pdf.setFontSize(14);
-        pdf.setTextColor(39, 174, 96); // Emerald Green (from --success-color)
-        if (prediction.includes('(Non-AMP)')) {
-             pdf.setTextColor(231, 76, 60); // Alizarin Red (from --clear-button-bg)
-         }
-        pdf.text(prediction, 20, yPos + 10);
-
+        pdf.setTextColor(39, 174, 96); // Emerald Green
+        if (ampLabel.includes('(Non-AMP)')) {
+            pdf.setTextColor(231, 76, 60); // Alizarin Red
+        }
+        pdf.text(ampLabel, 20, yPos + 10);
         yPos += 20;
 
-        pdf.setFontSize(14);
-        pdf.setTextColor(0, 77, 64); // Dark Teal
-        pdf.text(`Confidence: ${(confidence * 100).toFixed(2)}% (Placeholder)`, 20, yPos);
-        yPos += 10;
-        pdf.text("Explainability: (To be added later)", 20, yPos);
+        if (ampConfidence !== null) {
+            pdf.setFontSize(14);
+            pdf.setTextColor(0, 77, 64); // Dark Teal
+            pdf.text(`Confidence: ${(ampConfidence * 100).toFixed(2)}%`, 20, yPos);
+            yPos += 10;
+        }
 
+        // MIC Prediction Results (if any)
+        if (micResults && micResults.length > 0) {
+            yPos += 15; // Add some space
+            pdf.setFontSize(16);
+            pdf.setTextColor(0, 77, 64); // Dark Teal
+            pdf.text("Predicted MIC Values:", 20, yPos);
+            yPos += 10;
+            pdf.setFontSize(14);
+            pdf.setTextColor(0, 137, 123); // Teal (from --secondary-color)
+            micResults.forEach(res => {
+                pdf.text(`${res.target}: ${res.value}`, 20, yPos);
+                yPos += 10;
+            });
+        }
+
+        // Footer
         pdf.setFontSize(10);
-        pdf.setTextColor(127, 140, 141); // Gray (from character-count color)
+        pdf.setTextColor(127, 140, 141); // Gray
         pdf.text("Generated by BCBU-ZC AMP Classifier", 105, 285, { align: "center" });
 
         const pdfBlob = pdf.output('blob');
@@ -1069,8 +1240,8 @@
         }
         try{
             const canvas = document.createElement("canvas");
-            canvas.width = img.width;
-            canvas.height = img.height;
+            canvas.width = img.naturalWidth;
+            canvas.height = img.naturalHeight;
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0);
             const dataURL = canvas.toDataURL("image/png");
