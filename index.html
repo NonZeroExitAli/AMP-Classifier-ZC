@@ -626,13 +626,13 @@
                 </li>
                 <li><strong>Charge (ChargeD2001):</strong>
                     <ul>
-                        <li><strong>Description:</strong> Represents the net charge of the peptide.</li>
+                        <li><strong>Description:</b> Represents the net charge of the peptide.</li>
                         <li><strong>Interpretation:</strong> Charge is a significant positive predictor. Most AMPs are cationic, enabling them to interact with negatively charged bacterial membranes. Higher charge, as indicated by positive SHAP values, typically enhances antimicrobial potency.</li>
                     </ul>
                 </li>
                 <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
                     <ul>
-                        <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
+                        <li><strong>Description:</b> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
                         <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
                     </ul>
                 </li>
@@ -691,7 +691,7 @@
             <ul>
                 <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRAISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
                 <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
-                <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
+                <li><strong>Test 3:</b> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
                 <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
                 <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
 
@@ -833,7 +833,7 @@
     let clientInstance = null; // Initialize to null
     let debounceTimer;
 
-    // --- NEW: Function to safely initialize client ---
+    // Function to safely initialize client
     async function initializeGradioClient() {
         console.log("Attempting to initialize Gradio client...");
         predictBtn.disabled = true; // Disable button while trying to connect
@@ -1148,6 +1148,7 @@
                 console.log(`MIC prediction response for ${displayName}:`, micResponse);
 
 
+                // Check for errors in MIC response and format result
                 if (!micResponse || !micResponse.data || micResponse.data.length === 0 || String(micResponse.data[0]).startsWith("Error:")) {
                     micPredictionResults.push({ target: displayName, value: `Prediction Error: ${micResponse.data[0] || 'Unknown'}` });
                 } else {
@@ -1188,6 +1189,7 @@
         }
     }
 
+    // Function to generate PDF report
     function generatePDFReport(sequence, ampLabel, ampConfidence, micResults) {
         if (!window.jspdf || !window.jspdf.jsPDF) {
             console.error("jsPDF is not loaded correctly.");
@@ -1201,66 +1203,79 @@
             return;
         }
 
+        // Add Header
         pdf.setFontSize(22);
         pdf.setTextColor(44, 62, 80); // Dark Blue-Gray
         pdf.text("Peptide Analysis Report", 105, 20, { align: "center" });
 
+        // Add Logo
         const imgData = getBase64Image(document.querySelector('.logos-container img'));
           if (imgData) {
-            pdf.addImage(imgData, 'PNG', 25, 22, 30, 15);
+            pdf.addImage(imgData, 'PNG', 25, 22, 30, 15); // Adjust position/size as needed
         }
 
-        let yPos = 55;
+        let yPos = 55; // Starting Y position for content
 
+        // Input Sequence Section
         pdf.setFontSize(16);
         pdf.setTextColor(0, 77, 64); // Dark Teal (from --primary-color)
         pdf.text("Input Sequence:", 20, yPos);
         pdf.setFontSize(12);
         pdf.setTextColor(51, 51, 51); // Dark Gray (from --text-color)
 
-        const maxWidth = 170;
+        const maxWidth = 170; // Max width for text wrapping
         const sequenceLines = pdf.splitTextToSize(sequence, maxWidth);
         pdf.text(sequenceLines, 20, yPos + 10);
-        yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10;
+        yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10; // Update Y position
 
-        // AMP Classification Result
+        // AMP Classification Result Section
         pdf.setFontSize(16);
         pdf.setTextColor(0, 77, 64); // Dark Teal
         pdf.text("AMP Classification:", 20, yPos);
         pdf.setFontSize(14);
-        pdf.setTextColor(39, 174, 96); // Emerald Green
+        pdf.setTextColor(39, 174, 96); // Emerald Green (for AMP)
         if (ampLabel.includes('(Non-AMP)')) {
-            pdf.setTextColor(231, 76, 60); // Alizarin Red
+            pdf.setTextColor(231, 76, 60); // Alizarin Red (for Non-AMP)
         }
         pdf.text(ampLabel, 20, yPos + 10);
-        yPos += 20;
+        yPos += 20; // Update Y position
 
         if (ampConfidence !== null) {
             pdf.setFontSize(14);
             pdf.setTextColor(0, 77, 64); // Dark Teal
             pdf.text(`Confidence: ${(ampConfidence * 100).toFixed(2)}%`, 20, yPos);
-            yPos += 10;
+            yPos += 10; // Update Y position
         }
 
-        // MIC Prediction Results (if any)
+        // MIC Prediction Results Section (if any)
         if (micResults && micResults.length > 0) {
-            yPos += 15; // Add some space
+            yPos += 15; // Add some space before MIC section
             pdf.setFontSize(16);
             pdf.setTextColor(0, 77, 64); // Dark Teal
             pdf.text("Predicted MIC Values:", 20, yPos);
-            yPos += 10;
+            yPos += 10; // Update Y position
             pdf.setFontSize(14);
             pdf.setTextColor(0, 137, 123); // Teal (from --secondary-color)
             micResults.forEach(res => {
+                // Check for potential page overflow before adding more content
+                if (yPos > 270) { // If near bottom of page (297 is page height)
+                    pdf.addPage();
+                    yPos = 20; // Reset Y position for new page
+                    pdf.setFontSize(16);
+                    pdf.setTextColor(0, 77, 64);
+                    pdf.text("Predicted MIC Values (Continued):", 20, yPos);
+                    yPos += 10;
+                }
                 pdf.text(`${res.target}: ${res.value}`, 20, yPos);
-                yPos += 10;
+                yPos += 10; // Update Y position
             });
         }
 
         // Footer
         pdf.setFontSize(10);
         pdf.setTextColor(127, 140, 141); // Gray
-        pdf.text("Generated by BCBU-ZC AMP Classifier", 105, 285, { align: "center" });
+        // Position footer at the bottom of the last page
+        pdf.text("Generated by BCBU-ZC AMP Classifier", 105, pdf.internal.pageSize.height - 15, { align: "center" });
 
         const pdfBlob = pdf.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
@@ -1269,14 +1284,15 @@
         downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
     }
 
+    // Helper function to get base64 image data from an HTML image element
     function getBase64Image(img) {
         if (!img) {
-            console.error("Image element not found");
+            console.error("Image element not found for PDF logo.");
             return null;
         }
         try{
             const canvas = document.createElement("canvas");
-            canvas.width = img.naturalWidth;
+            canvas.width = img.naturalWidth; // Use naturalWidth/Height for original size
             canvas.height = img.naturalHeight;
             const ctx = canvas.getContext("2d");
             ctx.drawImage(img, 0, 0);
@@ -1284,7 +1300,10 @@
             return dataURL;
         }
         catch (error){
-            console.error("Error converting image to base64:", error);
+            console.error("Error converting image to base64 for PDF:", error);
+            // This error often occurs if the image is not loaded yet, or due to CORS restrictions.
+            // For local files, ensure the image exists and path is correct.
+            // For external images, they need to be served with CORS headers or proxy.
             return null
         }
     }
