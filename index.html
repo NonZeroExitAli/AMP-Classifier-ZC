@@ -214,33 +214,13 @@
         animation: fadeIn 0.5s ease forwards;
     }
 
-    .confidence-container {
+    .confidence-container { /* This block is likely unused now */
         display: flex;
         align-items: center;
         justify-content: center;
         margin-top: 0.5rem;
     }
 
-    .confidence-bar-container {
-        width: 80%;
-        height: 15px;
-        background-color: #eee;
-        border-radius: 7.5px;
-        margin-left: 0.5rem;
-        overflow: hidden;
-    }
-
-
-    .confidence-bar {
-        height: 100%;
-        background-color: var(--success-color);
-        border-radius: 7.5px;
-        transition: width: 0.3s ease, background-color: 0.3s ease;
-    }
-
-    .confidence-text {
-        margin-right: 10px;
-    }
 
     .hidden {
         display: none;
@@ -408,18 +388,9 @@
     /* New styles for result boxes and MIC checkboxes */
     .results-display-group {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr; /* Two columns for AMP and Additional Details */
         gap: 1rem;
         margin-top: 2rem;
-    }
-
-    @media (min-width: 768px) {
-        .results-display-group {
-            grid-template-columns: 1fr 1fr; /* Two columns for AMP/Confidence */
-        }
-        .mic-full-width {
-            grid-column: 1 / -1; /* MIC takes full width */
-        }
     }
 
     .result-box {
@@ -455,36 +426,6 @@
         flex-direction: column;
         justify-content: center;
         align-items: center;
-    }
-
-    /* Override previous confidence container */
-    .confidence-output .confidence-bar-container {
-        width: 90%;
-        height: 20px;
-        background-color: #eee;
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 0.5rem;
-    }
-
-    .dark-mode .confidence-output .confidence-bar-container {
-        background-color: #616161;
-    }
-
-    .confidence-output .confidence-bar {
-        height: 100%;
-        background-color: var(--success-color);
-        border-radius: 10px;
-        transition: width 0.5s ease;
-    }
-
-    .confidence-output #confidence-text {
-        font-size: 1.1rem;
-        font-weight: bold;
-        color: var(--primary-color);
-    }
-    .dark-mode .confidence-output #confidence-text {
-        color: var(--light-teal); /* Use a lighter color for dark mode */
     }
 
     /* Styles for MIC Checkboxes */
@@ -551,26 +492,6 @@
         font-weight: normal;
     }
 
-    /* Style for MIC output list */
-    #mic-output-display ul {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        width: 100%;
-    }
-
-    #mic-output-display li {
-        display: flex;
-        justify-content: space-between;
-        padding: 5px 0;
-        border-bottom: 1px dashed var(--border-color);
-    }
-
-    #mic-output-display li:last-child {
-        border-bottom: none;
-    }
-
-
 </style>
 
 </head>
@@ -609,11 +530,36 @@
             <div class="tooltip">
                 Enter the amino acid sequence you want to classify or upload a FASTA file. The sequence must be between 10 and 100 characters long and contain only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).
             </div>
-            </div>
-             <div class="button-group">
-                <button onclick="clearInput()" id="clear-btn">Clear Input</button>
-                <button onclick="classifySequenceDebounced()" id="predict-btn">Submit</button>
-            </div>
+        </div>
+
+        <!-- MOVED: MIC prediction selection now here, above the buttons -->
+        <h3 style="margin-top: 0rem; margin-bottom: 0.5rem;">Select Bacteria for MIC Prediction</h3>
+        <p style="margin-top: 0; margin-bottom: 1rem;">Choose one or more bacteria for which you'd like to predict the Minimum Inhibitory Concentration (MIC) of the peptide. MIC prediction is only performed if the sequence is classified as an Antimicrobial Peptide (AMP).</p>
+
+        <div class="mic-checkbox-group">
+            <label class="mic-checkbox-container">
+                <input type="checkbox" id="mic-ecoli" value="e_coli" disabled>
+                <span class="mic-label">E.coli</span>
+            </label>
+            <label class="mic-checkbox-container">
+                <input type="checkbox" id="mic-paeruginosa" value="p_aeruginosa" disabled>
+                <span class="mic-label">P. aeruginosa</span>
+            </label>
+            <label class="mic-checkbox-container">
+                <input type="checkbox" id="mic-saureus" value="s_aureus" disabled>
+                <span class="mic-label">S. aureus</span>
+            </label>
+            <label class="mic-checkbox-container">
+                <input type="checkbox" id="mic-kpneumoniae" value="k_pneumoniae" disabled>
+                <span class="mic-label">K. pneumoniae</span>
+            </label>
+        </div>
+        <!-- END MOVED SECTION -->
+
+        <div class="button-group">
+            <button onclick="clearInput()" id="clear-btn">Clear Input</button>
+            <button onclick="classifySequenceDebounced()" id="predict-btn">Submit</button>
+        </div>
 
 
         <div class="error-message" id="error"></div>
@@ -623,7 +569,7 @@
             <div class="progress-bar" id="progress-bar"></div>
         </div>
 
-        <!-- NEW RESULT DISPLAY STRUCTURE -->
+        <!-- UPDATED RESULT DISPLAY STRUCTURE -->
         <div class="results-display-group">
             <div class="result-box">
                 <div class="result-header"><i class="fas fa-file-alt"></i> AMP Classification</div>
@@ -632,48 +578,16 @@
                 </div>
             </div>
 
-            <div class="result-box confidence-output">
-                <div class="result-header"><i class="fas fa-percent"></i> Confidence</div>
-                <div class="result-content">
-                    <div class="confidence-bar-container" style="display: none;">
-                        <div class="confidence-bar" id="confidence-bar"></div>
-                    </div>
-                    <p id="confidence-text" style="text-align: center;">▓▓▓</p>
-                </div>
-            </div>
-
-            <!-- MIC Prediction Section -->
-            <div class="result-box mic-full-width">
-                <div class="result-header"><i class="fas fa-flask"></i> Predicted MIC (µM) for Each Bacterium</div>
-                <div class="result-content" id="mic-output-display">
-                    <p style="margin: 0; text-align: center;">{}</p>
+            <!-- New box for additional details message -->
+            <div class="result-box">
+                <div class="result-header"><i class="fas fa-info-circle"></i> Additional Details</div>
+                <div class="result-content" id="additional-details-output">
+                    <p style="text-align: center;">Results will appear here.</p>
                 </div>
             </div>
         </div>
 
-        <h3 style="margin-top: 2rem;">Select Bacteria for MIC Prediction</h3>
-        <p>Choose one or more bacteria for which you'd like to predict the Minimum Inhibitory Concentration (MIC) of the peptide. MIC prediction is only performed if the sequence is classified as an Antimicrobial Peptide (AMP).</p>
-
-        <div class="mic-checkbox-group">
-            <label class="mic-checkbox-container">
-                <input type="checkbox" id="mic-ecoli" value="e_coli">
-                <span class="mic-label">E.coli</span>
-            </label>
-            <label class="mic-checkbox-container">
-                <input type="checkbox" id="mic-paeruginosa" value="p_aeruginosa">
-                <span class="mic-label">P. aeruginosa</span>
-            </label>
-            <label class="mic-checkbox-container">
-                <input type="checkbox" id="mic-saureus" value="s_aureus">
-                <span class="mic-label">S. aureus</span>
-            </label>
-            <label class="mic-checkbox-container">
-                <input type="checkbox" id="mic-kpneumoniae" value="k_pneumoniae">
-                <span class="mic-label">K. pneumoniae</span>
-            </label>
-        </div>
-
-        <a id="download-link" style="display: none; margin-top: 10px;">Detailed Report</a>
+        <a id="download-link" style="display: none; margin-top: 10px;">Download Detailed Report</a>
     </div>
 
     <div class="tab-content" id="model">
@@ -726,113 +640,7 @@
             <img src="shap.png" alt="SHAP Plot" >
         </div>
 
-        <h3>Interpretation of SHAP Plot</h3>
-         <p>Based on the SHAP plot, the model's predictions for Antimicrobial Peptides (AMPs) are influenced by a combination of sequence-based, structural, and biophysical features. Here’s a breakdown of the key features and their biological implications:</p>
-
-        <h4>A. Sequence-Based Features</h4>
-        <h5>APAAC13 & APAAC5 (Amphiphilic Pseudo-Amino Acid Composition)</h5>
-        <ul>
-            <li><strong>Description:</strong> These features encode hydrophobicity, charge, and side-chain properties, reflecting the amphiphilic nature of the peptide.</li>
-            <li><strong>Interpretation:</strong> Higher APAAC values have a positive SHAP impact, indicating they are predictive of AMP activity. This suggests that the model values amphiphilic sequences, which are crucial for disrupting bacterial membranes.</li>
-        </ul>
-
-        <h5>Amino Acid Composition (M, C)</h5>
-        <ul>
-            <li><strong>M (Methionine):</strong>
-                <ul>
-                    <li><strong>Description:</strong> Methionine is often associated with structural stability in peptides.</li>
-                    <li><strong>Interpretation:</strong>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
-                </ul>
-            </li>
-            <li><strong>C (Cysteine):</strong>
-                <ul>
-                    <li><strong>Description:</strong> Cysteine is known for forming disulfide bonds, which can stabilize AMP structures like defensins.</li>
-                    <li><strong>Interpretation:</strong> High cysteine content appears to have a positive SHAP impact. This could be because disulfide-stabilized AMPs often exhibit enhanced antimicrobial action.</li>
-                </ul>
-            </li>
-        </ul>
-
-        <h4>B. Structural and Biophysical Features</h4>
-        <ul>
-            <li><strong>HydrophobicityD3001:</strong>
-                <ul>
-                    <li><strong>Description:</strong> Represents the overall hydrophobicity of the peptide sequence.</li>
-                    <li><strong>Interpretation:</strong> Hydrophobicity is shown to be a critical feature. More hydrophobic peptides are strongly favored for AMP classification, aligning with the understanding that hydrophobicity is essential for membrane insertion and disruption.</li>
-                </ul>
-            </li>
-            <li><strong>PolarityD1001:</strong>
-                <ul>
-                    <li><strong>Description:</strong>  Measures the polarity of the peptide sequence.</li>
-                    <li><strong>Interpretation:</strong>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
-                </ul>
-            </li>
-            <li><strong>Solvent Accessibility (SolventAccessibilityD3001):</strong>
-                <ul>
-                    <li><strong>Description:</strong> Reflects how exposed the residues are to the solvent (water).</li>
-                    <li><strong>Interpretation:</strong> Solvent-accessible residues positively contribute to AMP prediction. This might indicate that exposed residues facilitate interaction with bacterial membranes or the surrounding environment.</li>
-                </ul>
-            </li>
-            <li><strong>Charge (ChargeD2001):</strong>
-                <ul>
-                    <li><strong>Description:</strong> Represents the net charge of the peptide.</li>
-                    <li><strong>Interpretation:</strong> Charge is a significant positive predictor. Most AMPs are cationic, enabling them to interact with negatively charged bacterial membranes. Higher charge, as indicated by positive SHAP values, typically enhances antimicrobial potency.</li>
-                </ul>
-            </li>
-            <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
-                <ul>
-                    <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
-                    <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
-                </ul>
-            </li>
-        </ul>
-
-        <h4>C. Geary Autocorrelation Features</h4>
-        <p>Geary autocorrelation descriptors reflect spatial properties of peptides, encoding information about the distribution of physicochemical properties along the sequence.</p>
-        <ul>
-            <li><strong>GearyAuto_Hydrophobicity30:</strong>
-                <ul>
-                    <li><strong>Description:</strong> Encodes the clustering of hydrophobic residues within a spatial lag of 30.</li>
-                    <li><strong>Interpretation:</strong> Higher values of hydrophobicity autocorrelation are positively associated with AMP prediction. This likely reflects the importance of hydrophobic clustering in forming amphipathic structures, such as α-helices, which are common and effective in AMPs.</li>
-                </ul>
-            </li>
-            <li><strong>GearyAuto_Steric30 & GearyAuto_Steric29:</strong>
-                <ul>
-                    <li><strong>Description:</strong> Reflect peptide backbone flexibility and steric properties at spatial lags of 30 and 29.</li>
-                    <li><strong>Interpretation:</strong>  These features have a positive SHAP impact, suggesting that a certain degree of peptide backbone flexibility may be beneficial for AMP action. Flexibility could enhance the peptide's ability to interact with and adapt to diverse bacterial membrane structures.</li>
-                </ul>
-            </li>
-            <li><strong>GearyAuto_ResidueASA30:</strong>
-                <ul>
-                    <li><strong>Description:</strong> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
-                    <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
-                </ul>
-            </li>
-        </ul>
-
-
-        <h3>Biological Implications for AMP Design</h3>
-        <p>The feature importance highlighted by the SHAP plot underscores that AMP activity is highly dependent on a combination of hydrophobicity, charge, amphiphilicity, and structural properties. This understanding can be directly applied in several ways:</p>
-
-        <h4>Designing New AMPs</h4>
-        <ul>
-            <li><strong>Enhance Hydrophobicity and Charge:</strong> When designing novel AMP sequences, prioritize the inclusion of hydrophobic and positively charged amino acids. However, maintain a balance to ensure amphiphilicity and avoid excessive toxicity.</li>
-            <li><strong>Optimize Amphiphilicity:</strong> Design sequences that spatially segregate hydrophobic and hydrophilic residues. This can be achieved by strategically placing residue types to create distinct faces within the peptide structure.</li>
-            <li><strong>Promote Secondary Structure Formation:</strong> Incorporate amino acids that favor the formation of stable secondary structures, such as alpha-helices or beta-sheets, as these structures can enhance stability and membrane-disrupting capabilities.</li>
-        </ul>
-
-        <h4>Optimizing Existing AMPs</h4>
-        <ul>
-            <li><strong>Tune Solubility via Polar Residues:</strong> For AMPs with high hydrophobicity that suffer from poor solubility or increased toxicity, consider modifying polar residues to improve solubility without drastically reducing membrane interaction.</li>
-            <li><strong>Adjust Charge for Selectivity:</strong> Modify the net charge to potentially improve selectivity towards bacterial membranes over host cell membranes, reducing toxicity while maintaining antimicrobial activity.</li>
-        </ul>
-
-        <h4>Enhancing Predictive Models</h4>
-        <ul>
-            <li><strong>Incorporate Secondary Structure Predictors:</strong> To improve predictive accuracy, integrate features that directly predict or represent the secondary structure propensity of peptide sequences.</li>
-            <li><strong>Test Steric and Electronic Property Modifications:</strong> Further explore the impact of steric and electronic properties by testing modifications that fine-tune these characteristics and observing the effects on both predicted and experimental AMP activity.</li>
-        </ul>
-        <p>By considering these biological implications derived from the model's feature importance, researchers can more effectively design, optimize, and predict the activity of antimicrobial peptides, potentially accelerating the development of new therapeutics.</p>
-
+        
 
         <h3>Sample Run</h3>
          <p>You can test the model with various sequences to understand its behavior.  Here are a few examples:</p>
@@ -948,17 +756,12 @@
     const downloadLink = document.getElementById('download-link');
     const shapPlotContainer = document.getElementById('shap-plot-container');
 
-    // New references for the structured results display
+    // References for the structured results display
     const ampClassificationOutput = document.getElementById('amp-classification-output');
-    const confidenceOutput = document.querySelector('.confidence-output'); // Select the container div
-    const confidenceBarContainer = confidenceOutput.querySelector('.confidence-bar-container');
-    const confidenceBar = document.getElementById('confidence-bar');
-    const confidenceText = document.getElementById('confidence-text');
-    const micOutputDisplay = document.getElementById('mic-output-display'); // This is the box for MIC results
+    const additionalDetailsOutput = document.getElementById('additional-details-output');
 
-    // New references for MIC checkboxes
+    // References for MIC checkboxes
     const micCheckboxes = document.querySelectorAll('.mic-checkbox-group input[type="checkbox"]');
-
 
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
@@ -973,7 +776,8 @@
     });
 
     let clientInstance;
-    let debounceTimer;
+    let debounceTimer; // For debouncing prediction calls
+    let animationIntervalId; // To store the ID of the progress bar animation interval
 
     async function initClient() {
         try {
@@ -991,7 +795,7 @@
         document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
         document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
         fileInput.addEventListener('change', handleFileSelect);
-        // Initial clearing of output fields
+        // Initial clearing of output fields and disabling checkboxes
         clearInput();
     };
 
@@ -1011,20 +815,29 @@
         downloadLink.style.display = 'none';
         shapPlotContainer.innerHTML = '<p><i>SHAP plot will be displayed here after analysis.</i></p>';
 
-        // Clear new result boxes
+        // Clear classification and additional details
         ampClassificationOutput.innerHTML = '<p style="text-align: center;">▓▓▓</p>';
-        confidenceBarContainer.style.display = 'none';
-        confidenceBar.style.width = '0%';
-        confidenceText.textContent = '▓▓▓';
-        micOutputDisplay.innerHTML = '<p style="margin: 0; text-align: center;">{}</p>';
+        additionalDetailsOutput.innerHTML = '<p style="text-align: center;">Results will appear here.</p>';
 
-        // Clear MIC checkboxes
-        micCheckboxes.forEach(checkbox => checkbox.checked = false);
+        // Disable MIC checkboxes and uncheck them
+        micCheckboxes.forEach(checkbox => {
+            checkbox.checked = false;
+            checkbox.disabled = true;
+        });
+
+        // Clear any ongoing progress bar animation
+        if (animationIntervalId) {
+            clearInterval(animationIntervalId);
+            animationIntervalId = null;
+        }
+        progressBar.style.width = '0%';
+        progressContainer.style.display = 'none';
     }
 
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) {
+            clearInput(); // Clear everything if no file selected/cancelled
             return;
         }
 
@@ -1034,11 +847,12 @@
 
         if (!isValidExtension) {
             showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-            fileInput.value = '';
+            fileInput.value = ''; // Clear file input so same file can be selected again
+            micCheckboxes.forEach(checkbox => checkbox.disabled = true);
             return;
         }
 
-        clearError();
+        clearError(); // Clear previous errors
 
         const reader = new FileReader();
 
@@ -1048,15 +862,17 @@
                 if (sequence) {
                     sequenceInput.value = sequence;
                     updateCharacterCount();
-                    validateSequence(sequence);
+                    validateSequence(sequence); // This will enable/disable checkboxes based on the FASTA content
                 } else {
-                    showError("No sequence found in FASTA file.");
+                    showError("No valid sequence found in FASTA file.");
                     fileInput.value = '';
+                    micCheckboxes.forEach(checkbox => checkbox.disabled = true);
                 }
             } catch (error) {
                 console.error("Error in reader.onload:", error);
                 showError(error.message);
                 fileInput.value = '';
+                micCheckboxes.forEach(checkbox => checkbox.disabled = true);
             }
         };
 
@@ -1064,6 +880,7 @@
             console.error("FileReader error:", error);
             showError("Error reading file.");
             fileInput.value = '';
+            micCheckboxes.forEach(checkbox => checkbox.disabled = true);
         };
 
         reader.readAsText(file);
@@ -1104,23 +921,34 @@
     }
 
     function validateSequence(sequence) {
+        let isValid = true;
+        let errorMessage = '';
+
         if (!sequence) {
+            isValid = false;
+        } else if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
+            errorMessage = 'Invalid characters in sequence. Only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY) are allowed.';
+            isValid = false;
+        } else if (sequence.length < 10 || sequence.length > 100) {
+            errorMessage = 'Sequence length must be between 10 and 100 characters.';
+            isValid = false;
+        }
+
+        if (isValid) {
             clearError();
-            return true;
+            predictBtn.disabled = false; // Re-enable predict button if valid
+        } else {
+            showError(errorMessage); // Show specific error message
+            predictBtn.disabled = true; // Disable predict button if invalid
         }
 
-        if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
-            showError('Invalid characters in sequence. Only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY) are allowed.');
-            return false;
-        }
+        // Enable/disable checkboxes based on validation result
+        micCheckboxes.forEach(checkbox => {
+            checkbox.disabled = !isValid;
+            if (!isValid) checkbox.checked = false; // Uncheck if disabled
+        });
 
-        if (sequence.length < 10 || sequence.length > 100) {
-            showError('Sequence length must be between 10 and 100 characters.');
-            return false;
-        }
-
-        clearError();
-        return true;
+        return isValid;
     }
 
     function updateCharacterCount() {
@@ -1129,40 +957,55 @@
 
     sequenceInput.addEventListener('input', () => {
         updateCharacterCount();
-        validateSequence(sequenceInput.value);
+        validateSequence(sequenceInput.value); // Re-validate on every input
     });
 
     sequenceInput.addEventListener('paste', (e) => {
         e.preventDefault();
         const paste = (e.clipboardData || window.clipboardData).getData('text');
-        const cleanPaste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '');
-        const currentText = sequenceInput.value;
+        // Clean paste immediately, but full validation happens next
+        const cleanPaste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '').toUpperCase();
+
+        // Get current selection
         const selectionStart = sequenceInput.selectionStart;
         const selectionEnd = sequenceInput.selectionEnd;
+
+        // Construct potential new text
+        const currentText = sequenceInput.value;
         const newText = currentText.substring(0, selectionStart) + cleanPaste + currentText.substring(selectionEnd);
 
-        if (validateSequence(newText)) {
-            sequenceInput.value = newText;
-            updateCharacterCount();
+        // Apply new text and validate
+        sequenceInput.value = newText;
+        updateCharacterCount();
+
+        // Validate the entire new sequence
+        if (!validateSequence(newText)) {
+            // If the pasted text (or the resulting length) makes the sequence invalid
+            // The validateSequence function already calls showError and disables checkboxes/button
+            // No need to revert the text, as the error message explains the issue.
         }
     });
 
     sequenceInput.addEventListener('keypress', (e) => {
-        if (!/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
+        // Allow common control keys (backspace, delete, arrow keys, etc.)
+        if (e.key.length === 1 && !/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
             e.preventDefault();
-            showError('Only standard amino acid characters are allowed');
+            // Show error immediately for invalid characters, but let validateSequence handle overall state
+            showError('Only standard amino acid characters are allowed.');
+        } else {
+            // If a valid character is typed or a control key, clear error for the moment
+            clearError();
         }
+        // validateSequence will be called on 'input' event (after keypress)
     });
 
     function showError(message) {
         errorDiv.textContent = message;
         errorDiv.style.display = 'block';
-        predictBtn.disabled = true;
     }
 
     function clearError() {
         errorDiv.style.display = 'none';
-        predictBtn.disabled = false;
     }
 
     async function classifySequenceDebounced() {
@@ -1173,7 +1016,7 @@
     async function classifySequence() {
         const sequence = sequenceInput.value.trim().toUpperCase();
 
-        if (!validateSequence(sequence)) {
+        if (!validateSequence(sequence)) { // Re-validate one last time
             return;
         }
 
@@ -1181,122 +1024,108 @@
         predictBtn.disabled = true;
         predictBtn.textContent = 'Processing...';
 
-        // Clear previous results in the new boxes and show processing status
+        // Set initial processing states for UI
         ampClassificationOutput.innerHTML = '<p style="text-align: center;">Analyzing...</p>';
-        confidenceBarContainer.style.display = 'none';
-        confidenceBar.style.width = '0%';
-        confidenceText.textContent = 'Analyzing...';
+        additionalDetailsOutput.innerHTML = '<p style="text-align: center;">Generating detailed report...</p>';
         shapPlotContainer.innerHTML = '<p><i>Generating SHAP plot...</i></p>';
-        micOutputDisplay.innerHTML = '<p style="margin: 0; text-align: center;">Predicting...</p>'; // Indicate processing for MIC
+        downloadLink.style.display = 'none'; // Ensure it's hidden initially
 
         progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
-        downloadLink.style.display = 'none';
+        progressBar.style.width = '0%'; // Reset progress bar
 
         let micDataForPdf = {}; // To store MIC data for PDF report
+        let ampLabel = 'Unknown';
+        let ampConfidence = 0;
+        let shapPlotBase64 = null;
+
+        // --- Start progress bar animation (independent of actual processing) ---
+        let animationProgress = 0;
+        animationIntervalId = setInterval(() => {
+            if (animationProgress < 95) { // Stop just before 100% to leave room for final "completion"
+                animationProgress += 5; // Increment by 5%
+                progressBar.style.width = `${animationProgress}%`;
+            }
+        }, 100); // Update every 100ms
 
         try {
-            // Step 1: Perform AMP Classification
+            // --- Step 1: Perform AMP Classification (blocking await) ---
             const classificationResult = await clientInstance.predict("/predict", [sequence]);
+            
+            // Stop the progress bar animation once the *actual* classification is done
+            clearInterval(animationIntervalId);
+            animationIntervalId = null; // Clear the stored interval ID
+            progressBar.style.width = '100%'; // Immediately set to 100%
+            progressContainer.style.display = 'none'; // Hide it
 
             if (!classificationResult || !classificationResult.data || !classificationResult.data[0]) {
-                throw new Error("Invalid classification result from server.");
+                throw new Error("Invalid classification result from server. Please check backend response.");
             }
 
-            const ampLabel = classificationResult.data[0].label;
-            // Ensure confidence exists, default to 0 if not provided by backend
-            const ampConfidence = typeof classificationResult.data[0].confidence === 'number' ? classificationResult.data[0].confidence : 0;
-            const shapPlotBase64 = classificationResult.data[0].shap_plot_base64;
+            ampLabel = classificationResult.data[0].label;
+            ampConfidence = typeof classificationResult.data[0].confidence === 'number' ? classificationResult.data[0].confidence : 0;
+            shapPlotBase64 = classificationResult.data[0].shap_plot_base64;
 
-            // Animate progress bar (client-side only for visual feedback)
-            let progress = 0;
-            const interval = setInterval(async () => {
-                progress += 10;
-                progressBar.style.width = `${progress}%`;
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    progressContainer.style.display = 'none';
+            // Display AMP classification
+            ampClassificationOutput.innerHTML = `<p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabel.includes('Non-AMP') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0;">${ampLabel}</p>`;
 
-                    // Display AMP classification
-                    ampClassificationOutput.innerHTML = `<p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabel.includes('Non-AMP') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0;">${ampLabel}</p>`;
+            // Display SHAP Plot
+            if (shapPlotBase64) {
+                const shapPlotImg = document.createElement('img');
+                shapPlotImg.src = `data:image/png;base64,${shapPlotBase64}`;
+                shapPlotImg.alt = 'SHAP Plot';
+                shapPlotContainer.innerHTML = '';
+                shapPlotContainer.appendChild(shapPlotImg);
+            } else {
+                shapPlotContainer.innerHTML = '<p><i>SHAP plot not available for this prediction.</i></p>';
+            }
 
-                    // Display Confidence
-                    confidenceBarContainer.style.display = 'block';
-                    confidenceBar.style.width = `${(ampConfidence * 100).toFixed(0)}%`;
-                    confidenceText.textContent = `${(ampConfidence * 100).toFixed(2)}%`;
-                    confidenceText.style.color = 'var(--primary-color)';
+            // --- Step 2: Perform MIC Prediction if AMP and checkboxes are selected (blocking await) ---
+            if (ampLabel.includes('AMP (Positive)')) {
+                const selectedBacteria = Array.from(micCheckboxes)
+                                            .filter(checkbox => checkbox.checked)
+                                            .map(checkbox => checkbox.value);
 
-                    // Display SHAP Plot
-                    if (shapPlotBase64) {
-                        const shapPlotImg = document.createElement('img');
-                        shapPlotImg.src = `data:image/png;base64,${shapPlotBase64}`;
-                        shapPlotImg.alt = 'SHAP Plot';
-                        shapPlotContainer.innerHTML = '';
-                        shapPlotContainer.appendChild(shapPlotImg);
-                    } else {
-                        shapPlotContainer.innerHTML = '<p><i>SHAP plot not available for this prediction.</i></p>';
-                    }
+                if (selectedBacteria.length > 0) {
+                    try {
+                        const micPredictionResult = await clientInstance.predict("/predict_mic", [sequence, selectedBacteria]);
 
-                    // Step 2: Perform MIC Prediction if AMP and checkboxes are selected
-                    if (ampLabel.includes('AMP (Positive)')) {
-                        const selectedBacteria = Array.from(micCheckboxes)
-                                                    .filter(checkbox => checkbox.checked)
-                                                    .map(checkbox => checkbox.value);
-
-                        if (selectedBacteria.length > 0) {
-                            micOutputDisplay.innerHTML = '<p style="margin: 0; color: var(--text-color);">Predicting MIC values...</p>';
-                            try {
-                                // Call the MIC prediction endpoint
-                                const micPredictionResult = await clientInstance.predict("/predict_mic", [sequence, selectedBacteria]);
-
-                                if (micPredictionResult && micPredictionResult.data && micPredictionResult.data[0]) {
-                                    micDataForPdf = micPredictionResult.data[0]; // Store for PDF
-                                    let micHtml = '<ul style="list-style: none; padding: 0; margin: 0; width: 100%;">';
-                                    let hasMicValues = false;
-                                    for (const bacteriumKey in micDataForPdf) {
-                                        if (typeof micDataForPdf[bacteriumKey] === 'number') {
-                                            hasMicValues = true;
-                                            const bacteriumName = {
-                                                'e_coli': 'E.coli',
-                                                'p_aeruginosa': 'P. aeruginosa',
-                                                's_aureus': 'S. aureus',
-                                                'k_pneumoniae': 'K. pneumoniae'
-                                            }[bacteriumKey] || bacteriumKey;
-                                            micHtml += `<li style="display: flex; justify-content: space-between; padding: 5px 0;"><span>${bacteriumName}:</span> <span>${micDataForPdf[bacteriumKey].toFixed(2)} µM</span></li>`;
-                                        }
-                                    }
-                                    micHtml += '</ul>';
-                                    micOutputDisplay.innerHTML = hasMicValues ? micHtml : '<p style="margin: 0; text-align: center;">No valid MIC predictions returned for selected bacteria.</p>';
-
-                                } else {
-                                    micOutputDisplay.innerHTML = '<p style="margin: 0; text-align: center;">Could not retrieve MIC predictions. Please ensure the backend is configured.</p>';
-                                }
-                            } catch (micError) {
-                                console.error("Error during MIC prediction:", micError);
-                                micOutputDisplay.innerHTML = '<p style="margin: 0; color: var(--clear-button-bg);">Error predicting MIC: ' + (micError.message || 'Unknown error') + '</p>';
-                            }
+                        if (micPredictionResult && micPredictionResult.data && micPredictionResult.data[0]) {
+                            micDataForPdf = micPredictionResult.data[0]; // Store for PDF
+                            additionalDetailsOutput.innerHTML = '<p style="text-align: center;">Detailed report (including confidence and MIC values) is available for download.</p>';
                         } else {
-                            micOutputDisplay.innerHTML = '<p style="margin: 0; text-align: center;">No bacteria selected for MIC prediction.</p>';
+                            additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--warning-color);">MIC data could not be retrieved for the report. Report may be incomplete.</p>';
                         }
-                    } else {
-                        micOutputDisplay.innerHTML = '<p style="margin: 0; text-align: center;">MIC prediction is only available for Antimicrobial Peptides (AMPs).</p>';
+                    } catch (micError) {
+                        console.error("Error during MIC prediction:", micError);
+                        additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--warning-color);">Error predicting MIC for report: ' + (micError.message || 'Unknown error') + '</p>';
                     }
-
-                    // Generate PDF Report (call after all data is available, including MIC)
-                    generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf);
-                    downloadLink.style.display = 'block';
+                } else {
+                    additionalDetailsOutput.innerHTML = '<p style="text-align: center;">Detailed report (including confidence) is available for download. No MIC values selected.</p>';
                 }
-            }, 100);
+            } else {
+                // Not an AMP, so no MIC prediction even if checkboxes were selected
+                additionalDetailsOutput.innerHTML = '<p style="text-align: center;">Detailed report (including confidence) is available for download. MIC prediction not applicable (Non-AMP).</p>';
+            }
+
+            // --- Final Step: Generate PDF Report and show download link ---
+            generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf);
+            downloadLink.style.display = 'block'; // Always show download link if primary prediction is done
 
         } catch (error) {
             console.error("Error during prediction:", error);
-            showError("Prediction failed: " + (error.message || "Unknown error"));
+            // Ensure animation stops on error too
+            if (animationIntervalId) {
+                clearInterval(animationIntervalId);
+                animationIntervalId = null;
+            }
+            progressBar.style.width = '0%'; // Reset or clear on error
             progressContainer.style.display = 'none';
+
+            showError("Prediction failed: " + (error.message || "Unknown error"));
             shapPlotContainer.innerHTML = '<p><i>Error generating SHAP plot.</i></p>';
             ampClassificationOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error</p>';
-            confidenceText.textContent = 'Error';
-            confidenceBarContainer.style.display = 'none';
-            micOutputDisplay.innerHTML = '<p style="margin: 0; text-align: center; color: var(--clear-button-bg);">Error during prediction.</p>';
+            additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error during prediction. Detailed report not available.</p>';
+            downloadLink.style.display = 'none'; // Hide download link on critical error
         } finally {
             predictBtn.disabled = false;
             predictBtn.textContent = 'Submit';
@@ -1318,7 +1147,7 @@
 
         pdf.setFontSize(22);
         pdf.setTextColor(44, 62, 80); // Dark Blue-Gray
-        pdf.text("AMP Classification & MIC Report", 105, 20, { align: "center" }); // Updated title
+        pdf.text("AMP Classification & MIC Report", 105, 20, { align: "center" });
 
         const imgData = getBase64Image(document.querySelector('.logos-container img'));
           if (imgData) {
@@ -1336,7 +1165,7 @@
         const maxWidth = 170;
         const sequenceLines = pdf.splitTextToSize(sequence, maxWidth);
         pdf.text(sequenceLines, 20, yPos + 10);
-        yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10; // Update yPos based on sequence length
+        yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10;
 
         // AMP Classification
         pdf.setFontSize(16);
@@ -1368,19 +1197,27 @@
             yPos += 10;
             pdf.setFontSize(12);
             pdf.setTextColor(51, 51, 51); // Dark Gray
+            const bacteriumDisplayNamesForPdf = {
+                'e_coli': 'E.coli',
+                'p_aeruginosa': 'P. aeruginosa',
+                's_aureus': 'S. aureus',
+                'k_pneumoniae': 'K. pneumoniae',
+                // Add any other bacteria keys your backend might return
+            };
+
             for (const bacteriumKey in micResults) {
-                if (typeof micResults[bacteriumKey] === 'number') { // Only add if it's a valid number
-                    const bacteriumName = {
-                        'e_coli': 'E.coli',
-                        'p_aeruginosa': 'P. aeruginosa',
-                        's_aureus': 'S. aureus',
-                        'k_pneumoniae': 'K. pneumoniae'
-                    }[bacteriumKey] || bacteriumKey;
+                if (typeof micResults[bacteriumKey] === 'number' && bacteriumDisplayNamesForPdf[bacteriumKey]) {
+                    const bacteriumName = bacteriumDisplayNamesForPdf[bacteriumKey];
                     pdf.text(`${bacteriumName}: ${micResults[bacteriumKey].toFixed(2)} µM`, 20, yPos);
                     yPos += 7; // Line spacing
                 }
             }
             yPos += 10; // Add extra space after MIC list
+        } else {
+            pdf.setFontSize(12);
+            pdf.setTextColor(100, 100, 100);
+            pdf.text("No MIC predictions were selected or generated for this peptide.", 20, yPos + 10);
+            yPos += 20;
         }
 
 
