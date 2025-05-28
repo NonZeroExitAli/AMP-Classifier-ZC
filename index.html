@@ -317,31 +317,35 @@
         height: auto;     /* Maintain aspect ratio */
     }
 
-    /* Footer Styles */
+    /* Footer Styles - REFINED */
     footer {
-        width: 100%; /* Take full available width */
-        max-width: none; /* Override max-width of container if applicable */
-        text-align: center;
-        padding: 20px 0; /* Add padding vertical, horizontal will be adjusted by body padding */
+        width: 100%;
+        padding: 20px; /* Internal padding */
         background-color: var(--container-bg-color);
         border-top: 1px solid var(--border-color);
         font-size: 0.9rem;
         color: var(--text-color);
-        margin-top: auto; /* Push to bottom if body is flex column */
-        /* These properties allow the footer to break out of its parent's padding/alignment */
-        position: relative; /* Necessary for negative margin to work correctly */
-        left: 50%;
-        right: 50%;
-        margin-left: -50vw;
-        margin-right: -50vw;
-        width: 100vw; /* Take full viewport width */
-        padding-left: calc(50vw - 50%); /* Counteract horizontal body padding */
-        padding-right: calc(50vw - 50%); /* Counteract horizontal body padding */
+        text-align: center;
         box-sizing: border-box; /* Include padding in the width calculation */
+        /* To span full viewport width while body has padding */
+        position: relative;
+        left: 0;
+        right: 0;
+        margin: 0; /* Remove default margins */
+        /* These calculations offset the body's horizontal padding */
+        width: 100vw;
+        margin-left: calc(-100vw / 2 + 50%); 
+        margin-right: calc(-100vw / 2 + 50%);
+        /* Explicitly define text flow */
+        white-space: normal;
+        overflow-wrap: break-word; /* For longer words */
     }
-    footer p{
-         margin: 0.5rem 0;
+    footer p, footer address {
+         margin: 0.5rem 0; /* Space for content elements within footer */
+         white-space: normal; /* Ensure default text wrapping */
+         overflow-wrap: break-word; /* Breaks long words if necessary */
     }
+
 
     .button-group {
         display: flex;
@@ -560,10 +564,12 @@
         }
         footer {
             /* On very small screens, 100vw might cause horizontal scroll if body has padding */
-            margin-left: -10px;
-            margin-right: -10px;
-            padding-left: 10px;
+            /* Re-adjust these if using the advanced 100vw negative margin method with body padding */
+            padding-left: 10px; /* Reset padding to be consistent with body for this breakpoint */
             padding-right: 10px;
+            /* Recalculate margins for 100vw/50% relative to a padded body */
+            margin-left: calc(-50vw + 50%); /* Use 50% relative to viewport *current effective body width */
+            margin-right: calc(-50vw + 50%); /* This helps if body has static padding */
         }
     }
 
@@ -643,16 +649,16 @@
 
         <div class="results-display-group">
             <div class="result-box">
-                <div class="result-header"><i class="fas fa-file-alt"></i> AMP Classification</div>
+                <div class="result-header"><i class="fas fa-file-alt"></i>Classification</div>
                 <div class="result-content" id="amp-classification-output">
-                    <p class="info-message">▓▓▓</p>
+                    <p class="info-message"></p>
                 </div>
             </div>
 
             <div class="result-box">
                 <div class="result-header"><i class="fas fa-info-circle"></i> Additional Details</div>
                 <div class="result-content" id="additional-details-output">
-                    <p class="info-message">Results will appear here.</p>
+                    <p class="info-message">The detailed report will appear here.</p>
                     <a id="download-link" style="display: none;">Download Detailed Report (PDF)</a> <!-- MOVED HERE, inline style display:none initially -->
                 </div>
             </div>
@@ -754,7 +760,6 @@
                 </tr>
             </tbody>
         </table>
-        <!-- Removed duplicate </tbody> and </table> -->
         <!-- End of regressor metrics -->
 
 
@@ -806,7 +811,7 @@
                 </li>
                 <li><strong>PolarityD1001:</strong>
                     <ul>
-                        <li><strong>Description:</strong>  Measures the polarity of the peptide sequence.</li>
+                        <li><strong>Description:</b>  Measures the polarity of the peptide sequence.</li>
                         <li><strong>Interpretation:</strong>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
                     </ul>
                 </li>
@@ -816,7 +821,7 @@
                         <li><strong>Interpretation:</strong> Solvent-accessible residues positively contribute to AMP prediction. This might indicate that exposed residues facilitate interaction with bacterial membranes or the surrounding environment.</li>
                     </ul>
                 </li>
-                <li><strong>Charge (ChargeD2001):</strong>
+                <li><strong>Charge (ChargeD2001):</b>
                     <ul>
                         <li><strong>Description:</strong> Represents the net charge of the peptide.</li>
                         <li><strong>Interpretation:</strong> Charge is a significant positive predictor. Most AMPs are cationic, enabling them to interact with negatively charged bacterial membranes. Higher charge, as indicated by positive SHAP values, typically enhances antimicrobial potency.</li>
@@ -831,7 +836,7 @@
             </ul>
 
             <h4>C. Geary Autocorrelation Features</h4>
-            <p>Geary autocorrelation descriptors reflect spatial properties of peptides, encoding information about the distribution of physicochemical properties along the sequence.</p>
+            <p>Geary autocorrelation descriptors reflect spatial properties of peptides, encoding information about the adhesion and distribution of physicochemical properties along the sequence.</p>
             <ul>
                 <li><strong>GearyAuto_Hydrophobicity30:</strong>
                     <ul>
@@ -862,7 +867,7 @@
             <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
             <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
             <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
-            <li><strong>Test 5:</b> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
+            <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
 
         </ul>
 
@@ -876,7 +881,7 @@
         <h3>Model Selection Criteria</h3>
         <p>Our team rigorously evaluated 225 combinations of feature extraction and selection methods across three distinct machine learning models. The final model was selected based on the following criteria:</p>
         <ul>
-            <li><strong>High Accuracy, F1-score, and Validation Accuracy:</strong> The model achieved excellent performance metrics on a held-out test set, demonstrating its ability to generalize to unseen data.</li>
+            <li><strong>High Accuracy, F1-score, and Validation Accuracy:</b> The model achieved excellent performance metrics on a held-out test set, demonstrating its ability to generalize to unseen data.</li>
             <li><strong>Robustness to Sequence Length Variations:</strong> The model performs consistently well on sequences of varying lengths, within the specified range (10-100 amino acids).</li>
             <li><strong>Generalization Ability:</strong> The model was trained and evaluated on diverse datasets to ensure its ability to classify a broad range of AMP sequences.</li>
         </ul>
@@ -916,7 +921,7 @@
         <h3>Step 2: Input the Sequence</h3>
         <ul>
             <li><strong>Direct Input:</strong> Type or paste your sequence into the text area provided.</li>
-            <li><strong>FASTA File Upload:</b> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
+            <li><strong>FASTA File Upload:</strong> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
             <li>The character count will update as you type or upload a sequence.</li>
         </ul>
 
@@ -939,7 +944,7 @@
          <h3>Troubleshooting</h3>
             <ul>
                 <li><strong>Invalid Characters:</strong> If you see an error message about invalid characters, double-check that your sequence contains only standard amino acid characters.</li>
-                <li><strong>Sequence Length:</b> Ensure your sequence is between 10 and 100 characters long.</li>
+                <li><strong>Sequence Length:</strong> Ensure your sequence is between 10 and 100 characters long.</li>
                  <li><strong>Invalid FASTA Format:</strong> If you encounter an error with a FASTA file, make sure the file is correctly formatted.</li>
             </ul>
 
@@ -1030,8 +1035,8 @@
         // Hide download link explicitly using its direct ID as it's now in additionalDetailsOutput
         downloadLink.style.display = 'none';
 
-        ampClassificationOutput.innerHTML = '<p class="info-message">▓▓▓</p>'; // Use info-message class for default styling
-        additionalDetailsOutput.innerHTML = '<p class="info-message">Results will appear here.</p>'; // Ensure this clears other content too
+        ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>'; // Use info-message class for default styling
+        additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; // Ensure this clears other content too
         // Append download link back to the output div so it's managed correctly
         additionalDetailsOutput.appendChild(downloadLink);
 
@@ -1396,7 +1401,7 @@
                 });
             }
 
-            // Generate and provide PDF download link
+            // Generate and provide PDF report (PDF will use the parsed micDataForPdf)
             generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, topFeaturesForPdf, shapPlotBase64);
 
 
@@ -1426,17 +1431,8 @@
             console.error("jsPDF is not loaded correctly.");
             return;
         }
-        // No need to explicitly call .default for jspdf.umd.min.js
-        const pdf = new jspdf.jsPDF(); // Use jspdf.jsPDF() for clarity, or new window.jspdf.jsPDF()
-
-        // Important: jspdf-autotable attaches directly to the jsPDF prototype.
-        // It's assumed to be available globally because you've included its UMD script.
-        // If 'autoTable' isn't on 'pdf', it's usually a loading order or bundling issue.
-
-        if (!sequence || !prediction) {
-            console.error("Cannot generate PDF: Missing data.", { sequence, prediction });
-            return;
-        }
+        // This confirms jspdf is loaded correctly.
+        const pdf = new window.jspdf.jsPDF(); // Correct way to instantiate jsPDF with plugins
 
         // Set up standard colors and fonts
         const primaryColor = [0, 77, 64]; // Dark Teal
@@ -1524,7 +1520,7 @@
                 }
             }
             
-            pdf.autoTable({ // Ensure this function call works after adding autotable script
+            pdf.autoTable({
                 startY: yPos,
                 head: micTableHead,
                 body: micTableBody,
@@ -1541,8 +1537,7 @@
                     lineWidth: 0.1
                 },
                 columnStyles: {
-                    0: { fontStyle: 'italic' }, // Apply italic to first column of the body. jspdf-autotable handles `cellWidth` dynamically or you can explicitly set
-                    1: { halign: 'center' }
+                    0: { fontStyle: 'italic' }, // Italicize bacterium name column (jspdf-autotable applies it correctly to cells)
                 },
                 didDrawPage: function(data) { // Handler for pagination (new page starts)
                     yPos = data.cursor.y; // Update yPos after table draws
@@ -1574,7 +1569,7 @@
                 return [f.feature || '', f.condition || '', (typeof f.value === 'number' ? f.value.toFixed(4) : '')];
             });
 
-            pdf.autoTable({ // Ensure this function call works after adding autotable script
+            pdf.autoTable({
                 startY: yPos,
                 head: featuresTableHead,
                 body: featuresTableBody,
