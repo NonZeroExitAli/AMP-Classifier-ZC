@@ -6,7 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>BCBU-ZC AMP Classifier</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- jspdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <!-- jspdf-autotable plugin - THIS IS THE CRITICAL ADDITION -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+
     <style>
          :root {
             --primary-color: #004d40; /* Dark Teal */
@@ -312,22 +317,27 @@
         height: auto;     /* Maintain aspect ratio */
     }
 
+    /* Footer Styles */
     footer {
-        width: 100vw; /* Make footer full viewport width */
+        width: 100%; /* Take full available width */
+        max-width: none; /* Override max-width of container if applicable */
         text-align: center;
-        padding: 20px;
+        padding: 20px 0; /* Add padding vertical, horizontal will be adjusted by body padding */
         background-color: var(--container-bg-color);
         border-top: 1px solid var(--border-color);
         font-size: 0.9rem;
         color: var(--text-color);
-        margin-top: auto;
-        /* Position left to align with body start and overcome margin from parent body flexbox */
-        margin-left: calc(-50vw + 50%); 
-        margin-right: calc(-50vw + 50%);
-        /* Need to clear negative margin due to body padding */
-        padding-left: 20px; 
-        padding-right: 20px; 
-        box-sizing: border-box; /* Include padding in width */
+        margin-top: auto; /* Push to bottom if body is flex column */
+        /* These properties allow the footer to break out of its parent's padding/alignment */
+        position: relative; /* Necessary for negative margin to work correctly */
+        left: 50%;
+        right: 50%;
+        margin-left: -50vw;
+        margin-right: -50vw;
+        width: 100vw; /* Take full viewport width */
+        padding-left: calc(50vw - 50%); /* Counteract horizontal body padding */
+        padding-right: calc(50vw - 50%); /* Counteract horizontal body padding */
+        box-sizing: border-box; /* Include padding in the width calculation */
     }
     footer p{
          margin: 0.5rem 0;
@@ -378,22 +388,22 @@
       line-height: 1.7;  /* Increase line height for readability */
     }
 
-    /* Style for SHAP Plot Container (adjust as needed) */
+    /* Style for SHAP Plot Container */
     #shap-plot-container {
         width: 100%;
-        min-height: 300px; /* Adjust height as needed */
+        min-height: 300px;
         border: 1px solid var(--border-color);
         border-radius: 5px;
         margin-top: 1rem;
         display: flex;
         justify-content: center;
         align-items: center;
-        overflow-x: auto; /* Enable horizontal scrolling if plot is wide */
+        overflow-x: auto;
     }
      #shap-plot-container img{
-        max-width: 100%; /* Make sure image doesn't exceed container width */
-        height: auto;    /* Maintain aspect ratio */
-        display: block;   /* Prevent extra space below image */
+        max-width: 100%;
+        height: auto;
+        display: block;
     }
 
     /* New styles for result boxes and MIC checkboxes */
@@ -440,11 +450,10 @@
     }
     /* Styles within result-content when dynamically added */
     .result-content p.info-message {
-        text-align: center; /* Center the 'Results will appear here.' message */
+        text-align: center; /* Center the default messages */
         margin-bottom: 0;
         margin-top: 0;
     }
-
     .result-content ul {
         margin: 0.5rem 0 0 1.5rem; /* Adjust margin for lists */
         padding: 0;
@@ -458,6 +467,27 @@
         margin-top: 0.5rem;
         margin-bottom: 0.5rem;
     }
+
+    /* SHAP Interpretation scrollable section */
+    .scrollable-content {
+        max-height: 400px; /* Adjust as needed */
+        overflow-y: auto;
+        padding: 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        margin-top: 1rem;
+        background-color: var(--background-color); /* Matches body or container BG */
+    }
+    .dark-mode .scrollable-content {
+        background-color: #333; /* Darker for dark mode */
+        border-color: #616161;
+    }
+    .scrollable-content h4 {
+        color: var(--secondary-color); /* Maintain header color */
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+    }
+
 
     /* Adjusted MIC checkboxes for appearance */
     .mic-checkbox-group {
@@ -627,11 +657,10 @@
                 </div>
             </div>
         </div>
-        <!-- <a id="download-link" style="display: none; margin-top: 20px;">Download Detailed Report (PDF)</a> Moved/removed -->
     </div>
 
     <div class="tab-content" id="model">
-        <h2>Model Metrics</h2>
+        <h2>Classifier Metrics</h2>
         <p>The following table presents the performance metrics of our antimicrobial peptide classification model. These metrics were obtained on a held-out test set, separate from the training data.</p>
         <table class="metrics-table">
             <thead>
@@ -670,6 +699,65 @@
             </tbody>
         </table>
 
+        <!-- Start of regressor metrics -->
+        <h2 style="margin-top: 2rem;">Regressor Metrics (MIC Prediction Models)</h2>
+        <p>The Minimum Inhibitory Concentration (MIC) prediction is handled by separate regressor models. Their performance metrics for each bacterium are detailed below:</p>
+
+        <table class="metrics-table">
+            <thead>
+                <tr>
+                    <th>Bacterium</th>
+                    <th>MSE (log)</th>
+                    <th>MSE</th>
+                    <th>R2</th>
+                    <th>MAE</th>
+                    <th>Pearson</th>
+                    <th>Kendall</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>E.coli</td>
+                    <td>0.0481</td>
+                    <td>0.4864</td>
+                    <td>0.7023</td>
+                    <td>0.1375</td>
+                    <td>0.8394</td>
+                    <td>0.6725</td>
+                </tr>
+                <tr>
+                    <td>P. aeruginosa</td>
+                    <td>0.0517</td>
+                    <td>0.5227</td>
+                    <td>0.6864</td>
+                    <td>0.1233</td>
+                    <td>0.8311</td>
+                    <td>0.6922</td>
+                </tr>
+                 <tr>
+                    <td>S.aureus</td>
+                    <td>0.0517</td>
+                    <td>0.4988</td>
+                    <td>0.6828</td>
+                    <td>0.1472</td>
+                    <td>0.8278</td>
+                    <td>0.6536</td>
+                </tr>
+                <tr>
+                    <td>K. pneumoniae</td>
+                    <td>0.0538</td>
+                    <td>0.4292</td>
+                    <td>0.7416</td>
+                    <td>0.1479</td>
+                    <td>0.8693</td>
+                    <td>0.7194</td>
+                </tr>
+            </tbody>
+        </table>
+        <!-- Removed duplicate </tbody> and </table> -->
+        <!-- End of regressor metrics -->
+
+
         <h2 style="margin-top: 2rem;">Model Interpretability</h2>
         <p>To understand how our model makes predictions, we use SHAP (SHapley Additive exPlanations) values. SHAP values help to explain the output of the model by assessing the contribution of each feature to the prediction.</p>
 
@@ -681,112 +769,91 @@
         </div>
 
         <h3>Interpretation of SHAP Plot</h3>
-         <p>Based on the SHAP plot, the model's predictions for Antimicrobial Peptides (AMPs) are influenced by a combination of sequence-based, structural, and biophysical features. Here’s a breakdown of the key features and their biological implications:</p>
+        <!-- Start of scrollable section for SHAP Interpretation -->
+        <div class="scrollable-content">
+             <p>Based on the SHAP plot, the model's predictions for Antimicrobial Peptides (AMPs) are influenced by a combination of sequence-based, structural, and biophysical features. Here’s a breakdown of the key features and their biological implications:</p>
 
-        <h4>A. Sequence-Based Features</h4>
-        <h5>APAAC13 & APAAC5 (Amphiphilic Pseudo-Amino Acid Composition)</h5>
-        <ul>
-            <li><strong>Description:</strong> These features encode hydrophobicity, charge, and side-chain properties, reflecting the amphiphilic nature of the peptide.</li>
-            <li><strong>Interpretation:</strong> Higher APAAC values have a positive SHAP impact, indicating they are predictive of AMP activity. This suggests that the model values amphiphilic sequences, which are crucial for disrupting bacterial membranes.</li>
-        </ul>
+            <h4>A. Sequence-Based Features</h4>
+            <h5>APAAC13 & APAAC5 (Amphiphilic Pseudo-Amino Acid Composition)</h5>
+            <ul>
+                <li><strong>Description:</strong> These features encode hydrophobicity, charge, and side-chain properties, reflecting the amphiphilic nature of the peptide.</li>
+                <li><strong>Interpretation:</strong> Higher APAAC values have a positive SHAP impact, indicating they are predictive of AMP activity. This suggests that the model values amphiphilic sequences, which are crucial for disrupting bacterial membranes.</li>
+            </ul>
 
-        <h5>Amino Acid Composition (M, C)</h5>
-        <ul>
-            <li><strong>M (Methionine):</strong>
-                <ul>
-                    <li><strong>Description:</strong> Methionine is often associated with structural stability in peptides.</li>
-                    <li><strong>Interpretation:</strong>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
-                </ul>
-            </li>
-            <li><strong>C (Cysteine):</strong>
-                <ul>
-                    <li><strong>Description:</strong> Cysteine is known for forming disulfide bonds, which can stabilize AMP structures like defensins.</li>
-                    <li><strong>Interpretation:</strong> High cysteine content appears to have a positive SHAP impact. This could be because disulfide-stabilized AMPs often exhibit enhanced antimicrobial action.</li>
-                </ul>
-            </li>
-        </ul>
+            <h5>Amino Acid Composition (M, C)</h5>
+            <ul>
+                <li><strong>M (Methionine):</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Methionine is often associated with structural stability in peptides.</li>
+                        <li><strong>Interpretation:</strong>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
+                    </ul>
+                </li>
+                <li><strong>C (Cysteine):</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Cysteine is known for forming disulfide bonds, which can stabilize AMP structures like defensins.</li>
+                        <li><strong>Interpretation:</strong> High cysteine content appears to have a positive SHAP impact. This could be because disulfide-stabilized AMPs often exhibit enhanced antimicrobial action.</li>
+                    </ul>
+                </li>
+            </ul>
 
-        <h4>B. Structural and Biophysical Features</h4>
-        <ul>
-            <li><strong>HydrophobicityD3001:</strong>
-                <ul>
-                    <li><strong>Description:</strong> Represents the overall hydrophobicity of the peptide sequence.</li>
-                    <li><strong>Interpretation:</strong> Hydrophobicity is shown to be a critical feature. More hydrophobic peptides are strongly favored for AMP classification, aligning with the understanding that hydrophobicity is essential for membrane insertion and disruption.</li>
-                </ul>
-            </li>
-            <li><strong>PolarityD1001:</strong>
-                <ul>
-                    <li><strong>Description:</strong>  Measures the polarity of the peptide sequence.</li>
-                    <li><strong>Interpretation:</strong>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
-                </ul>
-            </li>
-            <li><strong>Solvent Accessibility (SolventAccessibilityD3001):</strong>
-                <ul>
-                    <li><strong>Description:</strong> Reflects how exposed the residues are to the solvent (water).</li>
-                    <li><strong>Interpretation:</strong> Solvent-accessible residues positively contribute to AMP prediction. This might indicate that exposed residues facilitate interaction with bacterial membranes or the surrounding environment.</li>
-                </ul>
-            </li>
-            <li><strong>Charge (ChargeD2001):</b>
-                <ul>
-                    <li><strong>Description:</strong> Represents the net charge of the peptide.</li>
-                    <li><strong>Interpretation:</b> Charge is a significant positive predictor. Most AMPs are cationic, enabling them to interact with negatively charged bacterial membranes. Higher charge, as indicated by positive SHAP values, typically enhances antimicrobial potency.</li>
-                </ul>
-            </li>
-            <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
-                <ul>
-                    <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
-                    <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
-                </ul>
-            </li>
-        </ul>
+            <h4>B. Structural and Biophysical Features</h4>
+            <ul>
+                <li><strong>HydrophobicityD3001:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Represents the overall hydrophobicity of the peptide sequence.</li>
+                        <li><strong>Interpretation:</strong> Hydrophobicity is shown to be a critical feature. More hydrophobic peptides are strongly favored for AMP classification, aligning with the understanding that hydrophobicity is essential for membrane insertion and disruption.</li>
+                    </ul>
+                </li>
+                <li><strong>PolarityD1001:</strong>
+                    <ul>
+                        <li><strong>Description:</strong>  Measures the polarity of the peptide sequence.</li>
+                        <li><strong>Interpretation:</strong>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
+                    </ul>
+                </li>
+                <li><strong>Solvent Accessibility (SolventAccessibilityD3001):</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Reflects how exposed the residues are to the solvent (water).</li>
+                        <li><strong>Interpretation:</strong> Solvent-accessible residues positively contribute to AMP prediction. This might indicate that exposed residues facilitate interaction with bacterial membranes or the surrounding environment.</li>
+                    </ul>
+                </li>
+                <li><strong>Charge (ChargeD2001):</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Represents the net charge of the peptide.</li>
+                        <li><strong>Interpretation:</strong> Charge is a significant positive predictor. Most AMPs are cationic, enabling them to interact with negatively charged bacterial membranes. Higher charge, as indicated by positive SHAP values, typically enhances antimicrobial potency.</li>
+                    </ul>
+                </li>
+                <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
+                        <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
+                    </ul>
+                </li>
+            </ul>
 
-        <h4>C. Geary Autocorrelation Features</h4>
-        <p>Geary autocorrelation descriptors reflect spatial properties of peptides, encoding information about the distribution of physicochemical properties along the sequence.</p>
-        <ul>
-            <li><strong>GearyAuto_Hydrophobicity30:</strong>
-                <ul>
-                    <li><strong>Description:</strong> Encodes the clustering of hydrophobic residues within a spatial lag of 30.</li>
-                    <li><strong>Interpretation:</strong> Higher values of hydrophobicity autocorrelation are positively associated with AMP prediction. This likely reflects the importance of hydrophobic clustering in forming amphipathic structures, such as α-helices, which are common and effective in AMPs.</li>
-                </ul>
-            </li>
-            <li><strong>GearyAuto_Steric30 & GearyAuto_Steric29:</strong>
-                <ul>
-                    <li><strong>Description:</strong> Reflect peptide backbone flexibility and steric properties at spatial lags of 30 and 29.</li>
-                    <li><strong>Interpretation:</strong>  These features have a positive SHAP impact, suggesting that a certain degree of peptide backbone flexibility may be beneficial for AMP action. Flexibility could enhance the peptide's ability to interact with and adapt to diverse bacterial membrane structures.</li>
-                </ul>
-            </li>
-            <li><strong>GearyAuto_ResidueASA30:</strong>
-                <ul>
-                    <li><strong>Description:</b> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
-                    <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
-                </ul>
-            </li>
-        </ul>
-
-
-        <!-- Removed the 'Biological Implications for AMP Design' section as requested -->
-        <!--
-        <h3>Biological Implications for AMP Design</h3>
-        <p>The feature importance highlighted by the SHAP plot underscores that AMP activity is highly dependent on a combination of hydrophobicity, charge, amphiphilicity, and structural properties. This understanding can be directly applied in several ways:</p>
-        <h4>Designing New AMPs</h4>
-        <ul>
-            <li><strong>Enhance Hydrophobicity and Charge:</strong> When designing novel AMP sequences, prioritize the inclusion of hydrophobic and positively charged amino acids. However, maintain a balance to ensure amphiphilicity and avoid excessive toxicity.</li>
-            <li><strong>Optimize Amphiphilicity:</strong> Design sequences that spatially segregate hydrophobic and hydrophilic residues. This can be achieved by strategically placing residue types to create distinct faces within the peptide structure.</li>
-            <li><strong>Promote Secondary Structure Formation:</strong> Incorporate amino acids that favor the formation of stable secondary structures, such as alpha-helices or beta-sheets, as these structures can enhance stability and membrane-disrupting capabilities.</li>
-        </ul>
-        <h4>Optimizing Existing AMPs</h4>
-        <ul>
-            <li><strong>Tune Solubility via Polar Residues:</strong> For AMPs with high hydrophobicity that suffer from poor solubility or increased toxicity, consider modifying polar residues to improve solubility without drastically reducing membrane interaction.</li>
-            <li><strong>Adjust Charge for Selectivity:</strong> Modify the net charge to potentially improve selectivity towards bacterial membranes over host cell membranes, reducing toxicity while maintaining antimicrobial activity.</li>
-        </ul>
-        <h4>Enhancing Predictive Models</h4>
-        <ul>
-            <li><strong>Incorporate Secondary Structure Predictors:</strong> To improve predictive accuracy, integrate features that directly predict or represent the secondary structure propensity of peptide sequences.</li>
-            <li><strong>Test Steric and Electronic Property Modifications:</strong> Further explore the impact of steric and electronic properties by testing modifications that fine-tune these characteristics and observing the effects on both predicted and experimental AMP activity.</li>
-        </ul>
-        <p>By considering these biological implications derived from the model's feature importance, researchers can more effectively design, optimize, and predict the activity of antimicrobial peptides, potentially accelerating the development of new therapeutics.</p>
-        -->
-
+            <h4>C. Geary Autocorrelation Features</h4>
+            <p>Geary autocorrelation descriptors reflect spatial properties of peptides, encoding information about the distribution of physicochemical properties along the sequence.</p>
+            <ul>
+                <li><strong>GearyAuto_Hydrophobicity30:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Encodes the clustering of hydrophobic residues within a spatial lag of 30.</li>
+                        <li><strong>Interpretation:</strong> Higher values of hydrophobicity autocorrelation are positively associated with AMP prediction. This likely reflects the importance of hydrophobic clustering in forming amphipathic structures, such as α-helices, which are common and effective in AMPs.</li>
+                    </ul>
+                </li>
+                <li><strong>GearyAuto_Steric30 & GearyAuto_Steric29:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Reflect peptide backbone flexibility and steric properties at spatial lags of 30 and 29.</li>
+                        <li><strong>Interpretation:</strong>  These features have a positive SHAP impact, suggesting that a certain degree of peptide backbone flexibility may be beneficial for AMP action. Flexibility could enhance the peptide's ability to interact with and adapt to diverse bacterial membrane structures.</li>
+                    </ul>
+                </li>
+                <li><strong>GearyAuto_ResidueASA30:</strong>
+                    <ul>
+                        <li><strong>Description:</strong> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
+                        <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+        <!-- End of scrollable section for SHAP Interpretation -->
 
         <h3>Sample Run</h3>
          <p>You can test the model with various sequences to understand its behavior.  Here are a few examples:</p>
@@ -794,8 +861,8 @@
             <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRAISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
             <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
             <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
-            <li><strong>Test 4:</b> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
-            <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
+            <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
+            <li><strong>Test 5:</b> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
 
         </ul>
 
@@ -849,7 +916,7 @@
         <h3>Step 2: Input the Sequence</h3>
         <ul>
             <li><strong>Direct Input:</strong> Type or paste your sequence into the text area provided.</li>
-            <li><strong>FASTA File Upload:</strong> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
+            <li><strong>FASTA File Upload:</b> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
             <li>The character count will update as you type or upload a sequence.</li>
         </ul>
 
@@ -965,6 +1032,9 @@
 
         ampClassificationOutput.innerHTML = '<p class="info-message">▓▓▓</p>'; // Use info-message class for default styling
         additionalDetailsOutput.innerHTML = '<p class="info-message">Results will appear here.</p>'; // Ensure this clears other content too
+        // Append download link back to the output div so it's managed correctly
+        additionalDetailsOutput.appendChild(downloadLink);
+
 
         micCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
@@ -1164,8 +1234,9 @@
 
         // Set initial messages for display boxes
         ampClassificationOutput.innerHTML = '<p class="info-message">Analyzing...</p>';
-        // Additional details will initially be empty and show the link later
         additionalDetailsOutput.innerHTML = '<p class="info-message">Generating detailed report...</p>';
+        // Append download link back to the output div so it's managed correctly
+        additionalDetailsOutput.appendChild(downloadLink);
         downloadLink.style.display = 'none'; // Ensure download link is hidden while processing
 
         micCheckboxes.forEach(checkbox => checkbox.disabled = true); // Disable MIC checkboxes while processing
@@ -1252,7 +1323,7 @@
                             'E.coli': 'e_coli',
                             'P.aeruginosa': 'p_aeruginosa',
                             'S.aureus': 's_aureus',
-                            'K.Pneumonia': 'k_pneumoniae', // Ensure this matches your sample
+                            'K.Pneumonia': 'k_pneumoniae', // Ensure this matches your sample if it's 'K.Pneumonia'
                         };
                         const displayMicName = micLineMatch[1].trim();
                         const internalKey = bacteriumNameMap[displayMicName];
@@ -1308,13 +1379,14 @@
                 <p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabel.includes('Non-AMP') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0; text-align: center;">${ampLabel}</p>
             `;
 
-            // Additional Details Output: Only the download link
-            additionalDetailsOutput.innerHTML = '<p class="info-message">Detailed results available for download:</p>';
-            // Append the existing downloadLink element back into the DOM
-            additionalDetailsOutput.appendChild(downloadLink);
+            // Additional Details Output: Only the download link and a message
+            additionalDetailsOutput.innerHTML = '<p class="info-message">Detailed report available for download:</p>';
+            additionalDetailsOutput.appendChild(downloadLink); // Append the actual link element
+            downloadLink.style.display = 'block'; // Make the link visible
 
 
             // Re-enable/disable MIC checkboxes based on AMP prediction
+            // This is primarily for new submissions, as parsed MIC values dictate PDF.
             if (ampLabel.includes('AMP (Positive)')) {
                 micCheckboxes.forEach(checkbox => checkbox.disabled = false);
             } else {
@@ -1325,9 +1397,8 @@
             }
 
             // Generate and provide PDF download link
-            // shapPlotBase64 will be null because it's not in the raw text output.
             generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, topFeaturesForPdf, shapPlotBase64);
-            downloadLink.style.display = 'block'; // Make the link visible
+
 
         } catch (error) {
             console.error("Error during prediction:", error);
@@ -1341,30 +1412,45 @@
             showError("Prediction failed: " + (error.message || "Unknown error"));
             ampClassificationOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error</p>';
             additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error during prediction. Detailed report not available.</p>';
-            downloadLink.style.display = 'none';
+            additionalDetailsOutput.appendChild(downloadLink); // Ensure link is still in DOM even on error
+            downloadLink.style.display = 'none'; // Keep hidden on error
         } finally {
             predictBtn.disabled = false;
             predictBtn.textContent = 'Submit';
         }
     }
 
+    // Function to generate the PDF report using jspdf and jspdf-autotable
     function generatePDFReport(sequence, prediction, confidence, micResults = null, topFeatures = null, shapPlotBase64 = null) {
         if (!window.jspdf || !window.jspdf.jsPDF) {
             console.error("jsPDF is not loaded correctly.");
             return;
         }
-        const jsPDF = window.jspdf.jsPDF;
-        const pdf = new jsPDF();
+        // No need to explicitly call .default for jspdf.umd.min.js
+        const pdf = new jspdf.jsPDF(); // Use jspdf.jsPDF() for clarity, or new window.jspdf.jsPDF()
+
+        // Important: jspdf-autotable attaches directly to the jsPDF prototype.
+        // It's assumed to be available globally because you've included its UMD script.
+        // If 'autoTable' isn't on 'pdf', it's usually a loading order or bundling issue.
 
         if (!sequence || !prediction) {
             console.error("Cannot generate PDF: Missing data.", { sequence, prediction });
             return;
         }
 
+        // Set up standard colors and fonts
+        const primaryColor = [0, 77, 64]; // Dark Teal
+        const textColor = [51, 51, 51]; // Dark Gray
+        const successColor = [39, 174, 96]; // Emerald Green
+        const errorColor = [231, 76, 60]; // Alizarin Red
+
+
+        pdf.setFont("helvetica"); // Default font family for report
         pdf.setFontSize(22);
-        pdf.setTextColor(44, 62, 80);
+        pdf.setTextColor(44, 62, 80); // Dark Blue-Gray for title
         pdf.text("AMP Classification & MIC Report", 105, 20, { align: "center" });
 
+        // Add logo if available
         const imgElement = document.querySelector('.logos-container img');
         if (imgElement && imgElement.src) {
             const imgData = getBase64Image(imgElement);
@@ -1373,60 +1459,96 @@
             }
         }
 
-        let yPos = 55;
+        let yPos = 55; // Initial Y position for content
 
+        // Input Sequence
         pdf.setFontSize(16);
-        pdf.setTextColor(0, 77, 64);
+        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         pdf.text("Input Sequence:", 20, yPos);
         pdf.setFontSize(12);
-        pdf.setTextColor(51, 51, 51);
+        pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
         const maxWidth = 170;
         const sequenceLines = pdf.splitTextToSize(sequence, maxWidth);
         pdf.text(sequenceLines, 20, yPos + 10);
         yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10;
 
+        // AMP Classification
         pdf.setFontSize(16);
-        pdf.setTextColor(0, 77, 64);
+        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         pdf.text("AMP Classification:", 20, yPos);
         pdf.setFontSize(14);
         if (prediction.includes('(Non-AMP)')) {
-             pdf.setTextColor(231, 76, 60);
+             pdf.setTextColor(errorColor[0], errorColor[1], errorColor[2]);
          } else {
-            pdf.setTextColor(39, 174, 96);
+            pdf.setTextColor(successColor[0], successColor[1], successColor[2]);
          }
         pdf.text(prediction, 20, yPos + 10);
         yPos += 20;
 
+        // Confidence
         pdf.setFontSize(16);
-        pdf.setTextColor(0, 77, 64);
+        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         pdf.text("Confidence:", 20, yPos);
         pdf.setFontSize(14);
-        pdf.setTextColor(39, 174, 96);
+        pdf.setTextColor(successColor[0], successColor[1], successColor[2]);
         pdf.text(`${(confidence * 100).toFixed(2)}%`, 20, yPos + 10);
         yPos += 20;
 
+
+        // MIC Values Table
         if (micResults && Object.keys(micResults).length > 0) {
+            if (yPos + 40 > pdf.internal.pageSize.height - 30) { // Check for page break needed
+                pdf.addPage();
+                yPos = 20; // Reset Y for new page
+            }
             pdf.setFontSize(16);
-            pdf.setTextColor(0, 77, 64);
+            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             pdf.text("Predicted MIC (µM):", 20, yPos);
             yPos += 10;
-            pdf.setFontSize(12);
-            pdf.setTextColor(51, 51, 51);
-            const bacteriumDisplayNamesForPdf = {
+
+            const micTableHead = [['Bacterium', 'MIC (µM)']];
+            const micTableBody = [];
+            const bacteriumDisplayNamesForPdf = { // Using consistent display names
                 'e_coli': 'E.coli',
                 'p_aeruginosa': 'P. aeruginosa',
-                's_aureus': 'S. aureus',
-                'k_pneumoniae': 'K. Pneumoniae', // Consistent display name for PDF
+                's_aureus': 'S.aureus',
+                'k_pneumoniae': 'K.Pneumoniae', // Consistent with sample format
             };
 
             for (const bacteriumKey in micResults) {
                 if (typeof micResults[bacteriumKey] === 'number' && bacteriumDisplayNamesForPdf[bacteriumKey]) {
-                    const bacteriumName = bacteriumDisplayNamesForPdf[bacteriumKey];
-                    pdf.text(`${bacteriumName}: ${micResults[bacteriumKey].toFixed(3)} µM`, 20, yPos);
-                    yPos += 7;
+                    micTableBody.push([
+                        bacteriumDisplayNamesForPdf[bacteriumKey],
+                        micResults[bacteriumKey].toFixed(3)
+                    ]);
                 }
             }
-            yPos += 10;
+            
+            pdf.autoTable({ // Ensure this function call works after adding autotable script
+                startY: yPos,
+                head: micTableHead,
+                body: micTableBody,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: primaryColor, // Dark Teal header
+                    textColor: 255 // White text
+                },
+                styles: {
+                    cellPadding: 3,
+                    fontSize: 10,
+                    textColor: textColor,
+                    lineColor: [200, 200, 200], // Lighter border
+                    lineWidth: 0.1
+                },
+                columnStyles: {
+                    0: { fontStyle: 'italic' }, // Apply italic to first column of the body. jspdf-autotable handles `cellWidth` dynamically or you can explicitly set
+                    1: { halign: 'center' }
+                },
+                didDrawPage: function(data) { // Handler for pagination (new page starts)
+                    yPos = data.cursor.y; // Update yPos after table draws
+                }
+            });
+            yPos = pdf.lastAutoTable.finalY + 10; // Update Y position based on table end
         } else {
             pdf.setFontSize(12);
             pdf.setTextColor(100, 100, 100);
@@ -1434,45 +1556,50 @@
             yPos += 20;
         }
 
+
+        // Top Features Influencing Prediction Table
         if (topFeatures && topFeatures.length > 0) {
+            if (yPos + 40 > pdf.internal.pageSize.height - 30) { // Check for page break needed
+                pdf.addPage();
+                yPos = 20; // Reset Y for new page
+            }
             pdf.setFontSize(16);
-            pdf.setTextColor(0, 77, 64);
+            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             pdf.text("Top Features Influencing Prediction:", 20, yPos);
             yPos += 10;
-            pdf.setFontSize(12);
-            pdf.setTextColor(51, 51, 51);
 
-            topFeatures.forEach(feature => {
-                let featureText;
-                if (typeof feature === 'object' && feature !== null && feature.feature) {
-                    featureText = `- ${feature.feature}`;
-                    if (feature.condition) {
-                        featureText += ` ${feature.condition}`;
-                    }
-                    if (typeof feature.value === 'number') {
-                        featureText += `: ${feature.value.toFixed(4)}`;
-                    }
-                } else if (typeof feature === 'string') {
-                    featureText = `- ${feature}`;
-                } else {
-                    featureText = `- Invalid feature format: ${JSON.stringify(feature)}`;
-                }
-
-                if (yPos + 7 > pdf.internal.pageSize.height - 30) {
-                    pdf.addPage();
-                    yPos = 20;
-                    pdf.setFontSize(16);
-                    pdf.setTextColor(0, 77, 64);
-                    pdf.text("Top Features Influencing Prediction (Continued):", 20, yPos);
-                    yPos += 10;
-                    pdf.setFontSize(12);
-                    pdf.setTextColor(51, 51, 51);
-                }
-
-                pdf.text(featureText, 20, yPos);
-                yPos += 7;
+            const featuresTableHead = [['Feature', 'Condition', 'SHAP Value']];
+            const featuresTableBody = topFeatures.map(f => {
+                // Ensure feature name is consistent, convert null/undefined condition to empty string for display
+                return [f.feature || '', f.condition || '', (typeof f.value === 'number' ? f.value.toFixed(4) : '')];
             });
-            yPos += 10;
+
+            pdf.autoTable({ // Ensure this function call works after adding autotable script
+                startY: yPos,
+                head: featuresTableHead,
+                body: featuresTableBody,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: primaryColor,
+                    textColor: 255
+                },
+                styles: {
+                    cellPadding: 3,
+                    fontSize: 10,
+                    textColor: textColor,
+                    lineColor: [200, 200, 200],
+                    lineWidth: 0.1
+                },
+                columnStyles: { // Adjust column widths if needed, these are examples
+                    0: { cellWidth: 60 },
+                    1: { cellWidth: 60, halign: 'center' },
+                    2: { cellWidth: 50, halign: 'right' }
+                },
+                didDrawPage: function(data) {
+                    yPos = data.cursor.y;
+                }
+            });
+            yPos = pdf.lastAutoTable.finalY + 10;
         } else {
             pdf.setFontSize(12);
             pdf.setTextColor(100, 100, 100);
@@ -1480,18 +1607,20 @@
             yPos += 20;
         }
 
+        // SHAP Plot (still from base64 if present, or static image for interpretation context)
+        // Note: For current setup, shapPlotBase64 will be null as it's not in the raw text output from Gradio.
         if (shapPlotBase64) {
-            if (yPos + 80 > pdf.internal.pageSize.height - 30) {
+            if (yPos + 80 > pdf.internal.pageSize.height - 30) { // Approx space for image
                 pdf.addPage();
                 yPos = 20;
             }
             pdf.setFontSize(16);
-            pdf.setTextColor(0, 77, 64);
+            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             pdf.text("SHAP Interpretability Plot:", 20, yPos);
             yPos += 10;
 
-            const imgWidth = 160;
-            const imgHeight = 90;
+            const imgWidth = 160; // Max width to fit page
+            const imgHeight = 90; // Approx height for plot
 
             try {
                 const dataURL = `data:image/png;base64,${shapPlotBase64}`;
@@ -1505,6 +1634,7 @@
                 yPos += 10;
             }
         } else {
+            // This message indicates no dynamic SHAP plot was received
             if (yPos + 10 < pdf.internal.pageSize.height - 30) {
                 pdf.setFontSize(12);
                 pdf.setTextColor(100, 100, 100);
@@ -1513,6 +1643,7 @@
             }
         }
 
+        // Footer
         pdf.setFontSize(10);
         pdf.setTextColor(127, 140, 141);
         pdf.text("Generated by BCBU-ZC AMP Classifier", 105, pdf.internal.pageSize.height - 15, { align: "center" });
@@ -1530,6 +1661,7 @@
             return null;
         }
         try {
+            // Check if the image is loaded, if not, wait for it or handle gracefully
             if (!img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) {
                  console.warn("Image not fully loaded or invalid dimensions for base64 conversion. Ensure image is loaded.");
                  return null;
