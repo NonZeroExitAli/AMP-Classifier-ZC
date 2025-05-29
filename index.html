@@ -863,8 +863,10 @@
         <h3>Sample Run</h3>
          <p>You can test the model with various sequences to understand its behavior.  Here are a few examples:</p>
         <ul>
-            <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRAISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
-            <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAKAQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
+            <li><strong>Test 1:</strong> Long Sequence of 99 AAs (P-AMP) - MEKAALIFIGLLLFSTCTQILAQSCNNDSDCTNLKCATKNIKCEQNKCQCLDERYIRA
+                ISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
+            <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAK
+                AQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
             <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
             <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
             <li><strong>Test 5:</strong> Invalid Characters (eg. X) - MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
@@ -879,11 +881,16 @@
         <p>This web application provides a user-friendly interface for classifying amino acid sequences as either Antimicrobial Peptides (AMPs) or Non-Antimicrobial Peptides (Non-AMPs). AMPs are crucial components of the innate immune system, offering defense against a wide range of pathogens.</p>
 
         <h3>Model Selection Criteria</h3>
-        <p>Our team rigorously evaluated 225 combinations of feature extraction and selection methods across three distinct machine learning models. The final model was selected based on the following criteria:</p>
+        <p>To identify the most effective model, our team rigorously evaluated over 225 combinations of feature extraction and selection methods across four different machine learning models for each target organism. The evaluation included both classification and regression tasks, with a focus on predicting antimicrobial activity and estimating minimum inhibitory concentration (MIC) values.
+
+The final model was selected based on the following criteria:</p>
         <ul>
             <li><strong>High Accuracy, F1-score, and Validation Accuracy:</b> The model achieved excellent performance metrics on a held-out test set, demonstrating its ability to generalize to unseen data.</li>
             <li><strong>Robustness to Sequence Length Variations:</strong> The model performs consistently well on sequences of varying lengths, within the specified range (10-100 amino acids).</li>
             <li><strong>Generalization Ability:</strong> The model was trained and evaluated on diverse datasets to ensure its ability to classify a broad range of AMP sequences.</li>
+            <li><strong>Robust regression capability: Assessed using Mean Squared Error (MSE), R-squared (R²), Pearson correlation, and Kendall’s tau, the model demonstrated strong agreement between predicted and true MIC values.
+
+</li>
         </ul>
 
         <h3>Intended Use</h3>
