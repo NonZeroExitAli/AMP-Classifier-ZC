@@ -1,5 +1,5 @@
 # EPIC AMP: EPIC-AMP: Explainable Platform for Peptide Identification and Concentration Estimation for AMPs
-<img src="image.png" alt="Tool Logo">
+<img src="image2.png" alt="Tool Logo">
 
 This project is a web application for classifying amino acid sequences as either Antimicrobial Peptides (AMPs) or Non-AMPs. It uses a machine learning model served via a Gradio interface.  The application allows users to input sequences either manually or by uploading a FASTA file.
 
