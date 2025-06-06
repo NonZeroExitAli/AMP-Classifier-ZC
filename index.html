@@ -823,7 +823,7 @@
                 <li><strong>Solvent Accessibility (SolventAccessibilityD3001):</strong>
                     <ul>
                         <li><strong>Description:</strong> Reflects how exposed the residues are to the solvent (water).</li>
-                        <li><strong>Interpretation:</strong> Solvent-accessible residues positively contribute to AMP prediction. This might indicate that exposed residues facilitate interaction with bacterial membranes or the surrounding environment.</li>
+                        <li><strong>Interpretation:</b> Solvent-accessible residues positively contribute to AMP prediction. This might indicate that exposed residues facilitate interaction with bacterial membranes or the surrounding environment.</li>
                     </ul>
                 </li>
                 <li><strong>Charge (ChargeD2001):</b>
@@ -834,7 +834,7 @@
                 </li>
                 <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
                     <ul>
-                        <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
+                        <li><strong>Description:</b> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
                         <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
                     </ul>
                 </li>
@@ -856,7 +856,7 @@
                 </li>
                 <li><strong>GearyAuto_ResidueASA30:</strong>
                     <ul>
-                        <li><strong>Description:</strong> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
+                        <li><strong>Description:</b> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
                         <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
                     </ul>
                 </li>
@@ -1269,9 +1269,7 @@
         let micDataForPdf = {};
         let ampLabel = 'Unknown';
         let ampConfidence = 0;
-        let shapPlotBase64 = null; 
-        let limeFeaturesForPdf = [];
-        let globalShapFeaturesForPdf = []; // This will remain empty per your latest instructions
+        let limeFeaturesForPdf = []; // Renamed from topFeaturesForPdf to clarify its LIME specific data
 
         let animationProgress = 0;
         animationIntervalId = setInterval(() => {
@@ -1295,13 +1293,9 @@
             const labelRegex = /Prediction:\s*(.+)/;
             const confidenceRegex = /Confidence:\s*([\d.]+)%/;
             const micSectionHeaderRegex = /Predicted MIC Values \(μM\):/i;
-            const limeSectionHeaderRegex = /LIME - Top Features Influencing This Prediction:/i;
-            // Removed specific parsing for global SHAP textual features since they are not being tabled per current screenshot.
-            // globalShapSectionHeaderRegex = /Global SHAP - Top (Model Features|Features Influencing Model Behavior) \(Overall Importance\):/i; 
+            const topFeaturesSectionHeaderRegex = /Top Features Influencing Prediction:/i; // Now looking for this exact text
             const micLineRegex = /-\s*([^:]+?):\s*([\d.]+)/;
-            // Generic feature regex to handle "feature" and "feature condition" extraction for LIME.
             const featureExtractorRegex = /-\s*(.+?)\s*(?:(<=|>=|<|>|==|is\snot|is)\s+([^:]+?))?\s*:\s*([+-]?[\d.]+)/;
-
 
             const labelMatch = rawTextOutput.match(labelRegex);
             if (labelMatch && labelMatch[1]) ampLabel = labelMatch[1];
@@ -1311,20 +1305,15 @@
             if (confidenceMatch && confidenceMatch[1]) ampConfidence = parseFloat(confidenceMatch[1]) / 100;
             else console.warn("Could not parse Confidence from output.");
 
-            let inMicSection = false;
-            let inLimeSection = false;
-            let inGlobalShapSectionDummy = false; // Dummy, as no data for this is collected from output per request
-            let currentSection = null; // Can be 'mic', 'lime', 'global_shap_dummy'
+            let currentSection = null; 
 
             for (const line of lines) {
                 if (micSectionHeaderRegex.test(line)) {
                     currentSection = 'mic'; continue;
-                } else if (limeSectionHeaderRegex.test(line)) {
-                    currentSection = 'lime'; continue;
+                } else if (topFeaturesSectionHeaderRegex.test(line)) { // Matching "Top Features Influencing Prediction:" for LIME
+                    currentSection = 'lime_features'; continue;
                 } 
-                // Removed global SHAP header test if its text isn't parsed into a table for the PDF.
-                // If Gradio still provides it and it causes issues for LIME parsing if it comes before it, keep the test.
-                // Assuming it's fine for now, and no features collected.
+                // Global SHAP textual features (if any) are explicitly *not* being parsed into a table for this version of the PDF.
 
                 if (currentSection === 'mic') {
                     const micLineMatch = line.match(micLineRegex);
@@ -1335,7 +1324,7 @@
                         const isMicCheckboxChecked = Array.from(micCheckboxes).some(cb => cb.checked && cb.value === internalKey);
                         if (internalKey && isMicCheckboxChecked) micDataForPdf[internalKey] = parseFloat(micLineMatch[2]);
                     }
-                } else if (currentSection === 'lime') {
+                } else if (currentSection === 'lime_features') {
                     const featureMatch = line.match(featureExtractorRegex);
                     if (featureMatch) {
                         const feature = featureMatch[1].trim();
@@ -1347,9 +1336,8 @@
                             console.warn(`Could not parse LIME feature value from line: ${line}`);
                         }
                     } else {
-                        // Sometimes empty lines or notes appear in Gradio output. Filter them.
-                        if (line.trim().length > 0 && !line.includes('---')) { // Simple check to avoid parsing horizontal rules or blank lines
-                             console.warn(`Line not parsed as LIME feature: ${line}`);
+                        if (line.trim().length > 0 && !line.includes('---')) {
+                             console.warn(`Line not parsed as LIME feature (possible unexpected content or section end): ${line}`);
                         }
                     }
                 }
@@ -1370,7 +1358,7 @@
                 micCheckboxes.forEach(checkbox => { checkbox.checked = false; checkbox.disabled = true; });
             }
 
-            await generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, limeFeaturesForPdf, globalShapFeaturesForPdf); // globalShapFeaturesForPdf will be empty array here.
+            await generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, limeFeaturesForPdf); 
 
         } catch (error) {
             console.error("Error during prediction:", error);
@@ -1395,7 +1383,7 @@
     async function getBase64Image(imgSrc) {
         return new Promise((resolve, reject) => {
             const img = new Image();
-            img.crossOrigin = 'Anonymous'; // Crucial for loading images from potentially different origins
+            img.crossOrigin = 'Anonymous'; 
             img.onload = () => {
                 if (img.naturalWidth === 0 || img.naturalHeight === 0) {
                     console.warn(`getBase64Image: Image at "${imgSrc}" has no natural dimensions. Possibly corrupted or failed to load fully.`);
@@ -1425,7 +1413,7 @@
 
 
     // Function to generate the PDF report using jspdf and jspdf-autotable
-    async function generatePDFReport(sequence, prediction, confidence, micResults = null, limeFeatures = null, globalShapFeatures = null) {
+    async function generatePDFReport(sequence, prediction, confidence, micResults = null, limeFeatures = null) {
         if (!window.jspdf || !window.jspdf.jsPDF) {
             console.error("jsPDF is not loaded correctly.");
             return;
@@ -1440,9 +1428,9 @@
         const headerTextColor = [44, 62, 80];
 
         const pageWidth = pdf.internal.pageSize.width;
-        let yPos = 20; // Starting Y for elements on first page (consistent with screenshot)
+        let yPos = 20; // Starting Y for elements on first page (consistent with screenshot top margin)
 
-        // --- Load SHAP plot image ---
+        // --- Load SHAP plot image (Only needed if successfully fetched) ---
         let shapPlotBase64 = null;
         try {
             shapPlotBase64 = await getBase64Image('shap.png'); 
@@ -1451,33 +1439,36 @@
             shapPlotBase64 = null; 
         }
         
-        // 1. Main Report Title (Centered, large)
+        // 1. Main Report Title (Centered, large - consistent with screenshot)
         pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(28);
+        pdf.setFontSize(28); // Based on your image size
         pdf.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
         pdf.text("Anti-microbial Peptides Report", pageWidth / 2, yPos, { align: "center" });
-        yPos += 28 + 20; // Height of title + large spacing below title
+        yPos += 28 + 20; // Height of title + spacing below title (approx. 20mm visually in your example)
 
         // 2. Input Sequence
         pdf.setFontSize(16);
         pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         pdf.text("Input Sequence:", 20, yPos);
-        yPos += 7; // Reduced space below heading
-        pdf.setFontSize(11); // Slightly larger font for sequence text for better readability in PDF
+        yPos += 7; // Spacing below heading (as seen in screenshot)
+        pdf.setFontSize(11); // Good size for main sequence text
         pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
-        const sequenceMaxWidth = pageWidth - 40; 
+        const sequenceMaxWidth = pageWidth - 40; // 20mm margin on each side
         const sequenceLines = pdf.splitTextToSize(sequence, sequenceMaxWidth);
         pdf.text(sequenceLines, 20, yPos);
-        yPos += (sequenceLines.length * (11 / pdf.internal.scaleFactor) * 1.1) + 18; // Adjusted dynamic height for text block, plus spacing after
+        // Calculate exact Y position after multi-line text + spacing
+        yPos += (sequenceLines.length * (pdf.getFontSize() / pdf.internal.scaleFactor) * 1.15) + 18; // 1.15 is jspdf's default line height factor, 18 for spacing
 
 
         // 3. Analysis Summary (Table for Prediction & Confidence)
+        // Check for enough space for the table + its header + trailing space (approx 35mm needed)
         if (yPos + 35 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; } 
+        
         pdf.setFontSize(16);
         pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         pdf.text("Analysis Summary:", 20, yPos);
-        yPos += 8; // Reduced spacing after heading
-
+        yPos += 8; // Spacing after heading
+        
         const predictionTableHead = [['Metric', 'Value']];
         const predictionTableBody = [
             ['Prediction', prediction],
@@ -1489,45 +1480,71 @@
             head: predictionTableHead,
             body: predictionTableBody,
             theme: 'striped',
-            headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'left' }, // Aligned to left
-            bodyStyles: { textColor: textColor, fontSize: 10, cellPadding: 2, lineWidth: 0.1, lineColor: [200, 200, 200] },
-            columnStyles: { 
-                0: { cellWidth: 70 }, // Fixed width for Metric
-                1: { halign: 'left', cellWidth: 'auto' } // Auto width for Value
+            // Head Styles (match screenshot for alignment)
+            headStyles: { 
+                fillColor: primaryColor, 
+                textColor: 255, 
+                fontSize: 11, 
+                fontStyle: 'bold', 
+                halign: 'left' // Aligned left
+            }, 
+            // Body Styles
+            bodyStyles: { 
+                textColor: textColor, 
+                fontSize: 10, 
+                cellPadding: 2, 
+                lineWidth: 0.1, 
+                lineColor: [200, 200, 200] 
             },
-            didParseCell: function(data) { // Use didParseCell to ensure content is proper before drawing
-                if (data.section === 'body' && data.column.dataKey === 1) { // Assuming 'Value' is dataKey 1
-                    if (data.row.raw[0] === 'Prediction') { // If this is the prediction row
-                        data.cell.styles.fontStyle = 'bold'; // Make prediction bold
-                        data.cell.styles.textColor = (prediction.includes('(Non-AMP)')) ? errorColor : successColor;
-                    } else if (data.row.raw[0] === 'Confidence') { // If this is the confidence row
-                        data.cell.styles.textColor = successColor;
+            // Column Specific Styles (match screenshot alignment for cells)
+            columnStyles: { 
+                0: { cellWidth: 70, halign: 'left' }, // Metric column: fixed width, left aligned
+                1: { halign: 'left', cellWidth: 'auto' } // Value column: auto width, left aligned
+            },
+            // Hook to style cell content after parsing (for dynamic colors)
+            didParseCell: function(data) { 
+                if (data.section === 'body' && data.column.dataKey === 1) { // Apply only to 'Value' column cells
+                    if (data.row.raw[0] === 'Prediction') { 
+                        data.cell.styles.fontStyle = 'bold'; // Prediction text is bold
+                        data.cell.styles.textColor = (prediction.includes('(Non-AMP)')) ? errorColor : successColor; // Color based on result
+                    } else if (data.row.raw[0] === 'Confidence') { 
+                        data.cell.styles.textColor = successColor; // Confidence text is green
+                        data.cell.styles.fontStyle = 'normal'; // Ensure normal, not bold
                     }
                 }
             }
         });
-        yPos = pdf.lastAutoTable.finalY + 20; // Increased spacing after table
+        yPos = pdf.lastAutoTable.finalY + 20; // Consistent spacing after table (visually matches screenshot)
 
 
         // 4. Predicted MIC Values (Table)
+        // Check for enough space for the table + its header + trailing space (approx 35mm needed)
         if (micResults && Object.keys(micResults).length > 0) {
             if (yPos + 35 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; } 
+            
             pdf.setFontSize(16);
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("Predicted MIC (µM):", 20, yPos); 
-            yPos += 8; // Consistent with screenshot spacing
-
-            const micTableHead = [['Bacterium', 'MIC (µM)']]; // Exactly as requested
+            pdf.text("Predicted MIC (µM):", 20, yPos); // Section heading as per screenshot
+            yPos += 8; // Spacing after heading
+            
+            const micTableHead = [['Bacterium', 'MIC (µM)']]; // Exactly as per screenshot column headers
             const micTableBody = [];
-            const bacteriumDisplayNamesForPdf = {
+            const bacteriumDisplayNamesForPdf = { // Mapping for display names
                 'e_coli': 'E.coli', 'p_aeruginosa': 'P. aeruginosa',
                 's_aureus': 'S.aureus', 'k_pneumoniae': 'K.Pneumoniae',
             };
-            // Sort keys to ensure consistent order in PDF (matches your screenshot order for E.coli, S.aureus, P. aeruginosa, K.Pneumoniae if that's the order returned by your Gradio script after mapping).
-            // No explicit sort on keys from screenshot, but doing alphabetically might be better. Let's keep it simple with existing code.
-            const micKeys = Object.keys(micResults); // No sort, relies on how `micDataForPdf` was populated.
+
+            // Order by how the Gradio output is formatted. If strict alphabetical order is needed for PDF
+            // regardless of Gradio output, uncomment and adjust the sort:
+            // const sortedMicKeys = Object.keys(micResults).sort((a,b) => (bacteriumDisplayNamesForPdf[a] || a).localeCompare(bacteriumDisplayNamesForPdf[b] || b));
+            // sortedMicKeys.forEach(bacteriumKey => { ... });
             
-            micKeys.forEach(bacteriumKey => { // Iterate without sorting for screenshot match
+            // As per screenshot, original order of MICs from Gradio is assumed, if the names match this order.
+            const micKeysInOrder = ['e_coli', 's_aureus', 'p_aeruginosa', 'k_pneumoniae']; // Example specific order based on your sample screenshot if results consistently come this way.
+            // A more robust way might be to filter by which MICs are available then sort them.
+            // For now, let's process directly from parsed micResults keys to match your screenshot implicitly.
+
+            Object.keys(micResults).forEach(bacteriumKey => {
                 if (typeof micResults[bacteriumKey] === 'number' && bacteriumDisplayNamesForPdf[bacteriumKey]) {
                     micTableBody.push([
                         bacteriumDisplayNamesForPdf[bacteriumKey],
@@ -1540,20 +1557,23 @@
                 startY: yPos,
                 head: micTableHead, 
                 body: micTableBody,
-                theme: 'striped', 
+                theme: 'striped', // Striped theme
+                // Head Styles (matching screenshot colors/boldness)
                 headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'center' },
+                // Column Styles (matching screenshot alignment: Bacterium left, MIC right)
                 columnStyles: { 
-                    0: { fontStyle: 'italic', cellWidth: 90, halign: 'left' }, // Aligned left as in screenshot
-                    1: { halign: 'right', cellWidth: 'auto' } // MIC (µM) aligned right
+                    0: { fontStyle: 'italic', cellWidth: 90, halign: 'left' }, // Bacterium column, left aligned
+                    1: { halign: 'right', cellWidth: 'auto' } // MIC (µM) column, right aligned
                 },
+                // Body Styles
                 styles: { cellPadding: 2, fontSize: 10, textColor: textColor, lineColor: [200, 200, 200], lineWidth: 0.1 },
             });
-            yPos = pdf.lastAutoTable.finalY + 20; // Adjusted spacing
-        } else { 
+            yPos = pdf.lastAutoTable.finalY + 20; // Adjusted spacing after table
+        } else { // Message when no MICs are predicted/selected
             if (yPos + 25 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; }
             pdf.setFontSize(10); pdf.setTextColor(100,100,100);
             pdf.text("No MIC prediction performed for this peptide (e.g., non-AMP or no bacteria selected).", 20, yPos);
-            yPos += 15; 
+            yPos += 15; // Spacing after message
         }
 
         // --- NEW PAGE FOR XAI ---
@@ -1563,21 +1583,21 @@
         // 5. LIME (Local XAI): Top Features Influencing Prediction (Table)
         pdf.setFontSize(16);
         pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        pdf.text("LIME (Local XAI): Top Features Influencing Prediction:", 20, yPos); // Exact title as requested
+        pdf.text("LIME (Local XAI): Top Features Influencing Prediction:", 20, yPos); // Exact heading as per screenshot
         yPos += 8; // Spacing
 
         if (limeFeatures && limeFeatures.length > 0) {
-            const limeTableHead = [['Feature', 'Condition', 'SHAP Value']]; // Corrected headers to match screenshot
+            const limeTableHead = [['Feature', 'Condition', 'SHAP Value']]; // Exactly matching screenshot headers
             const limeTableBody = [];
             
-            // Sort LIME features by absolute SHAP value (descending) as seen in screenshot order
+            // Sort LIME features by absolute SHAP value (descending) to match screenshot order if features are ordered by magnitude
             limeFeatures.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
 
             limeFeatures.forEach((f) => { 
                 limeTableBody.push([
                     f.feature, 
-                    f.condition || '', // Condition (or empty string if none)
-                    (typeof f.value === 'number' ? f.value.toFixed(4) : '') // SHAP Value
+                    f.condition || '', // Pass condition or empty string
+                    (typeof f.value === 'number' ? f.value.toFixed(4) : '') // Format SHAP Value
                 ]);
             });
             pdf.autoTable({
@@ -1585,59 +1605,67 @@
                 head: limeTableHead,
                 body: limeTableBody,
                 theme: 'striped',
-                headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'left' }, // Aligned left
+                headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'left' }, // Align left
                 columnStyles: { 
-                    0: { cellWidth: 70, halign: 'left' }, // Feature, align left as in screenshot
-                    1: { cellWidth: 50, halign: 'center' }, // Condition, align center as in screenshot
+                    0: { cellWidth: 70, halign: 'left' }, // Feature, align left
+                    1: { cellWidth: 50, halign: 'center' }, // Condition, align center
                     2: { halign: 'right', cellWidth: 'auto' } // SHAP Value, align right
                 },
-                styles: { cellPadding: 2, fontSize: 9.5, textColor: textColor, lineColor: [200, 200, 200], lineWidth: 0.1 }, // Adjust cell padding for spacing
+                styles: { cellPadding: 2, fontSize: 9.5, textColor: textColor, lineColor: [200, 200, 200], lineWidth: 0.1 },
+                // Color SHAP values in the 'SHAP Value' column
                 didDrawCell: (data) => {
-                    // Color positive SHAP values green, negative red in the 'SHAP Value' column
-                    if (data.column.index === 2 && data.row.section === 'body') {
+                    if (data.column.index === 2 && data.row.section === 'body') { // Column 2 is 'SHAP Value'
                         const val = parseFloat(data.cell.raw);
                         if (!isNaN(val)) {
-                            if (val > 0) pdf.setTextColor(successColor[0], successColor[1], successColor[2]);
-                            else if (val < 0) pdf.setTextColor(errorColor[0], errorColor[1], errorColor[2]);
+                            if (val > 0) pdf.setTextColor(successColor[0], successColor[1], successColor[2]); // Green for positive
+                            else if (val < 0) pdf.setTextColor(errorColor[0], errorColor[1], errorColor[2]); // Red for negative
                         }
                     }
                 }
             });
             yPos = pdf.lastAutoTable.finalY + 20; // Spacing after LIME table
-        } else {
-            pdf.setFontSize(10); pdf.setTextColor(100,100,100);
+        } else { // Message when LIME features are not available
+            pdf.setFontSize(10); 
+            pdf.setTextColor(100,100,100);
+            // This is placed under the fixed LIME heading as per screenshot where content for it is empty.
             pdf.text("LIME local explanation data not available for this prediction.", 20, yPos);
             yPos += 15; 
         }
 
         // 6. SHAP Plot (Global XAI - Static image from file)
-        // No explicit globalShapFeaturesTable based on screenshot; directly proceed to SHAP plot.
+        // This part strictly matches your request: plot directly, no "global features table" unless provided via image itself.
         if (shapPlotBase64) {
             const tempShapImg = new Image(); 
             tempShapImg.src = shapPlotBase64;
+            // Wait for temp image to load its dimensions from the Base64 dataURL
             await new Promise(resolve => tempShapImg.complete ? resolve() : (tempShapImg.onload = resolve));
             
             let imgWidth = tempShapImg.naturalWidth;
             let imgHeight = tempShapImg.naturalHeight;
             const ratio = imgWidth / imgHeight;
-            const imgMaxHeight = 80; // Adjusted for height to fit below LIME if space permits.
-            const imgMaxWidth = pageWidth - 40; 
+            const imgMaxHeight = 120; // Increased max height significantly for bigger plot
+            const imgMaxWidth = pageWidth - 40; // Max width with 20mm margins
 
-            if (imgWidth > imgMaxWidth) { imgWidth = imgMaxWidth; imgHeight = imgWidth / ratio; }
-            if (imgHeight > imgMaxHeight) { imgHeight = imgMaxHeight; imgWidth = imgHeight * ratio; }
+            // Scale to fit constraints
+            imgWidth = imgMaxWidth;
+            imgHeight = imgWidth / ratio;
+            if (imgHeight > imgMaxHeight) { 
+                imgHeight = imgMaxHeight;
+                imgWidth = imgHeight * ratio;
+            }
 
-            // Ensure there's space for title + image + a small buffer
+            // Check if space for plot + title + buffer (approx 40mm needed)
             if (yPos + imgHeight + 40 > pdf.internal.pageSize.height - 30) { 
-                pdf.addPage(); yPos = 20; 
+                pdf.addPage(); yPos = 20; // New page if doesn't fit
             }
 
             pdf.setFontSize(16);
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("SHAP Plot (Global XAI):", 20, yPos); // Exact title as requested
-            yPos += 8;
+            pdf.text("SHAP Plot (Global XAI):", 20, yPos); // Exact heading as per screenshot
+            yPos += 8; // Spacing
 
             try {
-                const imageX = (pageWidth - imgWidth) / 2; // Center the image
+                const imageX = (pageWidth - imgWidth) / 2; // Center the image horizontally
                 pdf.addImage(shapPlotBase64, 'PNG', imageX, yPos, imgWidth, imgHeight); 
                 yPos += imgHeight + 15; // Spacing after image
             } catch (imgError) { 
@@ -1646,21 +1674,21 @@
                 pdf.text("SHAP plot image could not be embedded due to an error.", 20, yPos);
                 yPos += 15;
             }
-        } else {
+        } else { // Message if SHAP plot is not available
             if (yPos + 25 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; }
             pdf.setFontSize(16);
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             pdf.text("SHAP Plot (Global XAI):", 20, yPos); // Heading regardless
             yPos += 8;
             pdf.setFontSize(10); pdf.setTextColor(100,100,100);
-            pdf.text("SHAP plot (Global XAI) could not be loaded or is not available.", 20, yPos);
+            pdf.text("SHAP plot (Global XAI) could not be loaded or is not available.", 20, yPos); // Exact error message
             yPos += 15; 
         }
 
         // Add page numbers and generic footer to all pages
         addPageNumbersAndFooter(pdf);
         
-        // Finalize PDF and prepare for download
+        // Finalize PDF and prepare for download link
         const pdfBlob = pdf.output('blob');
         const pdfUrl = URL.createObjectURL(pdfBlob);
         downloadLink.href = pdfUrl;
