@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -12,8 +11,8 @@
     
     <!-- jspdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- jspdf-autotable plugin - THIS IS THE CRITICAL ADDITION -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.14/jspdf.plugin.autotable.min.js"></script>
+    <!-- jspdf-autotable plugin -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script> <!-- Updated to a more recent autotable version -->
 
     <style>
          :root {
@@ -96,6 +95,7 @@
         transition: border-color 0.3s ease, background-color 0.3s ease;
         background-color: var(--container-bg-color);
         color: var(--text-color);
+        box-sizing: border-box; /* Ensures padding is included in width */
     }
 
     #file-input {
@@ -144,14 +144,14 @@
 
     .character-count {
         text-align: right;
-        color: var(--text-color); /* Use text color */
+        color: var(--text-color); 
         font-size: 0.9rem;
         margin-top: 0.5rem;
     }
 
 
     .error-message {
-         color: var(--warning-color);  /* Use warning color for errors */
+         color: var(--warning-color); 
         text-align: center;
         margin-top: 1rem;
         display: none;
@@ -199,7 +199,7 @@
     .progress-container {
          width: 100%;
         height: 8px;
-        background-color: var(--border-color); /* Use border color */
+        background-color: var(--border-color);
         border-radius: 4px;
         margin-top: 1rem;
         overflow: hidden;
@@ -223,19 +223,6 @@
         animation: fadeIn 0.5s ease forwards;
     }
 
-    .confidence-container { /* This block is likely unused now */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        margin-top: 0.5rem;
-    }
-
-
-    .hidden {
-        display: none;
-    }
-
-
    .tabs {
         display: flex;
         justify-content: center;
@@ -258,8 +245,8 @@
     }
 
    .tab.active {
-        border-color: var(--primary-color); /* Use primary color */
-        background-color: var(--primary-color); /* Use primary color */
+        border-color: var(--primary-color);
+        background-color: var(--primary-color);
         color: white;
     }
 
@@ -277,7 +264,7 @@
         width: 100%;
         border-collapse: collapse;
         margin-top: 1rem;
-         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); /* Add a subtle shadow */
+         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); 
     }
 
 
@@ -288,22 +275,22 @@
     }
 
    .metrics-table th {
-        background-color: var(--primary-color); /* Consistent header color */
+        background-color: var(--primary-color);
         color: white;
         font-weight: bold;
-        text-transform: uppercase; /* Make headers uppercase */
-        letter-spacing: 0.05em; /* Add some letter spacing */
+        text-transform: uppercase; 
+        letter-spacing: 0.05em; 
     }
 
     .metrics-table td {
-        padding: 0.8rem 0.5rem; /* Slightly more vertical padding */
+        padding: 0.8rem 0.5rem; 
     }
 
     .metrics-table tr:nth-child(even) {
-        background-color: #f9f9f9; /* Alternate row background */
+        background-color: #f9f9f9; 
     }
     .dark-mode .metrics-table tr:nth-child(even) {
-        background-color: #555; /* Dark mode alternate row color */
+        background-color: #555;
     }
 
     .logos-container {
@@ -315,38 +302,34 @@
     }
     .logos-container img {
 
-        transform: scale(1.083); /* Adjust the scale as needed */
-        max-width: 100%;  /* Ensure the logo doesn't exceed its container */
-        height: auto;     /* Maintain aspect ratio */
+        transform: scale(1.083); 
+        max-width: 100%;  
+        height: auto;     
     }
 
-    /* Footer Styles - REFINED */
     footer {
         width: 100%;
-        padding: 20px; /* Internal padding */
+        padding: 20px; 
         background-color: var(--container-bg-color);
         border-top: 1px solid var(--border-color);
         font-size: 0.9rem;
         color: var(--text-color);
         text-align: center;
-        box-sizing: border-box; /* Include padding in the width calculation */
-        /* To span full viewport width while body has padding */
+        box-sizing: border-box; 
         position: relative;
         left: 0;
         right: 0;
-        margin: 0; /* Remove default margins */
-        /* These calculations offset the body's horizontal padding */
+        margin: 0; 
         width: 100vw;
         margin-left: calc(-100vw / 2 + 50%); 
         margin-right: calc(-100vw / 2 + 50%);
-        /* Explicitly define text flow */
         white-space: normal;
-        overflow-wrap: break-word; /* For longer words */
+        overflow-wrap: break-word; 
     }
     footer p, footer address {
-         margin: 0.5rem 0; /* Space for content elements within footer */
-         white-space: normal; /* Ensure default text wrapping */
-         overflow-wrap: break-word; /* Breaks long words if necessary */
+         margin: 0.5rem 0; 
+         white-space: normal; 
+         overflow-wrap: break-word; 
     }
 
 
@@ -359,11 +342,11 @@
 
     #download-link {
       color: var(--secondary-color);
-      text-decoration: none; /* Remove underline */
+      text-decoration: none; 
       font-weight: bold;
-      display: block; /* Make it a block element to control margins easier */
-      margin: 10px auto; /* Center it within its parent */
-      text-align: center; /* For text itself */
+      display: block; 
+      margin: 10px auto; 
+      text-align: center; 
     }
     #download-link:hover{
         text-decoration: underline;
@@ -373,7 +356,7 @@
       margin-bottom: 0.5rem;
       border-bottom: 2px solid var(--secondary-color);
       padding-bottom: 0.25rem;
-      display: inline-block; /* Keep the border tight to the text */
+      display: inline-block; 
     }
 
     .tab-content h3 {
@@ -382,20 +365,19 @@
       margin-bottom: 0.5rem;
     }
     .tab-content ul {
-        list-style: disc;  /* Use disc bullets */
-        margin-left: 20px; /* Indent the list */
-        padding-left: 0;   /* Remove default padding */
+        list-style: disc;  
+        margin-left: 20px; 
+        padding-left: 0;   
     }
 
     .tab-content li {
         margin-bottom: 0.25rem;
     }
     .tab-content p {
-      margin-bottom: 1rem; /* Add some space below paragraphs */
-      line-height: 1.7;  /* Increase line height for readability */
+      margin-bottom: 1rem; 
+      line-height: 1.7;  
     }
 
-    /* Style for SHAP Plot Container */
     #shap-plot-container {
         width: 100%;
         min-height: 300px;
@@ -413,10 +395,9 @@
         display: block;
     }
 
-    /* New styles for result boxes and MIC checkboxes */
     .results-display-group {
         display: grid;
-        grid-template-columns: 1fr 1fr; /* Two columns for AMP and Additional Details */
+        grid-template-columns: 1fr 1fr; 
         gap: 1rem;
         margin-top: 2rem;
     }
@@ -431,7 +412,7 @@
     }
 
     .dark-mode .result-box {
-        background-color: #424242; /* Darker Gray */
+        background-color: #424242; 
         border-color: #616161;
     }
 
@@ -449,20 +430,19 @@
 
     .result-content {
         padding: 1rem;
-        min-height: 50px; /* Ensure consistent height */
+        min-height: 50px; 
         display: flex;
         flex-direction: column;
         justify-content: center;
-        text-align: left; /* Align text to the left within content */
+        text-align: left; 
     }
-    /* Styles within result-content when dynamically added */
     .result-content p.info-message {
-        text-align: center; /* Center the default messages */
+        text-align: center; 
         margin-bottom: 0;
         margin-top: 0;
     }
     .result-content ul {
-        margin: 0.5rem 0 0 1.5rem; /* Adjust margin for lists */
+        margin: 0.5rem 0 0 1.5rem; 
         padding: 0;
         list-style: disc;
     }
@@ -475,28 +455,26 @@
         margin-bottom: 0.5rem;
     }
 
-    /* SHAP Interpretation scrollable section */
     .scrollable-content {
-        max-height: 400px; /* Adjust as needed */
+        max-height: 400px; 
         overflow-y: auto;
         padding: 1rem;
         border: 1px solid var(--border-color);
         border-radius: 8px;
         margin-top: 1rem;
-        background-color: var(--background-color); /* Matches body or container BG */
+        background-color: var(--background-color); 
     }
     .dark-mode .scrollable-content {
-        background-color: #333; /* Darker for dark mode */
+        background-color: #333; 
         border-color: #616161;
     }
     .scrollable-content h4 {
-        color: var(--secondary-color); /* Maintain header color */
+        color: var(--secondary-color); 
         margin-top: 1rem;
         margin-bottom: 0.5rem;
     }
 
 
-    /* Adjusted MIC checkboxes for appearance */
     .mic-checkbox-group {
         margin-top: 1.5rem;
         padding: 1rem;
@@ -522,7 +500,7 @@
         cursor: pointer;
         font-size: 1rem;
         color: var(--text-color);
-        user-select: none; /* Prevent text selection */
+        user-select: none; 
     }
 
     .mic-checkbox-container input[type="checkbox"] {
@@ -545,7 +523,7 @@
     }
 
     .mic-checkbox-container input[type="checkbox"]:checked::before {
-        content: '\2713'; /* Checkmark unicode */
+        content: '\2713'; 
         display: block;
         position: absolute;
         top: 50%;
@@ -560,61 +538,54 @@
         font-weight: normal;
     }
 
-    /* Small screen adjustments for responsive footer */
     @media (max-width: 768px) {
         body {
-            padding: 10px; /* Less padding on smaller screens */
+            padding: 10px; 
         }
         footer {
-            /* On very small screens, 100vw might cause horizontal scroll if body has padding */
-            /* Re-adjust these if using the advanced 100vw negative margin method with body padding */
-            padding-left: 10px; /* Reset padding to be consistent with body for this breakpoint */
+            padding-left: 10px; 
             padding-right: 10px;
-            /* Recalculate margins for 100vw/50% relative to a padded body */
-            margin-left: calc(-50vw + 50%); /* Use 50% relative to viewport *current effective body width */
-            margin-right: calc(-50vw + 50%); /* This helps if body has static padding */
+            margin-left: calc(-50vw + 50%); 
+            margin-right: calc(-50vw + 50%); 
         }
     }
 
-    /* Styles for Team Images */
     .team-member-list {
-        list-style: none; /* Remove default bullet points */
+        list-style: none; 
         padding: 0;
         display: flex;
-        flex-direction: column; /* Stack members vertically */
-        align-items: flex-start; /* Align text and image to the left */
-        gap: 15px; /* Space between each team member entry */
+        flex-direction: column; 
+        align-items: flex-start; 
+        gap: 15px; 
     }
 
     .team-member-list li {
         display: flex;
-        align-items: center; /* Vertically align image and text */
-        gap: 15px; /* Space between image and name */
-        font-size: 1.1rem; /* Slightly larger font for names */
+        align-items: center; 
+        gap: 15px; 
+        font-size: 1.1rem; 
         color: var(--text-color);
-        background-color: var(--background-color); /* Light background for each entry */
+        background-color: var(--background-color); 
         padding: 10px 15px;
         border-radius: 8px;
         box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-        width: 100%; /* Take full width of parent */
-        box-sizing: border-box; /* Include padding in width */
+        width: 100%; 
+        box-sizing: border-box; 
     }
 
     .dark-mode .team-member-list li {
-        background-color: #333; /* Darker background for dark mode */
+        background-color: #333; 
         box-shadow: 0 1px 3px rgba(255,255,255,0.08);
     }
 
     .team-member-list img {
-        width: 60px; /* Size of the image */
+        width: 60px; 
         height: 60px;
-        border-radius: 50%; /* Make it circular */
-        object-fit: cover; /* Ensure image covers the area */
-        border: 2px solid var(--secondary-color); /* Small border */
-        flex-shrink: 0; /* Prevent image from shrinking */
+        border-radius: 50%; 
+        object-fit: cover; 
+        border: 2px solid var(--secondary-color); 
+        flex-shrink: 0; 
     }
-
-
 </style>
 
 </head>
@@ -622,7 +593,6 @@
 
 <div class="container">
     <div class="logos-container">
-        <!-- This is your tool logo, make sure 'image2.png' is in the same directory -->
         <img src="image2.png" alt="Tool Logo">
     </div>
 
@@ -701,7 +671,7 @@
                 <div class="result-header"><i class="fas fa-info-circle"></i> Additional Details</div>
                 <div class="result-content" id="additional-details-output">
                     <p class="info-message">The detailed report will appear here.</p>
-                    <a id="download-link" style="display: none;">Download Detailed Report (PDF)</a> <!-- MOVED HERE, inline style display:none initially -->
+                    <a id="download-link" style="display: none;">Download Detailed Report (PDF)</a> 
                 </div>
             </div>
         </div>
@@ -747,7 +717,6 @@
             </tbody>
         </table>
 
-        <!-- Start of regressor metrics -->
         <h2 style="margin-top: 2rem;">Regressor Metrics (MIC Prediction Models)</h2>
         <p>The Minimum Inhibitory Concentration (MIC) prediction is handled by separate regressor models. Their performance metrics for each bacterium are detailed below:</p>
 
@@ -802,37 +771,32 @@
                 </tr>
             </tbody>
         </table>
-        <!-- End of regressor metrics -->
-
 
         <h2 style="margin-top: 2rem;">Model Interpretability</h2>
-        <p>To understand how our model makes predictions, we use SHAP (SHapley Additive exPlanations) values. SHAP values help to explain the output of the model by assessing the contribution of each feature to the prediction.</p>
+        <p>To understand how our model makes predictions, we use SHAP (SHapley Additive exPlanations) values globally and LIME (Local Interpretable Model-agnostic Explanations) locally. SHAP values help assess the overall contribution of each feature to model predictions across the dataset, while LIME explains the features influencing a single, specific prediction.</p>
 
-        <h3>SHAP Plot</h3>
-        <p>The SHAP plot below visualizes the features that most significantly influence the model's prediction. Positive SHAP values contribute to the sequence being classified as AMP, while negative values contribute to Non-AMP classification.</p>
+        <h3>Global SHAP Plot (Illustrative)</h3>
+        <p>The SHAP plot below visualizes the features that most significantly influence the model's predictions *on average across all data*. Positive SHAP values generally contribute to the sequence being classified as AMP, while negative values contribute to Non-AMP classification.</p>
 
         <div id="shap-plot-container">
             <img src="shap.png" alt="SHAP Plot" >
         </div>
 
-        <h3>Interpretation of SHAP Plot</h3>
-        <!-- Start of scrollable section for SHAP Interpretation -->
+        <h3>Interpretation of Global SHAP Plot (Illustrative)</h3>
         <div class="scrollable-content">
              <p>Based on the SHAP plot, the model's predictions for Antimicrobial Peptides (AMPs) are influenced by a combination of sequence-based, structural, and biophysical features. Here’s a breakdown of the key features and their biological implications:</p>
-
             <h4>A. Sequence-Based Features</h4>
             <h5>APAAC13 & APAAC5 (Amphiphilic Pseudo-Amino Acid Composition)</h5>
             <ul>
-                <li><strong>Description:</strong> These features encode hydrophobicity, charge, and side-chain properties, reflecting the amphiphilic nature of the peptide.</li>
+                <li><strong>Description:</b> These features encode hydrophobicity, charge, and side-chain properties, reflecting the amphiphilic nature of the peptide.</li>
                 <li><strong>Interpretation:</strong> Higher APAAC values have a positive SHAP impact, indicating they are predictive of AMP activity. This suggests that the model values amphiphilic sequences, which are crucial for disrupting bacterial membranes.</li>
             </ul>
-
             <h5>Amino Acid Composition (M, C)</h5>
             <ul>
                 <li><strong>M (Methionine):</strong>
                     <ul>
                         <li><strong>Description:</strong> Methionine is often associated with structural stability in peptides.</li>
-                        <li><strong>Interpretation:</b>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
+                        <li><strong>Interpretation:</strong>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
                     </ul>
                 </li>
                 <li><strong>C (Cysteine):</strong>
@@ -842,7 +806,6 @@
                     </ul>
                 </li>
             </ul>
-
             <h4>B. Structural and Biophysical Features</h4>
             <ul>
                 <li><strong>HydrophobicityD3001:</strong>
@@ -853,8 +816,8 @@
                 </li>
                 <li><strong>PolarityD1001:</strong>
                     <ul>
-                        <li><strong>Description:</b>  Measures the polarity of the peptide sequence.</li>
-                        <li><strong>Interpretation:</strong>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
+                        <li><strong>Description:</strong>  Measures the polarity of the peptide sequence.</li>
+                        <li><strong>Interpretation:</b>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
                     </ul>
                 </li>
                 <li><strong>Solvent Accessibility (SolventAccessibilityD3001):</strong>
@@ -865,7 +828,7 @@
                 </li>
                 <li><strong>Charge (ChargeD2001):</b>
                     <ul>
-                        <li><strong>Description:</strong> Represents the net charge of the peptide.</li>
+                        <li><strong>Description:</b> Represents the net charge of the peptide.</li>
                         <li><strong>Interpretation:</strong> Charge is a significant positive predictor. Most AMPs are cationic, enabling them to interact with negatively charged bacterial membranes. Higher charge, as indicated by positive SHAP values, typically enhances antimicrobial potency.</li>
                     </ul>
                 </li>
@@ -876,7 +839,6 @@
                     </ul>
                 </li>
             </ul>
-
             <h4>C. Geary Autocorrelation Features</h4>
             <p>Geary autocorrelation descriptors reflect spatial properties of peptides, encoding information about the adhesion and distribution of physicochemical properties along the sequence.</p>
             <ul>
@@ -895,12 +857,11 @@
                 <li><strong>GearyAuto_ResidueASA30:</strong>
                     <ul>
                         <li><strong>Description:</strong> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
-                        <li><strong>Interpretation:</b> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
+                        <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
                     </ul>
                 </li>
             </ul>
         </div>
-        <!-- End of scrollable section for SHAP Interpretation -->
 
         <h3>Sample Run</h3>
          <p>You can test the model with various sequences to understand its behavior.  Here are a few examples:</p>
@@ -913,79 +874,64 @@
             <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
             <li><strong>Test 5:</strong> Invalid Characters (eg. X) - 
                 MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
-
         </ul>
-
-
     </div>
 
     <div class="tab-content" id="about">
         <h2>About This Tool</h2>
         <p>This web application provides a user-friendly interface for classifying amino acid sequences as either Antimicrobial Peptides (AMPs) or Non-Antimicrobial Peptides (Non-AMPs). AMPs are crucial components of the innate immune system, offering defense against a wide range of pathogens.</p>
-
         <h3>Model Selection Criteria</h3>
-        <p>To identify the most effective model, our team rigorously evaluated over 225 combinations of feature extraction and selection methods across four different machine learning models for each target organism. The evaluation included both classification and regression tasks, with a focus on predicting antimicrobial activity and estimating minimum inhibitory concentration (MIC) values.
-
-The final model was selected based on the following criteria:</p>
+        <p>To identify the most effective model, our team rigorously evaluated over 225 combinations of feature extraction and selection methods across four different machine learning models for each target organism. The evaluation included both classification and regression tasks, with a focus on predicting antimicrobial activity and estimating minimum inhibitory concentration (MIC) values. The final model was selected based on the following criteria:</p>
         <ul>
             <li><strong>High Accuracy, F1-score, and Validation Accuracy:</strong> The model achieved excellent performance metrics on a held-out test set, demonstrating its ability to generalize to unseen data.</li>
             <li><strong>Robustness to Sequence Length Variations:</strong> The model performs consistently well on sequences of varying lengths, within the specified range (10-100 amino acids).</li>
             <li><strong>Generalization Ability:</strong> The model was trained and evaluated on diverse datasets to ensure its ability to classify a broad range of AMP sequences.</li>
             <li><strong>Robust regression capability:</strong> Assessed using Mean Squared Error (MSE), R-squared (R²), Pearson correlation, and Kendall’s tau, the model demonstrated strong agreement between predicted and true MIC values.</li>
         </ul>
-
         <h3>Intended Use</h3>
         <p>This tool is intended for research and educational purposes. It can be a valuable resource for researchers studying antimicrobial peptides and developing new therapeutic strategies. However, it is not a replacement for laboratory-based experimental validation.</p>
-
         <h3>Our Team</h3>
-        <!-- NEW: Added a class for styling and img tags for team members -->
         <ul class="team-member-list">
             <li><img src="team-member-1.jpg" alt="Ali Magdi"> Ali Magdi - Computational Biologist</li>
             <li><img src="team-member-2.jpg" alt="Ahmed Amr"> Ahmed Amr - Computational Biologist</li>
             <li><img src="team-member-3.jpg" alt="Omar Loay"> Omar Loay - Molecular Biologist</li>
             <li><img src="team-member-4.jpg" alt="Prof. Eman Badr"> Prof. Eman Badr - Full Professor and Director of BCBU</li>
         </ul>
-
         <h3>Acknowledgements</h3>
         <p>We extend our gratitude to the following organizations for their support:</p>
         <ul>
             <li>Bioinformatics and Computational Biology Unit at Zewail City.</li>
             <li>The Centre for Genomics at Zewail City.</li>
         </ul>
-
         <h3>Contact</h3>
         <p>For questions, inquiries, or feedback, please reach out to us at: <a href="mailto:epicamp.sup@gmail.com">epicamp.sup@gmail.com</a></p>
     </div>
+
      <div class="tab-content" id="usage">
          <h2>Usage Guide</h2>
         <p>Follow these steps to use the AMP Classifier:</p>
-
         <h3>Step 1: Prepare Your Sequence</h3>
         <ul>
             <li>You can either enter the amino acid sequence directly or upload a FASTA file.</li>
             <li>Ensure your sequence contains only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).</li>
              <li>The sequence length must be between 10 and 100 amino acids.</li>
         </ul>
-
         <h3>Step 2: Input the Sequence</h3>
         <ul>
             <li><strong>Direct Input:</strong> Type or paste your sequence into the text area provided.</li>
-            <li><strong>FASTA File Upload:</strong> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
+            <li><strong>FASTA File Upload:</b> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
             <li>The character count will update as you type or upload a sequence.</li>
         </ul>
-
         <h3>Step 3: Analyze the Sequence</h3>
         <ul>
             <li>Click the "Submit" button.</li>
             <li>A progress bar will appear, indicating that the analysis is underway.</li>
         </ul>
-
         <h3>Step 4: View the Results</h3>
         <ul>
             <li>Once the analysis is complete, the prediction (AMP or Non-AMP) will be displayed in the "AMP Classification" box.</li>
-            <li>A link to "Download Detailed Report (PDF)" will appear, containing the prediction, confidence, MIC values (if selected and applicable), and a LIME interpretability plot.</li>
+            <li>A link to "Download Detailed Report (PDF)" will appear, containing the prediction, confidence, MIC values (if selected and applicable), LIME (local) feature explanations for the current prediction, global SHAP feature importance for the model, and an illustrative SHAP plot.</li>
         </ul>
-
         <h3>Step 5: Clear the Input</h3>
         <ul>
              <li>To analyze another sequence, click the "Clear Input" button. This will reset the input fields and results.</li>
@@ -996,10 +942,9 @@ The final model was selected based on the following criteria:</p>
                 <li><strong>Sequence Length:</strong> Ensure your sequence is between 10 and 100 characters long.</li>
                  <li><strong>Invalid FASTA Format:</strong> If you encounter an error with a FASTA file, make sure the file is correctly formatted.</li>
             </ul>
-
     </div>
 </div>
-<!-- Moved footer OUTSIDE container for full width -->
+
 <footer>
     <p>© 2025, Bioinformatics and Computational biology Unit, BCBU</p>
     <address>
@@ -1008,6 +953,7 @@ The final model was selected based on the following criteria:</p>
       Egypt
     </address>
 </footer>
+
 <script type="module">
     import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
     window.gradio = { client };
@@ -1021,7 +967,7 @@ The final model was selected based on the following criteria:</p>
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
     const fileInput = document.getElementById('file-input');
-    const downloadLink = document.getElementById('download-link');
+    const downloadLink = document.getElementById('download-link'); 
 
     const ampClassificationOutput = document.getElementById('amp-classification-output');
     const additionalDetailsOutput = document.getElementById('additional-details-output');
@@ -1045,15 +991,14 @@ The final model was selected based on the following criteria:</p>
 
     async function initClient() {
         try {
-            // !!! IMPORTANT: CHOOSE ONE OF THE FOLLOWING LINES AND COMMENT OUT THE OTHER !!!
             // Option 1: If you are running the Gradio backend locally (e.g., python app.py)
-            // clientInstance = await window.gradio.client("http://127.0.0.1:7860/");
+            // clientInstance = await window.gradio.client("http://127.0.0.1:7860/"); 
             // Option 2: If your Gradio backend is deployed on Hugging Face Spaces (using the Space ID)
-            clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier");
-
+            clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier"); 
+            console.log("Gradio client initialized successfully.");
         } catch (error) {
             console.error("Failed to initialize Gradio client:", error);
-            showError("Failed to connect to the classifier service. Please check your network and the Gradio backend URL, then try again.");
+            showError("Failed to connect to the classifier service. Please check your network and the Gradio backend URL, then try again. The service might be temporarily unavailable or under maintenance.");
             predictBtn.disabled = true;
         }
     }
@@ -1063,7 +1008,7 @@ The final model was selected based on the following criteria:</p>
         document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
         document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
         fileInput.addEventListener('change', handleFileSelect);
-        clearInput(); // Call clearInput on load to set initial state
+        clearInput(); 
     };
 
     function showTooltip() {
@@ -1080,15 +1025,12 @@ The final model was selected based on the following criteria:</p>
         charCount.textContent = '0';
         clearError();
         
-        // Hide download link explicitly using its direct ID as it's now in additionalDetailsOutput
         downloadLink.style.display = 'none';
+        downloadLink.href = '#'; 
 
-        // Reverted to original informative clear message
-        ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>'; 
+        ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>';
         additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; 
-        // Append download link back to the output div so it's managed correctly
-        additionalDetailsOutput.appendChild(downloadLink);
-
+        additionalDetailsOutput.appendChild(downloadLink); 
 
         micCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
@@ -1102,14 +1044,16 @@ The final model was selected based on the following criteria:</p>
         progressBar.style.width = '0%';
         progressContainer.style.display = 'none';
 
-        predictBtn.disabled = true; // Disable button until valid input
+        predictBtn.disabled = true; 
         predictBtn.textContent = 'Submit';
     }
 
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) {
-            clearInput();
+            if (sequenceInput.dataset.source === 'file') {
+                 clearInput(); 
+            }
             return;
         }
 
@@ -1119,95 +1063,106 @@ The final model was selected based on the following criteria:</p>
 
         if (!isValidExtension) {
             showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-            fileInput.value = '';
+            fileInput.value = ''; 
             micCheckboxes.forEach(checkbox => checkbox.disabled = true);
             predictBtn.disabled = true;
             return;
         }
 
         clearError();
-
         const reader = new FileReader();
-
         reader.onload = function(e) {
             try {
                 const sequence = parseFASTA(e.target.result);
                 if (sequence) {
                     sequenceInput.value = sequence;
+                    sequenceInput.dataset.source = 'file'; 
                     updateCharacterCount();
-                    validateSequence(sequence);
+                    validateSequence(sequence); 
                 } else {
                     showError("No valid sequence found in FASTA file.");
                     fileInput.value = '';
+                    sequenceInput.dataset.source = '';
                     micCheckboxes.forEach(checkbox => checkbox.disabled = true);
                     predictBtn.disabled = true;
                 }
             } catch (error) {
-                console.error("Error in reader.onload:", error);
-                showError(error.message);
+                console.error("Error in FASTA parsing:", error);
+                showError(error.message || "Error processing FASTA file.");
                 fileInput.value = '';
+                sequenceInput.dataset.source = '';
                 micCheckboxes.forEach(checkbox => checkbox.disabled = true);
                 predictBtn.disabled = true;
             }
         };
-
         reader.onerror = function(error) {
             console.error("FileReader error:", error);
             showError("Error reading file.");
             fileInput.value = '';
+            sequenceInput.dataset.source = '';
             micCheckboxes.forEach(checkbox => checkbox.disabled = true);
             predictBtn.disabled = true;
         };
-
         reader.readAsText(file);
     }
 
     function parseFASTA(text) {
         const lines = text.trim().split(/[\r\n]+/);
-        const sequences = [];
-        let currentSequence = '';
-        let hasHeader = false;
+        let sequence = '';
+        let headerFound = false;
 
         for (const line of lines) {
             const trimmedLine = line.trim();
             if (trimmedLine.startsWith('>')) {
-                if (hasHeader && currentSequence) {
-                    sequences.push(currentSequence);
+                if (headerFound && sequence) { 
+                    console.warn("Multiple sequences found in FASTA. Using the first one.");
+                    return sequence.toUpperCase(); 
                 }
-                currentSequence = '';
-                hasHeader = true;
-            } else if (hasHeader && trimmedLine) {
-                currentSequence += trimmedLine.replace(/\s/g, '').toUpperCase();
+                headerFound = true;
+                sequence = ''; 
+            } else if (headerFound) {
+                sequence += trimmedLine.replace(/\s/g, '');
+            } else if (!trimmedLine.startsWith('>') && trimmedLine.length > 0) {
+                 sequence += trimmedLine.replace(/\s/g, '');
             }
         }
-
-        if (hasHeader && currentSequence) {
-            sequences.push(currentSequence);
+        
+        if (!headerFound && sequence) { 
+             console.warn("No FASTA header found. Treating content as a single sequence.");
+        } else if (!sequence && headerFound) {
+            throw new Error("FASTA file contains a header but no sequence data.");
+        } else if (!sequence && !headerFound && lines.some(l => l.trim().length > 0) ) {
+             if (!lines.some(l => l.trim().startsWith('>'))) {
+                sequence = lines.join('').replace(/\s/g, '');
+                console.warn("No FASTA header. Treating content as single sequence.");
+             } else {
+                throw new Error("Invalid FASTA format. Could not extract sequence.");
+             }
+        } else if (!sequence && !headerFound && lines.every(l => l.trim().length === 0)){
+            throw new Error("FASTA file is empty or contains only whitespace.");
         }
 
-        if (sequences.length === 0) {
-            throw new Error("Invalid FASTA format. No valid sequences found.");
-        }
-        if (sequences.length > 1) {
-            console.warn("Multiple sequences found in FASTA file. Using only the first sequence.");
-            return sequences[0];
+
+        if (sequence) {
+            return sequence.toUpperCase();
         } else {
-            return sequences[0];
+            throw new Error("No valid sequence found in the provided FASTA content.");
         }
     }
+
 
     function validateSequence(sequence) {
         let isValid = true;
         let errorMessage = '';
+        const currentLength = sequence.length;
 
         if (!sequence) {
-            errorMessage = ''; // No error message for empty, just disable button
             isValid = false;
-        } else if (/[^ACDEFGHIKLMNPQRSTVWY]/.test(sequence)) {
+        } else if (/[^ACDEFGHIKLMNPQRSTVWY]/i.test(sequence)) { 
             errorMessage = 'Invalid characters in sequence. Only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY) are allowed.';
             isValid = false;
-        } else if (sequence.length < 10 || sequence.length > 100) {
-            errorMessage = `Sequence length (${sequence.length}) must be between 10 and 100 characters.`;
+        } else if (currentLength < 10 || currentLength > 100) {
+            errorMessage = `Sequence length (${currentLength}) must be between 10 and 100 characters.`;
             isValid = false;
         }
 
@@ -1215,7 +1170,7 @@ The final model was selected based on the following criteria:</p>
             clearError();
             predictBtn.disabled = false;
         } else {
-            showError(errorMessage);
+            if (errorMessage) showError(errorMessage); else clearError(); 
             predictBtn.disabled = true;
         }
 
@@ -1223,15 +1178,21 @@ The final model was selected based on the following criteria:</p>
             checkbox.disabled = !isValid;
             if (!isValid) checkbox.checked = false;
         });
-
         return isValid;
     }
 
     function updateCharacterCount() {
-        charCount.textContent = sequenceInput.value.length;
+        const currentLength = sequenceInput.value.length;
+        charCount.textContent = currentLength;
+        if (currentLength > 100) {
+            charCount.style.color = 'var(--warning-color)';
+        } else {
+            charCount.style.color = 'var(--text-color)';
+        }
     }
 
     sequenceInput.addEventListener('input', () => {
+        sequenceInput.dataset.source = 'manual'; 
         updateCharacterCount();
         validateSequence(sequenceInput.value);
     });
@@ -1239,25 +1200,31 @@ The final model was selected based on the following criteria:</p>
     sequenceInput.addEventListener('paste', (e) => {
         e.preventDefault();
         const paste = (e.clipboardData || window.clipboardData).getData('text');
-        const cleanPaste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY]/gi, '').toUpperCase();
+        const cleanPaste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY\s\r\n]/gi, '').replace(/[\s\r\n]+/g, '').toUpperCase();
+
 
         const selectionStart = sequenceInput.selectionStart;
         const selectionEnd = sequenceInput.selectionEnd;
-
         const currentText = sequenceInput.value;
-        const newText = currentText.substring(0, selectionStart) + cleanPaste + currentText.substring(selectionEnd);
+        let newText = currentText.substring(0, selectionStart) + cleanPaste + currentText.substring(selectionEnd);
+        
+        if (newText.length > parseInt(sequenceInput.maxLength, 10)) {
+            newText = newText.substring(0, parseInt(sequenceInput.maxLength, 10));
+        }
 
         sequenceInput.value = newText;
+        sequenceInput.dataset.source = 'manual';
         updateCharacterCount();
         validateSequence(newText);
+        sequenceInput.selectionStart = sequenceInput.selectionEnd = selectionStart + cleanPaste.length;
+
     });
 
     sequenceInput.addEventListener('keypress', (e) => {
         if (e.key.length === 1 && !/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
             e.preventDefault();
-            // Optional: show a temporary visual cue for invalid keypress
         } else {
-            clearError();
+            clearError(); 
         }
     });
 
@@ -1268,6 +1235,7 @@ The final model was selected based on the following criteria:</p>
 
     function clearError() {
         errorDiv.style.display = 'none';
+        errorDiv.textContent = '';
     }
 
     async function classifySequenceDebounced() {
@@ -1276,30 +1244,34 @@ The final model was selected based on the following criteria:</p>
     }
 
     async function classifySequence() {
-        const sequence = sequenceInput.value.trim().toUpperCase();
-
-        if (!validateSequence(sequence)) {
+        if (!clientInstance) {
+            showError("Classifier service is not available. Please try again later.");
+            console.error("Gradio client instance is not initialized.");
+            predictBtn.disabled = false; 
+            predictBtn.textContent = 'Submit';
             return;
         }
+
+        const sequence = sequenceInput.value.trim().toUpperCase();
+        if (!validateSequence(sequence)) return;
 
         clearError();
         predictBtn.disabled = true;
         predictBtn.textContent = 'Processing...';
-
         ampClassificationOutput.innerHTML = '<p class="info-message">Analyzing...</p>';
         additionalDetailsOutput.innerHTML = '<p class="info-message">Generating detailed report...</p>';
-        additionalDetailsOutput.appendChild(downloadLink);
-        downloadLink.style.display = 'none';
-
+        additionalDetailsOutput.appendChild(downloadLink); 
+        downloadLink.style.display = 'none'; 
         micCheckboxes.forEach(checkbox => checkbox.disabled = true);
-
         progressContainer.style.display = 'block';
         progressBar.style.width = '0%';
 
         let micDataForPdf = {};
         let ampLabel = 'Unknown';
         let ampConfidence = 0;
-        let topFeaturesForPdf = [];
+        let shapPlotBase64 = null; 
+        let limeFeaturesForPdf = [];
+        let globalShapFeaturesForPdf = []; // This will remain empty per your latest instructions
 
         let animationProgress = 0;
         animationIntervalId = setInterval(() => {
@@ -1311,476 +1283,122 @@ The final model was selected based on the following criteria:</p>
 
         try {
             const classificationResult = await clientInstance.predict("/predict", [sequence]);
+            console.log("Gradio Result:", classificationResult);
 
             if (!classificationResult || !classificationResult.data || typeof classificationResult.data[0] !== 'string') {
                 throw new Error("Unexpected result format from server. Expected a plain text string.");
             }
-
             const rawTextOutput = classificationResult.data[0];
-            console.log("Raw text output from Gradio:", rawTextOutput);
+            console.log("Raw text output from Gradio:\n", rawTextOutput);
 
             const lines = rawTextOutput.split('\n').map(line => line.trim()).filter(Boolean);
-
             const labelRegex = /Prediction:\s*(.+)/;
             const confidenceRegex = /Confidence:\s*([\d.]+)%/;
-            const micSectionHeader = /Predicted MIC Values \(μM\):/;
-            const topFeaturesSectionHeader = /Top Features Influencing Prediction:/;
-            const micLineRegex = /-\s*(.+?):\s*([\d.]+)/;
-            const featureLineRegex = /-\s*(.+?):\s*([\d.-]+)/;
+            const micSectionHeaderRegex = /Predicted MIC Values \(μM\):/i;
+            const limeSectionHeaderRegex = /LIME - Top Features Influencing This Prediction:/i;
+            // Removed specific parsing for global SHAP textual features since they are not being tabled per current screenshot.
+            // globalShapSectionHeaderRegex = /Global SHAP - Top (Model Features|Features Influencing Model Behavior) \(Overall Importance\):/i; 
+            const micLineRegex = /-\s*([^:]+?):\s*([\d.]+)/;
+            // Generic feature regex to handle "feature" and "feature condition" extraction for LIME.
+            const featureExtractorRegex = /-\s*(.+?)\s*(?:(<=|>=|<|>|==|is\snot|is)\s+([^:]+?))?\s*:\s*([+-]?[\d.]+)/;
 
 
             const labelMatch = rawTextOutput.match(labelRegex);
-            if (labelMatch && labelMatch[1]) {
-                ampLabel = labelMatch[1];
-            } else {
-                 console.warn("Could not parse AMP Label from output for PDF.");
-                 ampLabel = 'Prediction Unavailable';
-            }
+            if (labelMatch && labelMatch[1]) ampLabel = labelMatch[1];
+            else console.warn("Could not parse AMP Label from output.");
 
             const confidenceMatch = rawTextOutput.match(confidenceRegex);
-            if (confidenceMatch && confidenceMatch[1]) {
-                ampConfidence = parseFloat(confidenceMatch[1]) / 100;
-            } else {
-                console.warn("Could not parse Confidence from output for PDF.");
-                ampConfidence = 0;
-            }
+            if (confidenceMatch && confidenceMatch[1]) ampConfidence = parseFloat(confidenceMatch[1]) / 100;
+            else console.warn("Could not parse Confidence from output.");
 
-
-            let micSectionStarted = false;
-            let topFeaturesSectionStarted = false;
+            let inMicSection = false;
+            let inLimeSection = false;
+            let inGlobalShapSectionDummy = false; // Dummy, as no data for this is collected from output per request
+            let currentSection = null; // Can be 'mic', 'lime', 'global_shap_dummy'
 
             for (const line of lines) {
-                if (line.match(micSectionHeader)) {
-                    micSectionStarted = true;
-                    topFeaturesSectionStarted = false;
-                    continue;
-                } else if (line.match(topFeaturesSectionHeader)) {
-                    topFeaturesSectionStarted = true;
-                    micSectionStarted = false;
-                    continue;
-                }
+                if (micSectionHeaderRegex.test(line)) {
+                    currentSection = 'mic'; continue;
+                } else if (limeSectionHeaderRegex.test(line)) {
+                    currentSection = 'lime'; continue;
+                } 
+                // Removed global SHAP header test if its text isn't parsed into a table for the PDF.
+                // If Gradio still provides it and it causes issues for LIME parsing if it comes before it, keep the test.
+                // Assuming it's fine for now, and no features collected.
 
-                if (micSectionStarted && !topFeaturesSectionStarted) {
+                if (currentSection === 'mic') {
                     const micLineMatch = line.match(micLineRegex);
                     if (micLineMatch && micLineMatch[1] && micLineMatch[2]) {
-                        const bacteriumNameMap = {
-                            'E.coli': 'e_coli',
-                            'P.aeruginosa': 'p_aeruginosa',
-                            'S.aureus': 's_aureus',
-                            'K.Pneumonia': 'k_pneumoniae',
-                        };
+                        const bacteriumNameMap = { 'E.coli': 'e_coli', 'P.aeruginosa': 'p_aeruginosa', 'S.aureus': 's_aureus', 'K.Pneumonia': 'k_pneumoniae', 'K. pneumoniae': 'k_pneumoniae' };
                         const displayMicName = micLineMatch[1].trim();
                         const internalKey = bacteriumNameMap[displayMicName];
-
-                        const isMicCheckboxChecked = Array.from(micCheckboxes).some(
-                            cb => cb.checked && cb.value === internalKey
-                        );
-
-                        if (internalKey && isMicCheckboxChecked) {
-                             micDataForPdf[internalKey] = parseFloat(micLineMatch[2]);
-                        } else if (internalKey && !isMicCheckboxChecked) {
-                            console.log(`MIC for ${displayMicName} was parsed but not selected by user for PDF.`);
-                        } else {
-                            console.warn("Unknown MIC bacterium key in raw output text:", displayMicName);
-                        }
+                        const isMicCheckboxChecked = Array.from(micCheckboxes).some(cb => cb.checked && cb.value === internalKey);
+                        if (internalKey && isMicCheckboxChecked) micDataForPdf[internalKey] = parseFloat(micLineMatch[2]);
                     }
-                } else if (topFeaturesSectionStarted) {
-                    const featureLineMatch = line.match(featureLineRegex);
-                    if (featureLineMatch && featureLineMatch[1] && featureLineMatch[2]) {
-                        const fullFeatureDesc = featureLineMatch[1].trim();
-                        const value = parseFloat(featureLineMatch[2]);
-
-                        let featureName = fullFeatureDesc;
-                        let condition = '';
-                        const complexFeatureRegex = /(.*)\s*(<=|>=|<|>)\s*([\d.]+)$/;
-                        const complexMatch = fullFeatureDesc.match(complexFeatureRegex);
-                        if (complexMatch) {
-                            featureName = complexMatch[1].trim();
-                            condition = `${complexMatch[2]} ${complexMatch[3]}`;
+                } else if (currentSection === 'lime') {
+                    const featureMatch = line.match(featureExtractorRegex);
+                    if (featureMatch) {
+                        const feature = featureMatch[1].trim();
+                        const condition = featureMatch[3] ? `${featureMatch[2].trim()} ${featureMatch[3].trim()}` : '';
+                        const value = parseFloat(featureMatch[4]);
+                        if (!isNaN(value)) {
+                            limeFeaturesForPdf.push({ feature: feature, condition: condition, value: value });
+                        } else {
+                            console.warn(`Could not parse LIME feature value from line: ${line}`);
                         }
-
-                        topFeaturesForPdf.push({
-                            feature: featureName,
-                            condition: condition,
-                            value: value
-                        });
+                    } else {
+                        // Sometimes empty lines or notes appear in Gradio output. Filter them.
+                        if (line.trim().length > 0 && !line.includes('---')) { // Simple check to avoid parsing horizontal rules or blank lines
+                             console.warn(`Line not parsed as LIME feature: ${line}`);
+                        }
                     }
                 }
             }
 
-
-            clearInterval(animationIntervalId);
-            animationIntervalId = null;
+            clearInterval(animationIntervalId); animationIntervalId = null;
             progressBar.style.width = '100%';
             progressContainer.style.display = 'none';
 
-            ampClassificationOutput.innerHTML = `
-                <p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabel.includes('Non-AMP') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0; text-align: center;">${ampLabel}</p>
-            `;
-
+            ampClassificationOutput.innerHTML = `<p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabel.includes('Non-AMP') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0; text-align: center;">${ampLabel}</p>`;
             additionalDetailsOutput.innerHTML = '<p class="info-message">Detailed report available for download:</p>';
             additionalDetailsOutput.appendChild(downloadLink);
             downloadLink.style.display = 'block';
 
-
             if (ampLabel.includes('AMP (Positive)')) {
                 micCheckboxes.forEach(checkbox => checkbox.disabled = false);
             } else {
-                micCheckboxes.forEach(checkbox => {
-                    checkbox.checked = false;
-                    checkbox.disabled = true;
-                });
+                micCheckboxes.forEach(checkbox => { checkbox.checked = false; checkbox.disabled = true; });
             }
 
-            await generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, topFeaturesForPdf);
-
+            await generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, limeFeaturesForPdf, globalShapFeaturesForPdf); // globalShapFeaturesForPdf will be empty array here.
 
         } catch (error) {
             console.error("Error during prediction:", error);
-            if (animationIntervalId) {
-                clearInterval(animationIntervalId);
-                animationIntervalId = null;
-            }
-            progressBar.style.width = '0%';
-            progressContainer.style.display = 'none';
-
-            showError("Prediction failed: " + (error.message || "Unknown error"));
-            ampClassificationOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error</p>';
+            if (animationIntervalId) { clearInterval(animationIntervalId); animationIntervalId = null; }
+            progressBar.style.width = '0%'; progressContainer.style.display = 'none';
+            showError("Prediction failed: " + (error.message || "Unknown error. The service might be temporarily down."));
+            ampClassificationOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error in Prediction</p>';
             additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error during prediction. Detailed report not available.</p>';
-            additionalDetailsOutput.appendChild(downloadLink);
-            downloadLink.style.display = 'none';
+            additionalDetailsOutput.appendChild(downloadLink); downloadLink.style.display = 'none';
         } finally {
             predictBtn.disabled = false;
             predictBtn.textContent = 'Submit';
+            if (!ampLabel.includes('AMP (Positive)')) {
+                micCheckboxes.forEach(checkbox => { checkbox.checked = false; checkbox.disabled = true; });
+            } else {
+                 micCheckboxes.forEach(checkbox => checkbox.disabled = false);
+            }
         }
     }
 
-    // Helper to get image base64, now correctly async handling
-    function getBase64Image(imgSrc) {
-        return new Promise((resolve, reject) => {
-            const img = new Image();
-            img.crossOrigin = 'Anonymous'; // Required for images from different origins due to CORS policy
-            img.onload = () => {
-                try {
-                    if (img.naturalWidth === 0 || img.naturalHeight === 0) {
-                        console.warn(`Image "${imgSrc}" has no natural dimensions. Possibly corrupted or failed to load.`);
-                        resolve(null); // Resolve with null if image data is invalid
-                        return;
-                    }
-                    const canvas = document.createElement("canvas");
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
-                    const ctx = canvas.getContext("2d");
-                    ctx.drawImage(img, 0, 0);
-                    resolve(canvas.toDataURL("image/png"));
-                } catch (e) {
-                    console.error(`Error converting image "${imgSrc}" to base64:`, e);
-                    // Often a CORS error if the image is from a different domain and crossOrigin isn't enough or supported.
-                    reject(e); // Reject the promise on error
-                }
-            };
-            img.onerror = () => {
-                console.error(`Failed to load image at URL: "${imgSrc}"`);
-                reject(`Failed to load image: ${imgSrc}`);
-            };
-            img.src = imgSrc;
-        });
-    }
-
-
-    // Function to generate the PDF report using jspdf and jspdf-autotable
-    async function generatePDFReport(sequence, prediction, confidence, micResults = null, topFeatures = null) {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-            console.error("jsPDF is not loaded correctly.");
-            return;
-        }
-        const pdf = new window.jspdf.jsPDF(); 
-
-        const primaryColor = [0, 77, 64]; 
-        const textColor = [51, 51, 51]; 
-        const successColor = [39, 174, 96]; 
-        const errorColor = [231, 76, 60]; 
-        const headerTextColor = [44, 62, 80]; 
-
-        const pageWidth = pdf.internal.pageSize.width;
-        let currentHeaderY = 15; // Starting Y for elements in the header area
-
-        // --- Load images synchronously/await for PDF generation ---
-        const toolLogoElement = document.querySelector('.logos-container img');
-        let toolLogoBase64 = null;
-        if (toolLogoElement && toolLogoElement.src) {
-            try {
-                toolLogoBase64 = await getBase64Image(toolLogoElement.src);
-            } catch (error) {
-                console.error("Error loading tool logo for PDF:", error);
-                toolLogoBase64 = null;
-            }
-        }
-        
-        let shapPlotBase64 = null;
-        try {
-            // Assume 'shap.png' is in the same directory as the HTML file.
-            // Adjust this path if 'shap.png' is in a different location.
-            shapPlotBase64 = await getBase64Image('shap.png'); 
-        } catch (error) {
-            console.error("Error loading SHAP plot for PDF:", error);
-            shapPlotBase64 = null;
-        }
-
-
-        // Add tool logo
-        if (toolLogoBase64) {
-            // To get natural dimensions for aspect ratio without relying on a temporary `Image` onload
-            // The `addImage` function can calculate if given width=0 and height>0 or vice-versa.
-            // For stretching proportionally, we need original aspect ratio.
-            const tempImg = new Image(); // Use a dummy img to get natural width/height from the base64
-            tempImg.src = toolLogoBase64;
-            // It's guaranteed to be loaded if toolLogoBase64 is not null (due to getBase64Image already resolving on load)
-            
-            const originalLogoRatio = tempImg.naturalHeight / tempImg.naturalWidth;
-            const desiredLogoWidth = pageWidth * 0.8; // Use 80% of page width
-            const calculatedLogoHeight = desiredLogoWidth * originalLogoRatio;
-
-            const logoX = (pageWidth - desiredLogoWidth) / 2; // Center horizontally
-            
-            pdf.addImage(toolLogoBase64, 'PNG', logoX, currentHeaderY, desiredLogoWidth, calculatedLogoHeight);
-            currentHeaderY += calculatedLogoHeight + 5; // Move Y position below logo
-        } else {
-            console.warn("PDF Generation: Tool logo could not be added.");
-            // If no logo, just reserve some space for the title to start
-            currentHeaderY += 10; 
-        }
-
-        // Main Report Title
-        pdf.setFont("helvetica", "bold"); 
-        pdf.setFontSize(28); 
-        pdf.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
-        pdf.text("Anti-microbial Peptides Report", pageWidth / 2, currentHeaderY + 10, { align: "center" }); 
-        currentHeaderY += 10 + 28 + 15; // Adjusted spacing
-
-        let yPos = currentHeaderY; // Initial Y position for main content
-
-
-        // Input Sequence (No change here in PDF generation content/styles)
-        pdf.setFontSize(16);
-        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        pdf.text("Input Sequence:", 20, yPos);
-        pdf.setFontSize(12);
-        pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
-        const maxWidth = 170;
-        const sequenceLines = pdf.splitTextToSize(sequence, maxWidth);
-        pdf.text(sequenceLines, 20, yPos + 10);
-        yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10; // Reduced line height, maintained vertical spacing
-
-
-        // Prediction & Confidence Table
-        pdf.setFontSize(16);
-        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        pdf.text("Analysis Summary:", 20, yPos);
-        yPos += 8; // Reduced spacing after heading
-
-        const summaryTableHead = [['Metric', 'Value']];
-        const summaryTableBody = [
-            ['Prediction', prediction],
-            ['Confidence', `${(confidence * 100).toFixed(2)}%`]
-        ];
-
-        pdf.autoTable({
-            startY: yPos,
-            head: summaryTableHead,
-            body: summaryTableBody,
-            theme: 'striped',
-            headStyles: {
-                fillColor: primaryColor,
-                textColor: 255
-            },
-            styles: {
-                cellPadding: 3,
-                fontSize: 12, 
-                textColor: textColor,
-                lineColor: [200, 200, 200],
-                lineWidth: 0.1
-            },
-            columnStyles: {
-                0: { fontStyle: 'bold' },
-                1: { fontStyle: (prediction.includes('(Non-AMP)') ? 'normal' : 'bold'), textColor: (prediction.includes('(Non-AMP)') ? errorColor : successColor) }
-            },
-            didDrawPage: function(data) { 
-                yPos = data.cursor.y; 
-            }
-        });
-        yPos = pdf.lastAutoTable.finalY + 12; // Adjusted spacing after table
-
-
-        // MIC Values Table
-        if (micResults && Object.keys(micResults).length > 0) {
-            // Check if space for MIC table is enough or if new page is needed (with some margin)
-            if (yPos + 40 > pdf.internal.pageSize.height - 30) { 
-                pdf.addPage();
-                yPos = 20; 
-            }
-            pdf.setFontSize(16);
-            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("Predicted MIC (µM):", 20, yPos);
-            yPos += 8; // Reduced spacing after heading
-
-            const micTableHead = [['Bacterium', 'MIC (µM)']];
-            const micTableBody = [];
-            const bacteriumDisplayNamesForPdf = {
-                'e_coli': 'E.coli',
-                'p_aeruginosa': 'P. aeruginosa',
-                's_aureus': 'S.aureus',
-                'k_pneumoniae': 'K.Pneumoniae', 
-            };
-
-            for (const bacteriumKey in micResults) {
-                if (typeof micResults[bacteriumKey] === 'number' && bacteriumDisplayNamesForPdf[bacteriumKey]) {
-                    micTableBody.push([
-                        bacteriumDisplayNamesForPdf[bacteriumKey],
-                        micResults[bacteriumKey].toFixed(3)
-                    ]);
-                }
-            }
-            
-            pdf.autoTable({
-                startY: yPos,
-                head: micTableHead,
-                body: micTableBody,
-                theme: 'striped',
-                headStyles: {
-                    fillColor: primaryColor, 
-                    textColor: 255 
-                },
-                styles: {
-                    cellPadding: 3,
-                    fontSize: 10,
-                    textColor: textColor,
-                    lineColor: [200, 200, 200], 
-                    lineWidth: 0.1
-                },
-                columnStyles: {
-                    0: { fontStyle: 'italic' }, 
-                },
-                didDrawPage: function(data) {
-                    yPos = data.cursor.y;
-                }
-            });
-            yPos = pdf.lastAutoTable.finalY + 12; // Adjusted spacing
-        } else if (prediction.includes('AMP (Positive)')) { 
-            pdf.setFontSize(12);
-            pdf.setTextColor(100, 100, 100);
-            pdf.text("No MIC predictions were selected or generated for this peptide.", 20, yPos + 10);
-            yPos += 15; // Adjusted spacing
-        } else {
-            yPos += 10; // Small increment even if no MIC or message
-        }
-
-        // Top Features (LIME) and SHAP Plot - START A NEW PAGE FOR THIS SECTION
-        pdf.addPage(); 
-        yPos = 20; // Reset Y for new page
-
-        // LIME (Local XAI) - Top Features Table
-        if (topFeatures && topFeatures.length > 0) {
-            pdf.setFontSize(16);
-            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("LIME (Local XAI): Top Features Influencing Prediction:", 20, yPos);
-            yPos += 8; // Reduced spacing
-
-            const featuresTableHead = [['Feature', 'Condition', 'SHAP Value']];
-            const featuresTableBody = topFeatures.map(f => {
-                return [f.feature || '', f.condition || '', (typeof f.value === 'number' ? f.value.toFixed(4) : '')];
-            });
-
-            pdf.autoTable({
-                startY: yPos,
-                head: featuresTableHead,
-                body: featuresTableBody,
-                theme: 'striped',
-                headStyles: {
-                    fillColor: primaryColor,
-                    textColor: 255
-                },
-                styles: {
-                    cellPadding: 3,
-                    fontSize: 10,
-                    textColor: textColor,
-                    lineColor: [200, 200, 200],
-                    lineWidth: 0.1
-                },
-                columnStyles: { 
-                    0: { cellWidth: 60 },
-                    1: { cellWidth: 60, halign: 'center' },
-                    2: { cellWidth: 50, halign: 'right' }
-                },
-                didDrawPage: function(data) {
-                    yPos = data.cursor.y;
-                }
-            });
-            yPos = pdf.lastAutoTable.finalY + 15; // Adjusted spacing
-        } else {
-            pdf.setFontSize(12);
-            pdf.setTextColor(100, 100, 100);
-            pdf.text("No specific LIME features were provided for this prediction.", 20, yPos + 10);
-            yPos += 15; // Adjusted spacing
-        }
-
-        // SHAP Plot (Global XAI)
-        if (shapPlotBase64) {
-            // Check if SHAP plot fits on current page after LIME table, if not, add another page
-            const shapImageOptimalWidth = 170; // Max width to fit page nicely
-            const tempShapImg = new Image();
-            tempShapImg.src = shapPlotBase64;
-            const shapAspectRatio = tempShapImg.naturalHeight / tempShapImg.naturalWidth;
-            const shapImageCalculatedHeight = shapImageOptimalWidth * shapAspectRatio;
-
-            if (yPos + shapImageCalculatedHeight + 40 > pdf.internal.pageSize.height - 30) { 
-                pdf.addPage();
-                yPos = 20; 
-            }
-            
-            pdf.setFontSize(16);
-            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("SHAP Plot (Global XAI):", 20, yPos);
-            yPos += 8; // Reduced spacing
-
-            try {
-                const shapImageX = (pageWidth - shapImageOptimalWidth) / 2; // Center horizontally
-                pdf.addImage(shapPlotBase64, 'PNG', shapImageX, yPos, shapImageOptimalWidth, shapImageCalculatedHeight);
-                yPos += shapImageCalculatedHeight + 10;
-            } catch (imgError) {
-                console.error("Error adding SHAP plot to PDF:", imgError);
-                pdf.setFontSize(12);
-                pdf.setTextColor(100, 100, 100);
-                pdf.text("SHAP plot could not be embedded.", 20, yPos);
-                yPos += 15;
-            }
-        } else {
-            pdf.setFontSize(12);
-            pdf.setTextColor(100, 100, 100);
-            pdf.text("SHAP plot (Global XAI) could not be loaded or is not available.", 20, yPos + 10);
-            yPos += 15;
-        }
-
-        // Footer - Always appears on the last drawn page. jspdf handles multiple pages for autoTable correctly.
-        pdf.setFontSize(10);
-        pdf.setTextColor(127, 140, 141);
-        pdf.text("Generated by EPIC-AMP located @ Zewail City", 105, pdf.internal.pageSize.height - 15, { align: "center" });
-
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-
-        downloadLink.href = pdfUrl;
-        downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
-    }
-
-    // Helper to get image base64 from a URL, now specifically expecting a string URL
-    function getBase64Image(imgSrc) {
+    // Helper to get image base64 from a URL
+    async function getBase64Image(imgSrc) {
         return new Promise((resolve, reject) => {
             const img = new Image();
             img.crossOrigin = 'Anonymous'; // Crucial for loading images from potentially different origins
             img.onload = () => {
                 if (img.naturalWidth === 0 || img.naturalHeight === 0) {
-                    console.warn(`Image at "${imgSrc}" has no natural dimensions. Possibly corrupted or failed to load fully.`);
+                    console.warn(`getBase64Image: Image at "${imgSrc}" has no natural dimensions. Possibly corrupted or failed to load fully.`);
                     resolve(null); 
                     return;
                 }
@@ -1805,6 +1423,261 @@ The final model was selected based on the following criteria:</p>
         });
     }
 
+
+    // Function to generate the PDF report using jspdf and jspdf-autotable
+    async function generatePDFReport(sequence, prediction, confidence, micResults = null, limeFeatures = null, globalShapFeatures = null) {
+        if (!window.jspdf || !window.jspdf.jsPDF) {
+            console.error("jsPDF is not loaded correctly.");
+            return;
+        }
+        const { jsPDF } = window.jspdf; 
+        const pdf = new jsPDF(); 
+
+        const primaryColor = [0, 77, 64]; 
+        const textColor = [51, 51, 51]; 
+        const successColor = [39, 174, 96]; 
+        const errorColor = [231, 76, 60]; 
+        const headerTextColor = [44, 62, 80];
+
+        const pageWidth = pdf.internal.pageSize.width;
+        let yPos = 20; // Starting Y for elements on first page (consistent with screenshot)
+
+        // --- Load SHAP plot image ---
+        let shapPlotBase64 = null;
+        try {
+            shapPlotBase64 = await getBase64Image('shap.png'); 
+        } catch (error) {
+            console.error("Error loading SHAP plot for PDF:", error);
+            shapPlotBase64 = null; 
+        }
+        
+        // 1. Main Report Title (Centered, large)
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(28);
+        pdf.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
+        pdf.text("Anti-microbial Peptides Report", pageWidth / 2, yPos, { align: "center" });
+        yPos += 28 + 20; // Height of title + large spacing below title
+
+        // 2. Input Sequence
+        pdf.setFontSize(16);
+        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        pdf.text("Input Sequence:", 20, yPos);
+        yPos += 7; // Reduced space below heading
+        pdf.setFontSize(11); // Slightly larger font for sequence text for better readability in PDF
+        pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
+        const sequenceMaxWidth = pageWidth - 40; 
+        const sequenceLines = pdf.splitTextToSize(sequence, sequenceMaxWidth);
+        pdf.text(sequenceLines, 20, yPos);
+        yPos += (sequenceLines.length * (11 / pdf.internal.scaleFactor) * 1.1) + 18; // Adjusted dynamic height for text block, plus spacing after
+
+
+        // 3. Analysis Summary (Table for Prediction & Confidence)
+        if (yPos + 35 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; } 
+        pdf.setFontSize(16);
+        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        pdf.text("Analysis Summary:", 20, yPos);
+        yPos += 8; // Reduced spacing after heading
+
+        const predictionTableHead = [['Metric', 'Value']];
+        const predictionTableBody = [
+            ['Prediction', prediction],
+            ['Confidence', `${(confidence * 100).toFixed(2)}%`]
+        ];
+        
+        pdf.autoTable({
+            startY: yPos,
+            head: predictionTableHead,
+            body: predictionTableBody,
+            theme: 'striped',
+            headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'left' }, // Aligned to left
+            bodyStyles: { textColor: textColor, fontSize: 10, cellPadding: 2, lineWidth: 0.1, lineColor: [200, 200, 200] },
+            columnStyles: { 
+                0: { cellWidth: 70 }, // Fixed width for Metric
+                1: { halign: 'left', cellWidth: 'auto' } // Auto width for Value
+            },
+            didParseCell: function(data) { // Use didParseCell to ensure content is proper before drawing
+                if (data.section === 'body' && data.column.dataKey === 1) { // Assuming 'Value' is dataKey 1
+                    if (data.row.raw[0] === 'Prediction') { // If this is the prediction row
+                        data.cell.styles.fontStyle = 'bold'; // Make prediction bold
+                        data.cell.styles.textColor = (prediction.includes('(Non-AMP)')) ? errorColor : successColor;
+                    } else if (data.row.raw[0] === 'Confidence') { // If this is the confidence row
+                        data.cell.styles.textColor = successColor;
+                    }
+                }
+            }
+        });
+        yPos = pdf.lastAutoTable.finalY + 20; // Increased spacing after table
+
+
+        // 4. Predicted MIC Values (Table)
+        if (micResults && Object.keys(micResults).length > 0) {
+            if (yPos + 35 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; } 
+            pdf.setFontSize(16);
+            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            pdf.text("Predicted MIC (µM):", 20, yPos); 
+            yPos += 8; // Consistent with screenshot spacing
+
+            const micTableHead = [['Bacterium', 'MIC (µM)']]; // Exactly as requested
+            const micTableBody = [];
+            const bacteriumDisplayNamesForPdf = {
+                'e_coli': 'E.coli', 'p_aeruginosa': 'P. aeruginosa',
+                's_aureus': 'S.aureus', 'k_pneumoniae': 'K.Pneumoniae',
+            };
+            // Sort keys to ensure consistent order in PDF (matches your screenshot order for E.coli, S.aureus, P. aeruginosa, K.Pneumoniae if that's the order returned by your Gradio script after mapping).
+            // No explicit sort on keys from screenshot, but doing alphabetically might be better. Let's keep it simple with existing code.
+            const micKeys = Object.keys(micResults); // No sort, relies on how `micDataForPdf` was populated.
+            
+            micKeys.forEach(bacteriumKey => { // Iterate without sorting for screenshot match
+                if (typeof micResults[bacteriumKey] === 'number' && bacteriumDisplayNamesForPdf[bacteriumKey]) {
+                    micTableBody.push([
+                        bacteriumDisplayNamesForPdf[bacteriumKey],
+                        micResults[bacteriumKey].toFixed(3)
+                    ]);
+                }
+            });
+            
+            pdf.autoTable({
+                startY: yPos,
+                head: micTableHead, 
+                body: micTableBody,
+                theme: 'striped', 
+                headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'center' },
+                columnStyles: { 
+                    0: { fontStyle: 'italic', cellWidth: 90, halign: 'left' }, // Aligned left as in screenshot
+                    1: { halign: 'right', cellWidth: 'auto' } // MIC (µM) aligned right
+                },
+                styles: { cellPadding: 2, fontSize: 10, textColor: textColor, lineColor: [200, 200, 200], lineWidth: 0.1 },
+            });
+            yPos = pdf.lastAutoTable.finalY + 20; // Adjusted spacing
+        } else { 
+            if (yPos + 25 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; }
+            pdf.setFontSize(10); pdf.setTextColor(100,100,100);
+            pdf.text("No MIC prediction performed for this peptide (e.g., non-AMP or no bacteria selected).", 20, yPos);
+            yPos += 15; 
+        }
+
+        // --- NEW PAGE FOR XAI ---
+        pdf.addPage(); 
+        yPos = 20; // Reset Y for new page
+
+        // 5. LIME (Local XAI): Top Features Influencing Prediction (Table)
+        pdf.setFontSize(16);
+        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+        pdf.text("LIME (Local XAI): Top Features Influencing Prediction:", 20, yPos); // Exact title as requested
+        yPos += 8; // Spacing
+
+        if (limeFeatures && limeFeatures.length > 0) {
+            const limeTableHead = [['Feature', 'Condition', 'SHAP Value']]; // Corrected headers to match screenshot
+            const limeTableBody = [];
+            
+            // Sort LIME features by absolute SHAP value (descending) as seen in screenshot order
+            limeFeatures.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
+
+            limeFeatures.forEach((f) => { 
+                limeTableBody.push([
+                    f.feature, 
+                    f.condition || '', // Condition (or empty string if none)
+                    (typeof f.value === 'number' ? f.value.toFixed(4) : '') // SHAP Value
+                ]);
+            });
+            pdf.autoTable({
+                startY: yPos,
+                head: limeTableHead,
+                body: limeTableBody,
+                theme: 'striped',
+                headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'left' }, // Aligned left
+                columnStyles: { 
+                    0: { cellWidth: 70, halign: 'left' }, // Feature, align left as in screenshot
+                    1: { cellWidth: 50, halign: 'center' }, // Condition, align center as in screenshot
+                    2: { halign: 'right', cellWidth: 'auto' } // SHAP Value, align right
+                },
+                styles: { cellPadding: 2, fontSize: 9.5, textColor: textColor, lineColor: [200, 200, 200], lineWidth: 0.1 }, // Adjust cell padding for spacing
+                didDrawCell: (data) => {
+                    // Color positive SHAP values green, negative red in the 'SHAP Value' column
+                    if (data.column.index === 2 && data.row.section === 'body') {
+                        const val = parseFloat(data.cell.raw);
+                        if (!isNaN(val)) {
+                            if (val > 0) pdf.setTextColor(successColor[0], successColor[1], successColor[2]);
+                            else if (val < 0) pdf.setTextColor(errorColor[0], errorColor[1], errorColor[2]);
+                        }
+                    }
+                }
+            });
+            yPos = pdf.lastAutoTable.finalY + 20; // Spacing after LIME table
+        } else {
+            pdf.setFontSize(10); pdf.setTextColor(100,100,100);
+            pdf.text("LIME local explanation data not available for this prediction.", 20, yPos);
+            yPos += 15; 
+        }
+
+        // 6. SHAP Plot (Global XAI - Static image from file)
+        // No explicit globalShapFeaturesTable based on screenshot; directly proceed to SHAP plot.
+        if (shapPlotBase64) {
+            const tempShapImg = new Image(); 
+            tempShapImg.src = shapPlotBase64;
+            await new Promise(resolve => tempShapImg.complete ? resolve() : (tempShapImg.onload = resolve));
+            
+            let imgWidth = tempShapImg.naturalWidth;
+            let imgHeight = tempShapImg.naturalHeight;
+            const ratio = imgWidth / imgHeight;
+            const imgMaxHeight = 80; // Adjusted for height to fit below LIME if space permits.
+            const imgMaxWidth = pageWidth - 40; 
+
+            if (imgWidth > imgMaxWidth) { imgWidth = imgMaxWidth; imgHeight = imgWidth / ratio; }
+            if (imgHeight > imgMaxHeight) { imgHeight = imgMaxHeight; imgWidth = imgHeight * ratio; }
+
+            // Ensure there's space for title + image + a small buffer
+            if (yPos + imgHeight + 40 > pdf.internal.pageSize.height - 30) { 
+                pdf.addPage(); yPos = 20; 
+            }
+
+            pdf.setFontSize(16);
+            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            pdf.text("SHAP Plot (Global XAI):", 20, yPos); // Exact title as requested
+            yPos += 8;
+
+            try {
+                const imageX = (pageWidth - imgWidth) / 2; // Center the image
+                pdf.addImage(shapPlotBase64, 'PNG', imageX, yPos, imgWidth, imgHeight); 
+                yPos += imgHeight + 15; // Spacing after image
+            } catch (imgError) { 
+                console.error("Error adding SHAP plot to PDF:", imgError);
+                pdf.setFontSize(10); pdf.setTextColor(100,100,100);
+                pdf.text("SHAP plot image could not be embedded due to an error.", 20, yPos);
+                yPos += 15;
+            }
+        } else {
+            if (yPos + 25 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; }
+            pdf.setFontSize(16);
+            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            pdf.text("SHAP Plot (Global XAI):", 20, yPos); // Heading regardless
+            yPos += 8;
+            pdf.setFontSize(10); pdf.setTextColor(100,100,100);
+            pdf.text("SHAP plot (Global XAI) could not be loaded or is not available.", 20, yPos);
+            yPos += 15; 
+        }
+
+        // Add page numbers and generic footer to all pages
+        addPageNumbersAndFooter(pdf);
+        
+        // Finalize PDF and prepare for download
+        const pdfBlob = pdf.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        downloadLink.href = pdfUrl;
+        downloadLink.download = `EPIC-AMP_Report_${new Date().toISOString().slice(0,10)}.pdf`;
+    }
+
+    // Helper function to add page numbers and repeated footer
+    function addPageNumbersAndFooter(doc) {
+        const pageCount = doc.internal.getNumberOfPages();
+        for (let i = 1; i <= pageCount; i++) {
+            doc.setPage(i);
+            doc.setFontSize(9); 
+            doc.setTextColor(120, 120, 120); 
+            doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 7, { align: "right" });
+            doc.text("Generated by EPIC-AMP @ Zewail City", doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 7, { align: "center" });
+        }
+    }
 </script>
 
 </body>
