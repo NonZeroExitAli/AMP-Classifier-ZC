@@ -832,7 +832,7 @@
                 <li><strong>M (Methionine):</strong>
                     <ul>
                         <li><strong>Description:</strong> Methionine is often associated with structural stability in peptides.</li>
-                        <li><strong>Interpretation:</strong>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
+                        <li><strong>Interpretation:</b>  The plot suggests Methionine content has a positive influence, possibly contributing to the stability of AMP candidates.</li>
                     </ul>
                 </li>
                 <li><strong>C (Cysteine):</strong>
@@ -895,7 +895,7 @@
                 <li><strong>GearyAuto_ResidueASA30:</strong>
                     <ul>
                         <li><strong>Description:</strong> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
-                        <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
+                        <li><strong>Interpretation:</b> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
                     </ul>
                 </li>
             </ul>
@@ -1021,9 +1021,8 @@ The final model was selected based on the following criteria:</p>
     const progressContainer = document.getElementById('progress-container');
     const progressBar = document.getElementById('progress-bar');
     const fileInput = document.getElementById('file-input');
-    const downloadLink = document.getElementById('download-link'); // Now directly points to the element inside additional-details-output
+    const downloadLink = document.getElementById('download-link');
 
-    // Result display elements
     const ampClassificationOutput = document.getElementById('amp-classification-output');
     const additionalDetailsOutput = document.getElementById('additional-details-output');
     const micCheckboxes = document.querySelectorAll('.mic-checkbox-group input[type="checkbox"]');
@@ -1084,8 +1083,9 @@ The final model was selected based on the following criteria:</p>
         // Hide download link explicitly using its direct ID as it's now in additionalDetailsOutput
         downloadLink.style.display = 'none';
 
-        ampClassificationOutput.innerHTML = '<p class="info-message"></p>'; // Use info-message class for default styling
-        additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; // Ensure this clears other content too
+        // Reverted to original informative clear message
+        ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>'; 
+        additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; 
         // Append download link back to the output div so it's managed correctly
         additionalDetailsOutput.appendChild(downloadLink);
 
@@ -1286,24 +1286,20 @@ The final model was selected based on the following criteria:</p>
         predictBtn.disabled = true;
         predictBtn.textContent = 'Processing...';
 
-        // Set initial messages for display boxes
         ampClassificationOutput.innerHTML = '<p class="info-message">Analyzing...</p>';
         additionalDetailsOutput.innerHTML = '<p class="info-message">Generating detailed report...</p>';
-        // Append download link back to the output div so it's managed correctly
         additionalDetailsOutput.appendChild(downloadLink);
-        downloadLink.style.display = 'none'; // Ensure download link is hidden while processing
+        downloadLink.style.display = 'none';
 
-        micCheckboxes.forEach(checkbox => checkbox.disabled = true); // Disable MIC checkboxes while processing
+        micCheckboxes.forEach(checkbox => checkbox.disabled = true);
 
         progressContainer.style.display = 'block';
         progressBar.style.width = '0%';
 
-        // These variables will store the parsed data for the PDF
         let micDataForPdf = {};
         let ampLabel = 'Unknown';
         let ampConfidence = 0;
-        let shapPlotBase64 = null; // Cannot be parsed from the current text output, will remain null for PDF
-        let topFeaturesForPdf = []; // Parsed from text
+        let topFeaturesForPdf = [];
 
         let animationProgress = 0;
         animationIntervalId = setInterval(() => {
@@ -1314,8 +1310,6 @@ The final model was selected based on the following criteria:</p>
         }, 100);
 
         try {
-            // Call the main Gradio API endpoint to get the combined text output
-            // Assumes the `/predict` endpoint returns the entire formatted string.
             const classificationResult = await clientInstance.predict("/predict", [sequence]);
 
             if (!classificationResult || !classificationResult.data || typeof classificationResult.data[0] !== 'string') {
@@ -1323,12 +1317,10 @@ The final model was selected based on the following criteria:</p>
             }
 
             const rawTextOutput = classificationResult.data[0];
-            console.log("Raw text output from Gradio:", rawTextOutput); // Log raw output for debugging
+            console.log("Raw text output from Gradio:", rawTextOutput);
 
-            // --- Start Text Parsing Logic (Essential for PDF Data) ---
-            const lines = rawTextOutput.split('\n').map(line => line.trim()).filter(Boolean); // Split into lines, trim, remove empty
+            const lines = rawTextOutput.split('\n').map(line => line.trim()).filter(Boolean);
 
-            // Regex patterns
             const labelRegex = /Prediction:\s*(.+)/;
             const confidenceRegex = /Confidence:\s*([\d.]+)%/;
             const micSectionHeader = /Predicted MIC Values \(μM\):/;
@@ -1337,7 +1329,6 @@ The final model was selected based on the following criteria:</p>
             const featureLineRegex = /-\s*(.+?):\s*([\d.-]+)/;
 
 
-            // Parse Label and Confidence
             const labelMatch = rawTextOutput.match(labelRegex);
             if (labelMatch && labelMatch[1]) {
                 ampLabel = labelMatch[1];
@@ -1351,11 +1342,10 @@ The final model was selected based on the following criteria:</p>
                 ampConfidence = parseFloat(confidenceMatch[1]) / 100;
             } else {
                 console.warn("Could not parse Confidence from output for PDF.");
-                ampConfidence = 0; // Default to 0
+                ampConfidence = 0;
             }
 
 
-            // Parse MIC values and Top Features by section for PDF generation
             let micSectionStarted = false;
             let topFeaturesSectionStarted = false;
 
@@ -1377,12 +1367,11 @@ The final model was selected based on the following criteria:</p>
                             'E.coli': 'e_coli',
                             'P.aeruginosa': 'p_aeruginosa',
                             'S.aureus': 's_aureus',
-                            'K.Pneumonia': 'k_pneumoniae', // Ensure this matches your sample if it's 'K.Pneumonia'
+                            'K.Pneumonia': 'k_pneumoniae',
                         };
                         const displayMicName = micLineMatch[1].trim();
                         const internalKey = bacteriumNameMap[displayMicName];
 
-                        // ONLY add MIC to micDataForPdf if its checkbox was CHECKED
                         const isMicCheckboxChecked = Array.from(micCheckboxes).some(
                             cb => cb.checked && cb.value === internalKey
                         );
@@ -1418,7 +1407,6 @@ The final model was selected based on the following criteria:</p>
                     }
                 }
             }
-            // --- End Text Parsing Logic ---
 
 
             clearInterval(animationIntervalId);
@@ -1426,21 +1414,15 @@ The final model was selected based on the following criteria:</p>
             progressBar.style.width = '100%';
             progressContainer.style.display = 'none';
 
-            // --- Update ON-SCREEN Display ---
-
-            // AMP Classification Output: Only the label
             ampClassificationOutput.innerHTML = `
                 <p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabel.includes('Non-AMP') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0; text-align: center;">${ampLabel}</p>
             `;
 
-            // Additional Details Output: Only the download link and a message
             additionalDetailsOutput.innerHTML = '<p class="info-message">Detailed report available for download:</p>';
-            additionalDetailsOutput.appendChild(downloadLink); // Append the actual link element
-            downloadLink.style.display = 'block'; // Make the link visible
+            additionalDetailsOutput.appendChild(downloadLink);
+            downloadLink.style.display = 'block';
 
 
-            // Re-enable/disable MIC checkboxes based on AMP prediction
-            // This is primarily for new submissions, as parsed MIC values dictate PDF.
             if (ampLabel.includes('AMP (Positive)')) {
                 micCheckboxes.forEach(checkbox => checkbox.disabled = false);
             } else {
@@ -1450,8 +1432,7 @@ The final model was selected based on the following criteria:</p>
                 });
             }
 
-            // Generate and provide PDF report (PDF will use the parsed micDataForPdf)
-            generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, topFeaturesForPdf, shapPlotBase64);
+            await generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, topFeaturesForPdf);
 
 
         } catch (error) {
@@ -1466,65 +1447,121 @@ The final model was selected based on the following criteria:</p>
             showError("Prediction failed: " + (error.message || "Unknown error"));
             ampClassificationOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error</p>';
             additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error during prediction. Detailed report not available.</p>';
-            additionalDetailsOutput.appendChild(downloadLink); // Ensure link is still in DOM even on error
-            downloadLink.style.display = 'none'; // Keep hidden on error
+            additionalDetailsOutput.appendChild(downloadLink);
+            downloadLink.style.display = 'none';
         } finally {
             predictBtn.disabled = false;
             predictBtn.textContent = 'Submit';
         }
     }
 
+    // Helper to get image base64, now correctly async handling
+    function getBase64Image(imgSrc) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous'; // Required for images from different origins due to CORS policy
+            img.onload = () => {
+                try {
+                    if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+                        console.warn(`Image "${imgSrc}" has no natural dimensions. Possibly corrupted or failed to load.`);
+                        resolve(null); // Resolve with null if image data is invalid
+                        return;
+                    }
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
+                } catch (e) {
+                    console.error(`Error converting image "${imgSrc}" to base64:`, e);
+                    // Often a CORS error if the image is from a different domain and crossOrigin isn't enough or supported.
+                    reject(e); // Reject the promise on error
+                }
+            };
+            img.onerror = () => {
+                console.error(`Failed to load image at URL: "${imgSrc}"`);
+                reject(`Failed to load image: ${imgSrc}`);
+            };
+            img.src = imgSrc;
+        });
+    }
+
+
     // Function to generate the PDF report using jspdf and jspdf-autotable
-    function generatePDFReport(sequence, prediction, confidence, micResults = null, topFeatures = null, shapPlotBase64 = null) {
+    async function generatePDFReport(sequence, prediction, confidence, micResults = null, topFeatures = null) {
         if (!window.jspdf || !window.jspdf.jsPDF) {
             console.error("jsPDF is not loaded correctly.");
             return;
         }
         const pdf = new window.jspdf.jsPDF(); 
 
-        // Set up standard colors and fonts
-        const primaryColor = [0, 77, 64]; // Dark Teal
-        const textColor = [51, 51, 51]; // Dark Gray
-        const successColor = [39, 174, 96]; // Emerald Green
-        const errorColor = [231, 76, 60]; // Alizarin Red
-        const headerTextColor = [44, 62, 80]; // Dark Blue-Gray for title
+        const primaryColor = [0, 77, 64]; 
+        const textColor = [51, 51, 51]; 
+        const successColor = [39, 174, 96]; 
+        const errorColor = [231, 76, 60]; 
+        const headerTextColor = [44, 62, 80]; 
 
         const pageWidth = pdf.internal.pageSize.width;
         let currentHeaderY = 15; // Starting Y for elements in the header area
 
-        // Add tool logo
-        const imgElement = document.querySelector('.logos-container img');
-        if (imgElement && imgElement.src) {
-            const imgData = getBase64Image(imgElement);
-            if (imgData) {
-                // Determine logo dimensions and position to "stretch" it more prominently
-                // Let's aim for the logo to be 80% of the page width to make it larger and visible
-                const desiredLogoWidth = pageWidth * 0.8;
-                const originalLogoRatio = imgElement.naturalHeight / imgElement.naturalWidth;
-                const calculatedLogoHeight = desiredLogoWidth * originalLogoRatio;
-
-                const logoX = (pageWidth - desiredLogoWidth) / 2; // Center horizontally
-                
-                // Add the logo
-                pdf.addImage(imgData, 'PNG', logoX, currentHeaderY, desiredLogoWidth, calculatedLogoHeight);
-                currentHeaderY += calculatedLogoHeight + 5; // Move Y position below logo
-            } else {
-                console.warn("PDF Generation Warning: Could not get base64 data for tool logo (image2.png). It might not be loaded or an issue occurred (e.g., CORS).");
+        // --- Load images synchronously/await for PDF generation ---
+        const toolLogoElement = document.querySelector('.logos-container img');
+        let toolLogoBase64 = null;
+        if (toolLogoElement && toolLogoElement.src) {
+            try {
+                toolLogoBase64 = await getBase64Image(toolLogoElement.src);
+            } catch (error) {
+                console.error("Error loading tool logo for PDF:", error);
+                toolLogoBase64 = null;
             }
+        }
+        
+        let shapPlotBase64 = null;
+        try {
+            // Assume 'shap.png' is in the same directory as the HTML file.
+            // Adjust this path if 'shap.png' is in a different location.
+            shapPlotBase64 = await getBase64Image('shap.png'); 
+        } catch (error) {
+            console.error("Error loading SHAP plot for PDF:", error);
+            shapPlotBase64 = null;
+        }
+
+
+        // Add tool logo
+        if (toolLogoBase64) {
+            // To get natural dimensions for aspect ratio without relying on a temporary `Image` onload
+            // The `addImage` function can calculate if given width=0 and height>0 or vice-versa.
+            // For stretching proportionally, we need original aspect ratio.
+            const tempImg = new Image(); // Use a dummy img to get natural width/height from the base64
+            tempImg.src = toolLogoBase64;
+            // It's guaranteed to be loaded if toolLogoBase64 is not null (due to getBase64Image already resolving on load)
+            
+            const originalLogoRatio = tempImg.naturalHeight / tempImg.naturalWidth;
+            const desiredLogoWidth = pageWidth * 0.8; // Use 80% of page width
+            const calculatedLogoHeight = desiredLogoWidth * originalLogoRatio;
+
+            const logoX = (pageWidth - desiredLogoWidth) / 2; // Center horizontally
+            
+            pdf.addImage(toolLogoBase64, 'PNG', logoX, currentHeaderY, desiredLogoWidth, calculatedLogoHeight);
+            currentHeaderY += calculatedLogoHeight + 5; // Move Y position below logo
         } else {
-            console.warn("PDF Generation Warning: Tool logo (image2.png) element not found or has no src.");
+            console.warn("PDF Generation: Tool logo could not be added.");
+            // If no logo, just reserve some space for the title to start
+            currentHeaderY += 10; 
         }
 
         // Main Report Title
-        pdf.setFont("helvetica", "bold"); // Set font to bold for emphasis
-        pdf.setFontSize(28); // Increased font size for creativity/prominence
+        pdf.setFont("helvetica", "bold"); 
+        pdf.setFontSize(28); 
         pdf.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
-        pdf.text("Anti-microbial Peptides Report", pageWidth / 2, currentHeaderY + 10, { align: "center" }); // Add more padding below logo for title
-        currentHeaderY += 10 + 28 + 10; // Adjust for title height + small gap before content starts
+        pdf.text("Anti-microbial Peptides Report", pageWidth / 2, currentHeaderY + 10, { align: "center" }); 
+        currentHeaderY += 10 + 28 + 15; // Adjusted spacing
 
         let yPos = currentHeaderY; // Initial Y position for main content
 
-        // Input Sequence
+
+        // Input Sequence (No change here in PDF generation content/styles)
         pdf.setFontSize(16);
         pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
         pdf.text("Input Sequence:", 20, yPos);
@@ -1533,49 +1570,67 @@ The final model was selected based on the following criteria:</p>
         const maxWidth = 170;
         const sequenceLines = pdf.splitTextToSize(sequence, maxWidth);
         pdf.text(sequenceLines, 20, yPos + 10);
-        yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10;
+        yPos += 10 + (sequenceLines.length * pdf.getLineHeight()) + 10; // Reduced line height, maintained vertical spacing
 
-        // AMP Classification
+
+        // Prediction & Confidence Table
         pdf.setFontSize(16);
         pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        pdf.text("AMP Classification:", 20, yPos);
-        pdf.setFontSize(14);
-        if (prediction.includes('(Non-AMP)')) {
-             pdf.setTextColor(errorColor[0], errorColor[1], errorColor[2]);
-         } else {
-            pdf.setTextColor(successColor[0], successColor[1], successColor[2]);
-         }
-        pdf.text(prediction, 20, yPos + 10);
-        yPos += 20;
+        pdf.text("Analysis Summary:", 20, yPos);
+        yPos += 8; // Reduced spacing after heading
 
-        // Confidence
-        pdf.setFontSize(16);
-        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        pdf.text("Confidence:", 20, yPos);
-        pdf.setFontSize(14);
-        pdf.setTextColor(successColor[0], successColor[1], successColor[2]);
-        pdf.text(`${(confidence * 100).toFixed(2)}%`, 20, yPos + 10);
-        yPos += 20;
+        const summaryTableHead = [['Metric', 'Value']];
+        const summaryTableBody = [
+            ['Prediction', prediction],
+            ['Confidence', `${(confidence * 100).toFixed(2)}%`]
+        ];
+
+        pdf.autoTable({
+            startY: yPos,
+            head: summaryTableHead,
+            body: summaryTableBody,
+            theme: 'striped',
+            headStyles: {
+                fillColor: primaryColor,
+                textColor: 255
+            },
+            styles: {
+                cellPadding: 3,
+                fontSize: 12, 
+                textColor: textColor,
+                lineColor: [200, 200, 200],
+                lineWidth: 0.1
+            },
+            columnStyles: {
+                0: { fontStyle: 'bold' },
+                1: { fontStyle: (prediction.includes('(Non-AMP)') ? 'normal' : 'bold'), textColor: (prediction.includes('(Non-AMP)') ? errorColor : successColor) }
+            },
+            didDrawPage: function(data) { 
+                yPos = data.cursor.y; 
+            }
+        });
+        yPos = pdf.lastAutoTable.finalY + 12; // Adjusted spacing after table
 
 
         // MIC Values Table
         if (micResults && Object.keys(micResults).length > 0) {
-            if (yPos + 40 > pdf.internal.pageSize.height - 30) { // Check for page break needed
+            // Check if space for MIC table is enough or if new page is needed (with some margin)
+            if (yPos + 40 > pdf.internal.pageSize.height - 30) { 
                 pdf.addPage();
-                yPos = 20; // Reset Y for new page
+                yPos = 20; 
             }
             pdf.setFontSize(16);
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
             pdf.text("Predicted MIC (µM):", 20, yPos);
-            yPos += 10;
+            yPos += 8; // Reduced spacing after heading
 
             const micTableHead = [['Bacterium', 'MIC (µM)']];
             const micTableBody = [];
-            const bacteriumDisplayNamesForPdf = { // Using consistent display names
+            const bacteriumDisplayNamesForPdf = {
                 'e_coli': 'E.coli',
                 'p_aeruginosa': 'P. aeruginosa',
                 's_aureus': 'S.aureus',
-                'k_pneumoniae': 'K.Pneumoniae', // Consistent with sample format
+                'k_pneumoniae': 'K.Pneumoniae', 
             };
 
             for (const bacteriumKey in micResults) {
@@ -1593,46 +1648,46 @@ The final model was selected based on the following criteria:</p>
                 body: micTableBody,
                 theme: 'striped',
                 headStyles: {
-                    fillColor: primaryColor, // Dark Teal header
-                    textColor: 255 // White text
+                    fillColor: primaryColor, 
+                    textColor: 255 
                 },
                 styles: {
                     cellPadding: 3,
                     fontSize: 10,
                     textColor: textColor,
-                    lineColor: [200, 200, 200], // Lighter border
+                    lineColor: [200, 200, 200], 
                     lineWidth: 0.1
                 },
                 columnStyles: {
-                    0: { fontStyle: 'italic' }, // Italicize bacterium name column (jspdf-autotable applies it correctly to cells)
+                    0: { fontStyle: 'italic' }, 
                 },
-                didDrawPage: function(data) { // Handler for pagination (new page starts)
-                    yPos = data.cursor.y; // Update yPos after table draws
+                didDrawPage: function(data) {
+                    yPos = data.cursor.y;
                 }
             });
-            yPos = pdf.lastAutoTable.finalY + 10; // Update Y position based on table end
-        } else {
+            yPos = pdf.lastAutoTable.finalY + 12; // Adjusted spacing
+        } else if (prediction.includes('AMP (Positive)')) { 
             pdf.setFontSize(12);
             pdf.setTextColor(100, 100, 100);
             pdf.text("No MIC predictions were selected or generated for this peptide.", 20, yPos + 10);
-            yPos += 20;
+            yPos += 15; // Adjusted spacing
+        } else {
+            yPos += 10; // Small increment even if no MIC or message
         }
 
+        // Top Features (LIME) and SHAP Plot - START A NEW PAGE FOR THIS SECTION
+        pdf.addPage(); 
+        yPos = 20; // Reset Y for new page
 
-        // Top Features Influencing Prediction Table
+        // LIME (Local XAI) - Top Features Table
         if (topFeatures && topFeatures.length > 0) {
-            if (yPos + 40 > pdf.internal.pageSize.height - 30) { // Check for page break needed
-                pdf.addPage();
-                yPos = 20; // Reset Y for new page
-            }
             pdf.setFontSize(16);
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("Top Features Influencing Prediction:", 20, yPos);
-            yPos += 10;
+            pdf.text("LIME (Local XAI): Top Features Influencing Prediction:", 20, yPos);
+            yPos += 8; // Reduced spacing
 
             const featuresTableHead = [['Feature', 'Condition', 'SHAP Value']];
             const featuresTableBody = topFeatures.map(f => {
-                // Ensure feature name is consistent, convert null/undefined condition to empty string for display
                 return [f.feature || '', f.condition || '', (typeof f.value === 'number' ? f.value.toFixed(4) : '')];
             });
 
@@ -1652,7 +1707,7 @@ The final model was selected based on the following criteria:</p>
                     lineColor: [200, 200, 200],
                     lineWidth: 0.1
                 },
-                columnStyles: { // Adjust column widths if needed, these are examples
+                columnStyles: { 
                     0: { cellWidth: 60 },
                     1: { cellWidth: 60, halign: 'center' },
                     2: { cellWidth: 50, halign: 'right' }
@@ -1661,50 +1716,52 @@ The final model was selected based on the following criteria:</p>
                     yPos = data.cursor.y;
                 }
             });
-            yPos = pdf.lastAutoTable.finalY + 10;
+            yPos = pdf.lastAutoTable.finalY + 15; // Adjusted spacing
         } else {
             pdf.setFontSize(12);
             pdf.setTextColor(100, 100, 100);
-            pdf.text("No specific features provided for this prediction.", 20, yPos + 10);
-            yPos += 20;
+            pdf.text("No specific LIME features were provided for this prediction.", 20, yPos + 10);
+            yPos += 15; // Adjusted spacing
         }
 
-        // SHAP Plot (still from base64 if present, or static image for interpretation context)
-        // Note: For current setup, shapPlotBase64 will be null as it's not in the raw text output from Gradio.
+        // SHAP Plot (Global XAI)
         if (shapPlotBase64) {
-            if (yPos + 80 > pdf.internal.pageSize.height - 30) { // Approx space for image
+            // Check if SHAP plot fits on current page after LIME table, if not, add another page
+            const shapImageOptimalWidth = 170; // Max width to fit page nicely
+            const tempShapImg = new Image();
+            tempShapImg.src = shapPlotBase64;
+            const shapAspectRatio = tempShapImg.naturalHeight / tempShapImg.naturalWidth;
+            const shapImageCalculatedHeight = shapImageOptimalWidth * shapAspectRatio;
+
+            if (yPos + shapImageCalculatedHeight + 40 > pdf.internal.pageSize.height - 30) { 
                 pdf.addPage();
-                yPos = 20;
+                yPos = 20; 
             }
+            
             pdf.setFontSize(16);
             pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("SHAP Interpretability Plot:", 20, yPos);
-            yPos += 10;
-
-            const imgWidth = 160; // Max width to fit page
-            const imgHeight = 90; // Approx height for plot
+            pdf.text("SHAP Plot (Global XAI):", 20, yPos);
+            yPos += 8; // Reduced spacing
 
             try {
-                const dataURL = `data:image/png;base64,${shapPlotBase64}`;
-                pdf.addImage(dataURL, 'PNG', 20, yPos, imgWidth, imgHeight);
-                yPos += imgHeight + 10;
+                const shapImageX = (pageWidth - shapImageOptimalWidth) / 2; // Center horizontally
+                pdf.addImage(shapPlotBase64, 'PNG', shapImageX, yPos, shapImageOptimalWidth, shapImageCalculatedHeight);
+                yPos += shapImageCalculatedHeight + 10;
             } catch (imgError) {
                 console.error("Error adding SHAP plot to PDF:", imgError);
                 pdf.setFontSize(12);
                 pdf.setTextColor(100, 100, 100);
                 pdf.text("SHAP plot could not be embedded.", 20, yPos);
-                yPos += 10;
+                yPos += 15;
             }
         } else {
-            // This message indicates no dynamic SHAP plot was received
-            if (yPos + 10 < pdf.internal.pageSize.height - 30) {
-                pdf.setFontSize(12);
-                pdf.setTextColor(100, 100, 100);
-                yPos += 20;
-            }
+            pdf.setFontSize(12);
+            pdf.setTextColor(100, 100, 100);
+            pdf.text("SHAP plot (Global XAI) could not be loaded or is not available.", 20, yPos + 10);
+            yPos += 15;
         }
 
-        // Footer
+        // Footer - Always appears on the last drawn page. jspdf handles multiple pages for autoTable correctly.
         pdf.setFontSize(10);
         pdf.setTextColor(127, 140, 141);
         pdf.text("Generated by EPIC-AMP located @ Zewail City", 105, pdf.internal.pageSize.height - 15, { align: "center" });
@@ -1716,29 +1773,36 @@ The final model was selected based on the following criteria:</p>
         downloadLink.download = `AMP_Classifier_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
     }
 
-    function getBase64Image(img) {
-        if (!img || !img.src) {
-            console.error("Image element not found or has no source.");
-            return null;
-        }
-        try {
-            // Check if the image is loaded, if not, wait for it or handle gracefully
-            if (!img.complete || img.naturalWidth === 0 || img.naturalHeight === 0) {
-                 console.warn("Image not fully loaded or invalid dimensions for base64 conversion. Ensure image is loaded.");
-                 return null;
-            }
-
-            const canvas = document.createElement("canvas");
-            canvas.width = img.naturalWidth;
-            canvas.height = img.naturalHeight;
-            const ctx = canvas.getContext("2d");
-            ctx.drawImage(img, 0, 0);
-            const dataURL = canvas.toDataURL("image/png");
-            return dataURL;
-        } catch (error) {
-            console.error("Error converting image to base64:", error);
-            return null;
-        }
+    // Helper to get image base64 from a URL, now specifically expecting a string URL
+    function getBase64Image(imgSrc) {
+        return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.crossOrigin = 'Anonymous'; // Crucial for loading images from potentially different origins
+            img.onload = () => {
+                if (img.naturalWidth === 0 || img.naturalHeight === 0) {
+                    console.warn(`Image at "${imgSrc}" has no natural dimensions. Possibly corrupted or failed to load fully.`);
+                    resolve(null); 
+                    return;
+                }
+                try {
+                    const canvas = document.createElement("canvas");
+                    canvas.width = img.naturalWidth;
+                    canvas.height = img.naturalHeight;
+                    const ctx = canvas.getContext("2d");
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas.toDataURL("image/png"));
+                } catch (e) {
+                    // This often catches tainted canvas (CORS issues) or drawing errors
+                    console.error(`Error converting image "${imgSrc}" to base64 via canvas:`, e);
+                    reject(`Error converting image to base64: ${imgSrc} - ${e.message}`);
+                }
+            };
+            img.onerror = () => {
+                console.error(`Failed to load image at URL: "${imgSrc}"`);
+                reject(`Failed to load image: ${imgSrc}`);
+            };
+            img.src = imgSrc;
+        });
     }
 
 </script>
