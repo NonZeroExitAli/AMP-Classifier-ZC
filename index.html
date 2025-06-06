@@ -871,7 +871,7 @@
                 <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
                     <ul>
                         <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
-                        <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
+                        <li><strong>Interpretation:</strong> These properties impact membrane ***** and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
                     </ul>
                 </li>
             </ul>
@@ -908,7 +908,7 @@
                 ISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
             <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAK
                 AQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
-            <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
+            <li><strong>Test 3:</b> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
             <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
             <li><strong>Test 5:</strong> Invalid Characters (eg. X) - 
                 MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
@@ -1479,7 +1479,6 @@ The final model was selected based on the following criteria:</p>
             console.error("jsPDF is not loaded correctly.");
             return;
         }
-        // This confirms jspdf is loaded correctly.
         const pdf = new window.jspdf.jsPDF(); // Correct way to instantiate jsPDF with plugins
 
         // Set up standard colors and fonts
@@ -1487,23 +1486,32 @@ The final model was selected based on the following criteria:</p>
         const textColor = [51, 51, 51]; // Dark Gray
         const successColor = [39, 174, 96]; // Emerald Green
         const errorColor = [231, 76, 60]; // Alizarin Red
+        const headerTextColor = [44, 62, 80]; // Dark Blue-Gray for title
 
-
-        pdf.setFont("helvetica"); // Default font family for report
-        pdf.setFontSize(22);
-        pdf.setTextColor(44, 62, 80); // Dark Blue-Gray for title
-        pdf.text("AMP Classification & MIC Report", 105, 20, { align: "center" });
-
-        // Add logo if available
+        // Add logo if available FIRST, then position title relative to it
         const imgElement = document.querySelector('.logos-container img');
+        const imgWidth = 30; // Original width used in current setup
+        const imgHeight = 15; // Original height used in current setup
+        const pageWidth = pdf.internal.pageSize.width;
+        const imgX = (pageWidth - imgWidth) / 2; // Center horizontally
+        let currentHeaderY = 15; // Starting Y for logo
+
         if (imgElement && imgElement.src) {
             const imgData = getBase64Image(imgElement);
             if (imgData) {
-                pdf.addImage(imgData, 'PNG', 25, 22, 30, 15);
+                pdf.addImage(imgData, 'PNG', imgX, currentHeaderY, imgWidth, imgHeight);
             }
         }
+        currentHeaderY += imgHeight + 5; // Add space below logo (5mm)
 
-        let yPos = 55; // Initial Y position for content
+        // Main Report Title
+        pdf.setFont("helvetica");
+        pdf.setFontSize(22);
+        pdf.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
+        pdf.text("Anti-microbial Peptides Report", pageWidth / 2, currentHeaderY, { align: "center" });
+        currentHeaderY += 10; // Adjust for title height + small gap before content starts
+
+        let yPos = currentHeaderY + 15; // Initial Y position for content, leaving more space after header
 
         // Input Sequence
         pdf.setFontSize(16);
