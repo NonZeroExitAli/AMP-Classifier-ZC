@@ -388,7 +388,7 @@
     }
 
     .tab-content li {
-        margin-bottom: 0.25rem; /* Spacing between list items */
+        margin-bottom: 0.25rem;
     }
     .tab-content p {
       margin-bottom: 1rem; /* Add some space below paragraphs */
@@ -622,6 +622,7 @@
 
 <div class="container">
     <div class="logos-container">
+        <!-- This is your tool logo, make sure 'image2.png' is in the same directory -->
         <img src="image2.png" alt="Tool Logo">
     </div>
 
@@ -871,7 +872,7 @@
                 <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
                     <ul>
                         <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
-                        <li><strong>Interpretation:</strong> These properties impact membrane ***** and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
+                        <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
                     </ul>
                 </li>
             </ul>
@@ -908,7 +909,7 @@
                 ISLNTRSPRCNVQSCIDHCKAIGEVIYVCFTYHCYCRKPPM</li>
             <li><strong>Test 2:</strong> Long Sequence of 99 AAs (Non-AMP) - MKSLLPLAILAALAVAALCYESHESMESYEVSPFTTRRNANTFISPQQRWHAK
                 AQERVRELNKPAQEINREACDDYKLCERYALIYGYNAAYNRYFRQR</li>
-            <li><strong>Test 3:</b> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
+            <li><strong>Test 3:</strong> Short Sequence of 51 AAs (P-AMP) - SLQGGAPNFPQPSQQNGGWQVSPDLGRDDKGNTRGQIEIQNKGKDHDFNAG</li>
             <li><strong>Test 4:</strong> Short Sequence of 50 AAs (Non-AMP) - MKPLKQKVSITLDEDVIKNLKTLAEECDRSLSQYINLILKEHLKNLDQQ</li>
             <li><strong>Test 5:</strong> Invalid Characters (eg. X) - 
                 MEKAALIFIGLLLFSTCTQILAQSC(XX).</li>
@@ -1083,7 +1084,7 @@ The final model was selected based on the following criteria:</p>
         // Hide download link explicitly using its direct ID as it's now in additionalDetailsOutput
         downloadLink.style.display = 'none';
 
-        ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>'; // Use info-message class for default styling
+        ampClassificationOutput.innerHTML = '<p class="info-message"></p>'; // Use info-message class for default styling
         additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; // Ensure this clears other content too
         // Append download link back to the output div so it's managed correctly
         additionalDetailsOutput.appendChild(downloadLink);
@@ -1479,7 +1480,7 @@ The final model was selected based on the following criteria:</p>
             console.error("jsPDF is not loaded correctly.");
             return;
         }
-        const pdf = new window.jspdf.jsPDF(); // Correct way to instantiate jsPDF with plugins
+        const pdf = new window.jspdf.jsPDF(); 
 
         // Set up standard colors and fonts
         const primaryColor = [0, 77, 64]; // Dark Teal
@@ -1488,30 +1489,40 @@ The final model was selected based on the following criteria:</p>
         const errorColor = [231, 76, 60]; // Alizarin Red
         const headerTextColor = [44, 62, 80]; // Dark Blue-Gray for title
 
-        // Add logo if available FIRST, then position title relative to it
-        const imgElement = document.querySelector('.logos-container img');
-        const imgWidth = 30; // Original width used in current setup
-        const imgHeight = 15; // Original height used in current setup
         const pageWidth = pdf.internal.pageSize.width;
-        const imgX = (pageWidth - imgWidth) / 2; // Center horizontally
-        let currentHeaderY = 15; // Starting Y for logo
+        let currentHeaderY = 15; // Starting Y for elements in the header area
 
+        // Add tool logo
+        const imgElement = document.querySelector('.logos-container img');
         if (imgElement && imgElement.src) {
             const imgData = getBase64Image(imgElement);
             if (imgData) {
-                pdf.addImage(imgData, 'PNG', imgX, currentHeaderY, imgWidth, imgHeight);
+                // Determine logo dimensions and position to "stretch" it more prominently
+                // Let's aim for the logo to be 80% of the page width to make it larger and visible
+                const desiredLogoWidth = pageWidth * 0.8;
+                const originalLogoRatio = imgElement.naturalHeight / imgElement.naturalWidth;
+                const calculatedLogoHeight = desiredLogoWidth * originalLogoRatio;
+
+                const logoX = (pageWidth - desiredLogoWidth) / 2; // Center horizontally
+                
+                // Add the logo
+                pdf.addImage(imgData, 'PNG', logoX, currentHeaderY, desiredLogoWidth, calculatedLogoHeight);
+                currentHeaderY += calculatedLogoHeight + 5; // Move Y position below logo
+            } else {
+                console.warn("PDF Generation Warning: Could not get base64 data for tool logo (image2.png). It might not be loaded or an issue occurred (e.g., CORS).");
             }
+        } else {
+            console.warn("PDF Generation Warning: Tool logo (image2.png) element not found or has no src.");
         }
-        currentHeaderY += imgHeight + 5; // Add space below logo (5mm)
 
         // Main Report Title
-        pdf.setFont("helvetica");
-        pdf.setFontSize(22);
+        pdf.setFont("helvetica", "bold"); // Set font to bold for emphasis
+        pdf.setFontSize(28); // Increased font size for creativity/prominence
         pdf.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
-        pdf.text("Anti-microbial Peptides Report", pageWidth / 2, currentHeaderY, { align: "center" });
-        currentHeaderY += 10; // Adjust for title height + small gap before content starts
+        pdf.text("Anti-microbial Peptides Report", pageWidth / 2, currentHeaderY + 10, { align: "center" }); // Add more padding below logo for title
+        currentHeaderY += 10 + 28 + 10; // Adjust for title height + small gap before content starts
 
-        let yPos = currentHeaderY + 15; // Initial Y position for content, leaving more space after header
+        let yPos = currentHeaderY; // Initial Y position for main content
 
         // Input Sequence
         pdf.setFontSize(16);
