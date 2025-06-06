@@ -7,6 +7,9 @@
     <title>EPIC-AMP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     
+    <!-- FAVICON LINK ADDED HERE -->
+    <link rel="icon" type="image/png" href="favicon.png"> 
+    
     <!-- jspdf library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <!-- jspdf-autotable plugin - THIS IS THE CRITICAL ADDITION -->
@@ -573,6 +576,44 @@
         }
     }
 
+    /* Styles for Team Images */
+    .team-member-list {
+        list-style: none; /* Remove default bullet points */
+        padding: 0;
+        display: flex;
+        flex-direction: column; /* Stack members vertically */
+        align-items: flex-start; /* Align text and image to the left */
+        gap: 15px; /* Space between each team member entry */
+    }
+
+    .team-member-list li {
+        display: flex;
+        align-items: center; /* Vertically align image and text */
+        gap: 15px; /* Space between image and name */
+        font-size: 1.1rem; /* Slightly larger font for names */
+        color: var(--text-color);
+        background-color: var(--background-color); /* Light background for each entry */
+        padding: 10px 15px;
+        border-radius: 8px;
+        box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+        width: 100%; /* Take full width of parent */
+        box-sizing: border-box; /* Include padding in width */
+    }
+
+    .dark-mode .team-member-list li {
+        background-color: #333; /* Darker background for dark mode */
+        box-shadow: 0 1px 3px rgba(255,255,255,0.08);
+    }
+
+    .team-member-list img {
+        width: 60px; /* Size of the image */
+        height: 60px;
+        border-radius: 50%; /* Make it circular */
+        object-fit: cover; /* Ensure image covers the area */
+        border: 2px solid var(--secondary-color); /* Small border */
+        flex-shrink: 0; /* Prevent image from shrinking */
+    }
+
 
 </style>
 
@@ -844,7 +885,7 @@
                         <li><strong>Interpretation:</strong> Higher values of hydrophobicity autocorrelation are positively associated with AMP prediction. This likely reflects the importance of hydrophobic clustering in forming amphipathic structures, such as α-helices, which are common and effective in AMPs.</li>
                     </ul>
                 </li>
-                <li><strong>GearyAuto_Steric30 & GearyAuto_Steric29:</strong>
+                <li><strong>GearyAuto_Steric30 & GearyAuto_Steric29:</b>
                     <ul>
                         <li><strong>Description:</strong> Reflect peptide backbone flexibility and steric properties at spatial lags of 30 and 29.</li>
                         <li><strong>Interpretation:</strong>  These features have a positive SHAP impact, suggesting that a certain degree of peptide backbone flexibility may be beneficial for AMP action. Flexibility could enhance the peptide's ability to interact with and adapt to diverse bacterial membrane structures.</li>
@@ -886,23 +927,22 @@
 
 The final model was selected based on the following criteria:</p>
         <ul>
-            <li><strong>High Accuracy, F1-score, and Validation Accuracy:</b> The model achieved excellent performance metrics on a held-out test set, demonstrating its ability to generalize to unseen data.</li>
+            <li><strong>High Accuracy, F1-score, and Validation Accuracy:</strong> The model achieved excellent performance metrics on a held-out test set, demonstrating its ability to generalize to unseen data.</li>
             <li><strong>Robustness to Sequence Length Variations:</strong> The model performs consistently well on sequences of varying lengths, within the specified range (10-100 amino acids).</li>
             <li><strong>Generalization Ability:</strong> The model was trained and evaluated on diverse datasets to ensure its ability to classify a broad range of AMP sequences.</li>
-            <li><strong>Robust regression capability: Assessed using Mean Squared Error (MSE), R-squared (R²), Pearson correlation, and Kendall’s tau, the model demonstrated strong agreement between predicted and true MIC values.
-
-</li>
+            <li><strong>Robust regression capability:</strong> Assessed using Mean Squared Error (MSE), R-squared (R²), Pearson correlation, and Kendall’s tau, the model demonstrated strong agreement between predicted and true MIC values.</li>
         </ul>
 
         <h3>Intended Use</h3>
         <p>This tool is intended for research and educational purposes. It can be a valuable resource for researchers studying antimicrobial peptides and developing new therapeutic strategies. However, it is not a replacement for laboratory-based experimental validation.</p>
 
         <h3>Our Team</h3>
-        <ul>
-            <li>Ali Magdi - Computational Biologist</li>
-            <li>Ahmed Amr - Computational Biologist</li>
-            <li>Omar Loay - Molecular Biologist</li>
-            <li>Prof. Eman Badr - Full Professor and Director of BCBU</li>
+        <!-- NEW: Added a class for styling and img tags for team members -->
+        <ul class="team-member-list">
+            <li><img src="team-member-1.jpg" alt="Ali Magdi"> Ali Magdi - Computational Biologist</li>
+            <li><img src="team-member-2.jpg" alt="Ahmed Amr"> Ahmed Amr - Computational Biologist</li>
+            <li><img src="team-member-3.jpg" alt="Omar Loay"> Omar Loay - Molecular Biologist</li>
+            <li><img src="team-member-4.jpg" alt="Prof. Eman Badr"> Prof. Eman Badr - Full Professor and Director of BCBU</li>
         </ul>
 
         <h3>Acknowledgements</h3>
