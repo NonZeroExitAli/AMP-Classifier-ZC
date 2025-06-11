@@ -5,14 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EPIC-AMP</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" integrity="sha512-9usAa10IRO0HhonpyAIVpjrylPvoDwiPUiKdWk5t3PyolY1cOd4DSE0Ga+ri4AuTroPR5aQvXU9xC6qOPnzFeg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
-    
-    <!-- FAVICON LINK ADDED HERE -->
-    <link rel="icon" type="image/png" href="favicon.png"> 
-    
-    <!-- jspdf library -->
+    <link rel="icon" type="image/png" href="favicon.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <!-- jspdf-autotable plugin -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script> <!-- Updated to a more recent autotable version -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
 
     <style>
          :root {
@@ -58,7 +53,7 @@
         min-height: 100vh;
         display: flex;
         flex-direction: column;
-        align-items: center; /* Centers the main container horizontally */
+        align-items: center; 
         background-color: var(--background-color);
         color: var(--text-color);
         transition: background-color 0.3s ease, color 0.3s ease;
@@ -75,7 +70,7 @@
         transition: background-color 0.3s ease;
         display: flex;
         flex-direction: column;
-        margin-bottom: 20px; /* Space between container and full-width footer */
+        margin-bottom: 20px; 
     }
 
     .input-group {
@@ -95,7 +90,7 @@
         transition: border-color 0.3s ease, background-color 0.3s ease;
         background-color: var(--container-bg-color);
         color: var(--text-color);
-        box-sizing: border-box; /* Ensures padding is included in width */
+        box-sizing: border-box; 
     }
 
     #file-input {
@@ -158,7 +153,7 @@
     }
 
 
-    .result { /* This might be redundant due to specific result-box styles */
+    .result { 
         margin-top: 1.5rem;
         font-size: 1.2rem;
         font-weight: bold;
@@ -211,7 +206,7 @@
         height: 100%;
         width: 0;
         background-color: var(--success-color);
-        transition: width: 0.3s ease;
+        transition: width 0.3s ease;
     }
 
     @keyframes fadeIn {
@@ -538,9 +533,41 @@
         font-weight: normal;
     }
 
+    /* Styles for Email input and status messages */
+    #user-email-input-group {
+        margin-top: 1.5rem;     /* Space above the email input section */
+        margin-bottom: 1rem;    /* Space between email input and buttons */
+    }
+    #user-email {
+        width: 100%;
+        padding: 0.7rem;
+        border: 1px solid var(--border-color);
+        border-radius: 5px;
+        box-sizing: border-box;
+        font-size: 1rem;
+        color: var(--text-color);
+        background-color: var(--container-bg-color);
+    }
+    #user-email:focus {
+        outline: none;
+        border-color: var(--secondary-color);
+    }
+    /* #email-error is already styled by .error-message */
+    #email-status {
+        text-align: left;
+        font-size: 0.9rem;
+        margin-top: 0.3rem;
+        min-height: 1.2em; /* Reserve space to prevent layout jumps */
+    }
+    /* End of Email input styles */
+
+
     @media (max-width: 768px) {
         body {
             padding: 10px; 
+        }
+        .results-display-group {
+             grid-template-columns: 1fr; 
         }
         footer {
             padding-left: 10px; 
@@ -593,7 +620,7 @@
 
 <div class="container">
     <div class="logos-container">
-        <img src="image2.png" alt="Tool Logo">
+        <img src="image2.png" alt="Tool Logo"> <!-- Ensure image2.png exists -->
     </div>
 
     <div class="tabs">
@@ -648,12 +675,22 @@
             </label>
         </div>
 
+        <!-- ***** MOVED AND MODIFIED EMAIL INPUT FIELD SECTION (NOW MANDATORY) ***** -->
+        <div class="input-group" id="user-email-input-group" style="margin-top: 1.5rem; margin-bottom: 1rem;">
+            <label for="user-email" style="display:block; text-align:left; margin-bottom:0.5rem; font-weight:bold;">Your Email Address (for Report):<span style="color:red;">*</span></label>
+            <input type="email" id="user-email" placeholder="Enter your email to receive the PDF report" required>
+            <div id="email-error" class="error-message" style="text-align:left; font-size:0.9rem; margin-top:0.3rem; display:none;"></div> <!-- Initially hidden -->
+            <div id="email-status" style="text-align:left; font-size:0.9rem; margin-top:0.3rem; min-height: 1.2em;"></div>
+        </div>
+        <!-- ***** END: EMAIL INPUT FIELD SECTION ***** -->
+
         <div class="button-group">
             <button onclick="clearInput()" id="clear-btn">Clear Input</button>
             <button onclick="classifySequenceDebounced()" id="predict-btn">Submit</button>
         </div>
 
         <div class="error-message" id="error"></div>
+
 
         <div class="progress-container" id="progress-container">
             <div class="progress-bar" id="progress-bar"></div>
@@ -779,7 +816,7 @@
         <p>The SHAP plot below visualizes the features that most significantly influence the model's predictions *on average across all data*. Positive SHAP values generally contribute to the sequence being classified as AMP, while negative values contribute to Non-AMP classification.</p>
 
         <div id="shap-plot-container">
-            <img src="shap.png" alt="SHAP Plot" >
+            <img src="shap.png" alt="SHAP Plot" > <!-- Ensure shap.png exists -->
         </div>
 
         <h3>Interpretation of Global SHAP Plot (Illustrative)</h3>
@@ -788,7 +825,7 @@
             <h4>A. Sequence-Based Features</h4>
             <h5>APAAC13 & APAAC5 (Amphiphilic Pseudo-Amino Acid Composition)</h5>
             <ul>
-                <li><strong>Description:</b> These features encode hydrophobicity, charge, and side-chain properties, reflecting the amphiphilic nature of the peptide.</li>
+                <li><strong>Description:</strong> These features encode hydrophobicity, charge, and side-chain properties, reflecting the amphiphilic nature of the peptide.</li>
                 <li><strong>Interpretation:</strong> Higher APAAC values have a positive SHAP impact, indicating they are predictive of AMP activity. This suggests that the model values amphiphilic sequences, which are crucial for disrupting bacterial membranes.</li>
             </ul>
             <h5>Amino Acid Composition (M, C)</h5>
@@ -817,16 +854,16 @@
                 <li><strong>PolarityD1001:</strong>
                     <ul>
                         <li><strong>Description:</strong>  Measures the polarity of the peptide sequence.</li>
-                        <li><strong>Interpretation:</b>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
+                        <li><strong>Interpretation:</strong>  The model considers polarity, likely in balance with hydrophobicity. An optimal AMP efficacy is often linked to having both hydrophobic and polar residues to facilitate membrane interaction and solubility.</li>
                     </ul>
                 </li>
                 <li><strong>Solvent Accessibility (SolventAccessibilityD3001):</strong>
                     <ul>
-                        <li><strong>Description:</b> Reflects how exposed the residues are to the solvent (water).</li>
+                        <li><strong>Description:</strong> Reflects how exposed the residues are to the solvent (water).</li>
                         <li><strong>Interpretation:</strong> Solvent-accessible residues positively contribute to AMP prediction. This might indicate that exposed residues facilitate interaction with bacterial membranes or the surrounding environment.</li>
                     </ul>
                 </li>
-                <li><strong>Charge (ChargeD2001):</b>
+                <li><strong>Charge (ChargeD2001):</strong>
                     <ul>
                         <li><strong>Description:</strong> Represents the net charge of the peptide.</li>
                         <li><strong>Interpretation:</strong> Charge is a significant positive predictor. Most AMPs are cationic, enabling them to interact with negatively charged bacterial membranes. Higher charge, as indicated by positive SHAP values, typically enhances antimicrobial potency.</li>
@@ -834,7 +871,7 @@
                 </li>
                 <li><strong>PolarizabilityD3001 & NormalizedVDWVD3001:</strong>
                     <ul>
-                        <li><strong>Description:</b> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
+                        <li><strong>Description:</strong> These features relate to electronic distribution (Polarizability) and steric effects (NormalizedVDWVD) of the peptide.</li>
                         <li><strong>Interpretation:</strong> These properties impact membrane penetration and peptide-membrane interactions. Their positive SHAP values suggest they are important for AMP activity, possibly by influencing how the peptide inserts into and destabilizes membranes.</li>
                     </ul>
                 </li>
@@ -848,13 +885,13 @@
                         <li><strong>Interpretation:</strong> Higher values of hydrophobicity autocorrelation are positively associated with AMP prediction. This likely reflects the importance of hydrophobic clustering in forming amphipathic structures, such as α-helices, which are common and effective in AMPs.</li>
                     </ul>
                 </li>
-                <li><strong>GearyAuto_Steric30 & GearyAuto_Steric29:</b>
+                <li><strong>GearyAuto_Steric30 & GearyAuto_Steric29:</strong>
                     <ul>
                         <li><strong>Description:</strong> Reflect peptide backbone flexibility and steric properties at spatial lags of 30 and 29.</li>
                         <li><strong>Interpretation:</strong>  These features have a positive SHAP impact, suggesting that a certain degree of peptide backbone flexibility may be beneficial for AMP action. Flexibility could enhance the peptide's ability to interact with and adapt to diverse bacterial membrane structures.</li>
                     </ul>
                 </li>
-                <li><strong>GearyAuto_ResidueASA30:</b>
+                <li><strong>GearyAuto_ResidueASA30:</strong>
                     <ul>
                         <li><strong>Description:</strong> Indicates the autocorrelation of accessible surface area of residues at a spatial lag of 30.</li>
                         <li><strong>Interpretation:</strong> Higher autocorrelation of residue accessible surface area is favored. This could mean that a consistent pattern of residue exposure, possibly with higher exposure of charged or polar residues, improves bacterial targeting or membrane interaction.</li>
@@ -916,21 +953,23 @@
             <li>Ensure your sequence contains only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).</li>
              <li>The sequence length must be between 10 and 100 amino acids.</li>
         </ul>
-        <h3>Step 2: Input the Sequence</h3>
+        <h3>Step 2: Input the Sequence & Email</h3> <!-- MODIFIED -->
         <ul>
             <li><strong>Direct Input:</strong> Type or paste your sequence into the text area provided.</li>
-            <li><strong>FASTA File Upload:</b> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
+            <li><strong>FASTA File Upload:</strong> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
             <li>The character count will update as you type or upload a sequence.</li>
+            <li><strong>Enter Your Email:</strong> Input your email address in the "Your Email Address (for Report)" field. This is required to receive the PDF report.</li> <!-- MODIFIED -->
         </ul>
         <h3>Step 3: Analyze the Sequence</h3>
         <ul>
             <li>Click the "Submit" button.</li>
             <li>A progress bar will appear, indicating that the analysis is underway.</li>
         </ul>
-        <h3>Step 4: View the Results</h3>
+        <h3>Step 4: View the Results</h3> <!-- MODIFIED -->
         <ul>
             <li>Once the analysis is complete, the prediction (AMP or Non-AMP) will be displayed in the "AMP Classification" box.</li>
-            <li>A link to "Download Detailed Report (PDF)" will appear, containing the prediction, confidence, MIC values (if selected and applicable), LIME (local) feature explanations for the current prediction, global SHAP feature importance for the model, and an illustrative SHAP plot.</li>
+            <li>A link to "Download Detailed Report (PDF)" will appear.</li>
+            <li>The PDF report will also be automatically sent to the email address you provided. Check your inbox and spam folder.</li>
         </ul>
         <h3>Step 5: Clear the Input</h3>
         <ul>
@@ -941,6 +980,7 @@
                 <li><strong>Invalid Characters:</strong> If you see an error message about invalid characters, double-check that your sequence contains only standard amino acid characters.</li>
                 <li><strong>Sequence Length:</strong> Ensure your sequence is between 10 and 100 characters long.</li>
                  <li><strong>Invalid FASTA Format:</strong> If you encounter an error with a FASTA file, make sure the file is correctly formatted.</li>
+                 <li><strong>Email Not Received:</strong> Ensure you entered your email address correctly (it's a required field). Also, check your spam/junk folder. The email sending service might be temporarily unavailable; in this case, please use the "Download Detailed Report (PDF)" link which will always be available after a successful analysis.</li> <!-- MODIFIED -->
             </ul>
     </div>
 </div>
@@ -960,6 +1000,17 @@
 </script>
 
 <script>
+    // ***** START: IMPORTANT CONFIGURATION - YOU MUST EDIT THESE *****
+    // 1. URL of YOUR Email Sender API Docker Space on Hugging Face
+    const EMAIL_SERVICE_API_URL = "https://nonzeroexit-epic-amp-email-sender.hf.space/send-report-via-email"; 
+    // Example: const EMAIL_SERVICE_API_URL = "https://ali-magdi-epicamp-email-sender.hf.space/send-report-via-email";
+
+    // 2. Space ID or URL of YOUR Gradio Prediction Backend
+    const GRADIO_PREDICTION_SPACE_ID_OR_URL = "nonzeroexit/AMP-Classifier"; 
+    // Example for local: const GRADIO_PREDICTION_SPACE_ID_OR_URL = "http://127.0.0.1:7860/";
+    // ***** END: IMPORTANT CONFIGURATION *****
+
+
     const sequenceInput = document.getElementById('sequence');
     const charCount = document.getElementById('char-count');
     const errorDiv = document.getElementById('error');
@@ -968,13 +1019,16 @@
     const progressBar = document.getElementById('progress-bar');
     const fileInput = document.getElementById('file-input');
     const downloadLink = document.getElementById('download-link'); 
-
     const ampClassificationOutput = document.getElementById('amp-classification-output');
     const additionalDetailsOutput = document.getElementById('additional-details-output');
     const micCheckboxes = document.querySelectorAll('.mic-checkbox-group input[type="checkbox"]');
-
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
+
+    // New Email Field Selectors
+    const userEmailInput = document.getElementById('user-email');
+    const emailErrorDiv = document.getElementById('email-error');
+    const emailStatusDiv = document.getElementById('email-status');
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -990,49 +1044,70 @@
     let animationIntervalId;
 
     async function initClient() {
+        if (!window.gradio || !window.gradio.client) {
+            console.error("Gradio client ESM module not loaded correctly.");
+            showError("Core library for prediction service is missing. Please check your internet connection or script tags.");
+            if (predictBtn) predictBtn.disabled = true;
+            return;
+        }
         try {
-            // Option 1: If you are running the Gradio backend locally (e.g., python app.py)
-            // clientInstance = await window.gradio.client("http://127.0.0.1:7860/"); 
-            // Option 2: If your Gradio backend is deployed on Hugging Face Spaces (using the Space ID)
-            clientInstance = await window.gradio.client("nonzeroexit/AMP-Classifier"); 
-            console.log("Gradio client initialized successfully.");
+            clientInstance = await window.gradio.client(GRADIO_PREDICTION_SPACE_ID_OR_URL); 
+            console.log("Gradio client for prediction initialized successfully to:", GRADIO_PREDICTION_SPACE_ID_OR_URL);
         } catch (error) {
-            console.error("Failed to initialize Gradio client:", error);
-            showError("Failed to connect to the classifier service. Please check your network and the Gradio backend URL, then try again. The service might be temporarily unavailable or under maintenance.");
-            predictBtn.disabled = true;
+            console.error("Failed to initialize Gradio client for prediction:", error);
+            showError(`Failed to connect to the classifier service at ${GRADIO_PREDICTION_SPACE_ID_OR_URL}. Please check network/backend status.`);
+            if (predictBtn) predictBtn.disabled = true;
         }
     }
 
     window.onload = function() {
         initClient();
-        document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
-        document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
-        fileInput.addEventListener('change', handleFileSelect);
+        if (document.getElementById('info-icon')) {
+             document.getElementById('info-icon').addEventListener('mouseenter', showTooltip);
+             document.getElementById('info-icon').addEventListener('mouseleave', hideTooltip);
+        }
+        if (fileInput) fileInput.addEventListener('change', handleFileSelect);
+        
+        if(userEmailInput) {
+            userEmailInput.addEventListener('input', () => {
+                validateEmail(userEmailInput.value); 
+                if (emailStatusDiv) emailStatusDiv.textContent = ''; 
+            });
+        } else {
+            console.error("Email input field with ID 'user-email' not found.");
+        }
+        
         clearInput(); 
     };
 
     function showTooltip() {
-        document.querySelector('.tooltip').style.display = 'block';
+        const tooltip = document.querySelector('.tooltip');
+        if (tooltip) tooltip.style.display = 'block';
     }
 
     function hideTooltip() {
-        document.querySelector('.tooltip').style.display = 'none';
+        const tooltip = document.querySelector('.tooltip');
+        if (tooltip) tooltip.style.display = 'none';
     }
 
     function clearInput() {
-        sequenceInput.value = '';
-        fileInput.value = '';
-        charCount.textContent = '0';
-        clearError();
+        if(sequenceInput) sequenceInput.value = '';
+        if(fileInput) fileInput.value = '';
+        if(charCount) charCount.textContent = '0';
+        clearError(); // Clears main error div
         
-        downloadLink.style.display = 'none';
-        downloadLink.href = '#'; 
+        if(downloadLink) {
+            downloadLink.style.display = 'none';
+            downloadLink.href = '#'; 
+        }
 
-        ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>';
-        additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; 
-        additionalDetailsOutput.appendChild(downloadLink); 
+        if(ampClassificationOutput) ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>';
+        if(additionalDetailsOutput) {
+            additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; 
+            if(downloadLink) additionalDetailsOutput.appendChild(downloadLink); 
+        }
 
-        micCheckboxes.forEach(checkbox => {
+        if(micCheckboxes) micCheckboxes.forEach(checkbox => {
             checkbox.checked = false;
             checkbox.disabled = true;
         });
@@ -1041,17 +1116,26 @@
             clearInterval(animationIntervalId);
             animationIntervalId = null;
         }
-        progressBar.style.width = '0%';
-        progressContainer.style.display = 'none';
+        if(progressBar) progressBar.style.width = '0%';
+        if(progressContainer) progressContainer.style.display = 'none';
 
-        predictBtn.disabled = true; 
-        predictBtn.textContent = 'Submit';
+        if(predictBtn) {
+            predictBtn.disabled = true; 
+            predictBtn.textContent = 'Submit';
+        }
+
+        if (userEmailInput) userEmailInput.value = '';
+        if (emailErrorDiv) {
+            emailErrorDiv.textContent = '';
+            emailErrorDiv.style.display = 'none';
+        }
+        if (emailStatusDiv) emailStatusDiv.textContent = '';
     }
 
     function handleFileSelect(event) {
         const file = event.target.files[0];
         if (!file) {
-            if (sequenceInput.dataset.source === 'file') {
+            if (sequenceInput && sequenceInput.dataset.source === 'file') {
                  clearInput(); 
             }
             return;
@@ -1063,9 +1147,9 @@
 
         if (!isValidExtension) {
             showError('Invalid file type. Please upload a .fasta, .fa, or .fna file.');
-            fileInput.value = ''; 
-            micCheckboxes.forEach(checkbox => checkbox.disabled = true);
-            predictBtn.disabled = true;
+            if(fileInput) fileInput.value = ''; 
+            if(micCheckboxes) micCheckboxes.forEach(checkbox => checkbox.disabled = true);
+            if(predictBtn) predictBtn.disabled = true;
             return;
         }
 
@@ -1073,92 +1157,76 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const sequence = parseFASTA(e.target.result);
-                if (sequence) {
-                    sequenceInput.value = sequence;
-                    sequenceInput.dataset.source = 'file'; 
+                const parsedSeq = parseFASTA(e.target.result); // Renamed to avoid conflict
+                if (parsedSeq) {
+                    if(sequenceInput) {
+                        sequenceInput.value = parsedSeq;
+                        sequenceInput.dataset.source = 'file'; 
+                    }
                     updateCharacterCount();
-                    validateSequence(sequence); 
+                    validateSequence(parsedSeq); 
                 } else {
                     showError("No valid sequence found in FASTA file.");
-                    fileInput.value = '';
-                    sequenceInput.dataset.source = '';
-                    micCheckboxes.forEach(checkbox => checkbox.disabled = true);
-                    predictBtn.disabled = true;
+                    if(fileInput) fileInput.value = '';
+                    if(sequenceInput) sequenceInput.dataset.source = '';
+                    if(micCheckboxes) micCheckboxes.forEach(checkbox => checkbox.disabled = true);
+                    if(predictBtn) predictBtn.disabled = true;
                 }
             } catch (error) {
                 console.error("Error in FASTA parsing:", error);
                 showError(error.message || "Error processing FASTA file.");
-                fileInput.value = '';
-                sequenceInput.dataset.source = '';
-                micCheckboxes.forEach(checkbox => checkbox.disabled = true);
-                predictBtn.disabled = true;
+                if(fileInput) fileInput.value = '';
+                if(sequenceInput) sequenceInput.dataset.source = '';
+                if(micCheckboxes) micCheckboxes.forEach(checkbox => checkbox.disabled = true);
+                if(predictBtn) predictBtn.disabled = true;
             }
         };
         reader.onerror = function(error) {
             console.error("FileReader error:", error);
             showError("Error reading file.");
-            fileInput.value = '';
-            sequenceInput.dataset.source = '';
-            micCheckboxes.forEach(checkbox => checkbox.disabled = true);
-            predictBtn.disabled = true;
+            if(fileInput) fileInput.value = '';
+            if(sequenceInput) sequenceInput.dataset.source = '';
+            if(micCheckboxes) micCheckboxes.forEach(checkbox => checkbox.disabled = true);
+            if(predictBtn) predictBtn.disabled = true;
         };
         reader.readAsText(file);
     }
 
-    function parseFASTA(text) {
+    function parseFASTA(text) { // No changes to this function's logic
         const lines = text.trim().split(/[\r\n]+/);
-        let sequence = '';
+        let sequenceData = ''; // Renamed local var to avoid conflict with global `sequenceInput`
         let headerFound = false;
-
         for (const line of lines) {
             const trimmedLine = line.trim();
             if (trimmedLine.startsWith('>')) {
-                if (headerFound && sequence) { 
-                    console.warn("Multiple sequences found in FASTA. Using the first one.");
-                    return sequence.toUpperCase(); 
-                }
-                headerFound = true;
-                sequence = ''; 
+                if (headerFound && sequenceData) { return sequenceData.toUpperCase(); }
+                headerFound = true; sequenceData = ''; 
             } else if (headerFound) {
-                sequence += trimmedLine.replace(/\s/g, '');
+                sequenceData += trimmedLine.replace(/\s/g, '');
             } else if (!trimmedLine.startsWith('>') && trimmedLine.length > 0) {
-                 sequence += trimmedLine.replace(/\s/g, '');
+                 sequenceData += trimmedLine.replace(/\s/g, '');
             }
         }
-        
-        if (!headerFound && sequence) { 
-             console.warn("No FASTA header found. Treating content as a single sequence.");
-        } else if (!sequence && headerFound) {
-            throw new Error("FASTA file contains a header but no sequence data.");
-        } else if (!sequence && !headerFound && lines.some(l => l.trim().length > 0) ) {
-             if (!lines.some(l => l.trim().startsWith('>'))) {
-                sequence = lines.join('').replace(/\s/g, '');
-                console.warn("No FASTA header. Treating content as single sequence.");
-             } else {
-                throw new Error("Invalid FASTA format. Could not extract sequence.");
-             }
-        } else if (!sequence && !headerFound && lines.every(l => l.trim().length === 0)){
-            throw new Error("FASTA file is empty or contains only whitespace.");
+        if (!headerFound && sequenceData) { console.warn("No FASTA header found."); }
+        else if (!sequenceData && headerFound) { throw new Error("FASTA header found but no sequence.");}
+        else if (!sequenceData && !headerFound && lines.some(l=>l.trim().length>0) && !lines.some(l=>l.trim().startsWith('>'))){
+            sequenceData = lines.join('').replace(/\s/g, '');
+        } else if (!sequenceData && !headerFound && lines.every(l=>l.trim().length === 0)) {
+            throw new Error("FASTA file is empty.");
         }
-
-
-        if (sequence) {
-            return sequence.toUpperCase();
-        } else {
-            throw new Error("No valid sequence found in the provided FASTA content.");
-        }
+        if (sequenceData) { return sequenceData.toUpperCase(); } 
+        else { throw new Error("No valid sequence found in FASTA."); }
     }
 
 
-    function validateSequence(sequence) {
+    function validateSequence(seqToValidate) { // Parameter renamed
         let isValid = true;
         let errorMessage = '';
-        const currentLength = sequence.length;
+        const currentLength = seqToValidate.length;
 
-        if (!sequence) {
-            isValid = false;
-        } else if (/[^ACDEFGHIKLMNPQRSTVWY]/i.test(sequence)) { 
+        if (!seqToValidate) {
+            isValid = false; // No error message, just disable button
+        } else if (/[^ACDEFGHIKLMNPQRSTVWY]/i.test(seqToValidate)) { 
             errorMessage = 'Invalid characters in sequence. Only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY) are allowed.';
             isValid = false;
         } else if (currentLength < 10 || currentLength > 100) {
@@ -1168,13 +1236,13 @@
 
         if (isValid) {
             clearError();
-            predictBtn.disabled = false;
+            if(predictBtn) predictBtn.disabled = false;
         } else {
             if (errorMessage) showError(errorMessage); else clearError(); 
-            predictBtn.disabled = true;
+            if(predictBtn) predictBtn.disabled = true;
         }
 
-        micCheckboxes.forEach(checkbox => {
+        if(micCheckboxes) micCheckboxes.forEach(checkbox => {
             checkbox.disabled = !isValid;
             if (!isValid) checkbox.checked = false;
         });
@@ -1182,60 +1250,88 @@
     }
 
     function updateCharacterCount() {
+        if(!sequenceInput || !charCount) return;
         const currentLength = sequenceInput.value.length;
         charCount.textContent = currentLength;
-        if (currentLength > 100) {
-            charCount.style.color = 'var(--warning-color)';
-        } else {
-            charCount.style.color = 'var(--text-color)';
-        }
+        charCount.style.color = currentLength > 100 ? 'var(--warning-color)' : 'var(--text-color)';
     }
 
-    sequenceInput.addEventListener('input', () => {
-        sequenceInput.dataset.source = 'manual'; 
-        updateCharacterCount();
-        validateSequence(sequenceInput.value);
-    });
+    if(sequenceInput) {
+        sequenceInput.addEventListener('input', () => {
+            sequenceInput.dataset.source = 'manual'; 
+            updateCharacterCount();
+            if (sequenceInput) validateSequence(sequenceInput.value);
+        });
 
-    sequenceInput.addEventListener('paste', (e) => {
-        e.preventDefault();
-        const paste = (e.clipboardData || window.clipboardData).getData('text');
-        const cleanPaste = paste.replace(/[^ACDEFGHIKLMNPQRSTVWY\s\r\n]/gi, '').replace(/[\s\r\n]+/g, '').toUpperCase();
-
-
-        const selectionStart = sequenceInput.selectionStart;
-        const selectionEnd = sequenceInput.selectionEnd;
-        const currentText = sequenceInput.value;
-        let newText = currentText.substring(0, selectionStart) + cleanPaste + currentText.substring(selectionEnd);
-        
-        if (newText.length > parseInt(sequenceInput.maxLength, 10)) {
-            newText = newText.substring(0, parseInt(sequenceInput.maxLength, 10));
-        }
-
-        sequenceInput.value = newText;
-        sequenceInput.dataset.source = 'manual';
-        updateCharacterCount();
-        validateSequence(newText);
-        sequenceInput.selectionStart = sequenceInput.selectionEnd = selectionStart + cleanPaste.length;
-
-    });
-
-    sequenceInput.addEventListener('keypress', (e) => {
-        if (e.key.length === 1 && !/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
+        sequenceInput.addEventListener('paste', (e) => {
             e.preventDefault();
-        } else {
-            clearError(); 
-        }
-    });
+            const paste = (e.clipboardData || window.clipboardData).getData('text');
+            // Simpler paste cleaning, relies on main validation
+            const cleanPaste = paste.replace(/[\s\r\n]+/g, '').toUpperCase(); 
+
+            const selectionStart = sequenceInput.selectionStart;
+            const selectionEnd = sequenceInput.selectionEnd;
+            const currentText = sequenceInput.value;
+            let newText = currentText.substring(0, selectionStart) + cleanPaste + currentText.substring(selectionEnd);
+            
+            if (newText.length > parseInt(sequenceInput.maxLength, 10)) {
+                newText = newText.substring(0, parseInt(sequenceInput.maxLength, 10));
+            }
+
+            sequenceInput.value = newText;
+            sequenceInput.dataset.source = 'manual';
+            updateCharacterCount();
+            validateSequence(newText);
+            sequenceInput.selectionStart = sequenceInput.selectionEnd = selectionStart + cleanPaste.length;
+        });
+
+        sequenceInput.addEventListener('keypress', (e) => {
+            if (e.key.length === 1 && !/^[ACDEFGHIKLMNPQRSTVWY]$/i.test(e.key)) {
+                e.preventDefault();
+            } else {
+                clearError(); 
+            }
+        });
+    }
+
 
     function showError(message) {
-        errorDiv.textContent = message;
-        errorDiv.style.display = 'block';
+        if(errorDiv) {
+            errorDiv.textContent = message;
+            errorDiv.style.display = 'block';
+        }
     }
 
     function clearError() {
-        errorDiv.style.display = 'none';
-        errorDiv.textContent = '';
+        if(errorDiv) {
+            errorDiv.style.display = 'none';
+            errorDiv.textContent = '';
+        }
+    }
+
+    function validateEmail(emailToVal) { // Parameter renamed
+        if (!userEmailInput) return true; // If field doesn't exist, bypass
+
+        if (!emailToVal || !emailToVal.trim()) { 
+            if(emailErrorDiv) {
+                emailErrorDiv.textContent = 'Email address is required for the report.';
+                emailErrorDiv.style.display = 'block';
+            }
+            return false;
+        }
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!re.test(String(emailToVal).toLowerCase())) {
+            if(emailErrorDiv) {
+                emailErrorDiv.textContent = 'Please enter a valid email address.';
+                emailErrorDiv.style.display = 'block';
+            }
+            return false;
+        }
+        if(emailErrorDiv) {
+            emailErrorDiv.textContent = '';
+            emailErrorDiv.style.display = 'none';
+        }
+        return true;
     }
 
     async function classifySequenceDebounced() {
@@ -1247,492 +1343,420 @@
         if (!clientInstance) {
             showError("Classifier service is not available. Please try again later.");
             console.error("Gradio client instance is not initialized.");
-            predictBtn.disabled = false; 
-            predictBtn.textContent = 'Submit';
+            if (predictBtn) { predictBtn.disabled = false; predictBtn.textContent = 'Submit'; }
             return;
         }
 
-        const sequence = sequenceInput.value.trim().toUpperCase();
-        if (!validateSequence(sequence)) return;
+        const currentSequence = sequenceInput ? sequenceInput.value.trim().toUpperCase() : "";
+        const recipientEmail = userEmailInput ? userEmailInput.value.trim() : "";
 
-        clearError();
-        predictBtn.disabled = true;
-        predictBtn.textContent = 'Processing...';
-        ampClassificationOutput.innerHTML = '<p class="info-message">Analyzing...</p>';
-        additionalDetailsOutput.innerHTML = '<p class="info-message">Generating detailed report...</p>';
-        additionalDetailsOutput.appendChild(downloadLink); 
-        downloadLink.style.display = 'none'; 
-        micCheckboxes.forEach(checkbox => checkbox.disabled = true);
-        progressContainer.style.display = 'block';
-        progressBar.style.width = '0%';
+        if (!validateSequence(currentSequence)) return;
+        if (!validateEmail(recipientEmail)) { // Email is now mandatory
+            if (userEmailInput) userEmailInput.focus();
+            return;
+        }
 
-        let micDataForPdf = {};
-        let ampLabel = 'Unknown';
-        let ampConfidence = 0;
-        let limeFeaturesForPdf = []; 
+        clearError(); // Clear general error
+        if (emailErrorDiv) { emailErrorDiv.style.display = 'none'; emailErrorDiv.textContent = ''; } // Clear specific email error
+        if (emailStatusDiv) emailStatusDiv.textContent = ''; // Clear previous email status
+
+        if (predictBtn) { predictBtn.disabled = true; predictBtn.textContent = 'Processing...'; }
+        if (ampClassificationOutput) ampClassificationOutput.innerHTML = '<p class="info-message">Analyzing...</p>';
+        if (additionalDetailsOutput) {
+             additionalDetailsOutput.innerHTML = '<p class="info-message">Generating detailed report...</p>';
+             if(downloadLink) additionalDetailsOutput.appendChild(downloadLink); 
+        }
+        if (downloadLink) downloadLink.style.display = 'none'; 
+        if (micCheckboxes) micCheckboxes.forEach(checkbox => checkbox.disabled = true);
+        if (progressContainer) progressContainer.style.display = 'block';
+        if (progressBar) progressBar.style.width = '0%';
+        
+
+        let micDataForPdfFromPrediction = {};
+        let ampLabelFromPrediction = 'Unknown';
+        let ampConfidenceFromPrediction = 0;
+        let limeFeaturesForPdfFromPrediction = []; 
 
         let animationProgress = 0;
         animationIntervalId = setInterval(() => {
             if (animationProgress < 95) {
                 animationProgress += 5;
-                progressBar.style.width = `${animationProgress}%`;
+                if(progressBar) progressBar.style.width = `${animationProgress}%`;
             }
         }, 100);
 
         try {
-            const classificationResult = await clientInstance.predict("/predict", [sequence]);
-            console.log("Gradio Result:", classificationResult);
+            const classificationResult = await clientInstance.predict("/predict", [currentSequence]); 
+            console.log("Gradio Result (Prediction):", classificationResult);
 
             if (!classificationResult || !classificationResult.data || typeof classificationResult.data[0] !== 'string') {
-                throw new Error("Unexpected result format from server. Expected a plain text string.");
+                throw new Error("Unexpected result format from prediction server.");
             }
             const rawTextOutput = classificationResult.data[0];
-            console.log("Raw text output from Gradio:\n", rawTextOutput);
+            console.log("Raw text output from Gradio (Prediction):\n", rawTextOutput);
 
             const lines = rawTextOutput.split('\n').map(line => line.trim()).filter(Boolean);
-            const labelRegex = /Prediction:\s*(.+)/;
-            const confidenceRegex = /Confidence:\s*([\d.]+)%/;
+            const labelRegex = /Prediction:\s*(.+)/i; // Case insensitive match for Prediction
+            const confidenceRegex = /Confidence:\s*([\d.]+)%/i; // Case insensitive match
             const micSectionHeaderRegex = /Predicted MIC Values \(μM\):/i;
-            const topFeaturesSectionHeaderRegex = /Top Features Influencing Prediction:/i; 
-            const micLineRegex = /-\s*([^:]+?):\s*([\d.]+)/;
-            const featureExtractorRegex = /-\s*(.+?)\s*(?:(<=|>=|<|>|==|is\snot|is)\s+([^:]+?))?\s*:\s*([+-]?[\d.]+)/;
-
+            const topFeaturesSectionHeaderRegex = /Top Features Influencing Prediction/i; // Removed : for flexibility
+            const micLineRegex = /-\s*([^:]+?):\s*((?:[\d.]+)|(?:Error:.*)|(?:N\/A)|(?:Could not process)|(?:Skipped))/i; // Capture various MIC states
+            const featureExtractorRegex = /-\s*(.+?)\s*:\s*([+-]?[\d.]+)/i; // Simpler, assuming "Feature: Value" or "Feature Condition: Value"
 
             const labelMatch = rawTextOutput.match(labelRegex);
-            if (labelMatch && labelMatch[1]) ampLabel = labelMatch[1];
+            if (labelMatch && labelMatch[1]) ampLabelFromPrediction = labelMatch[1];
             else console.warn("Could not parse AMP Label from output.");
 
             const confidenceMatch = rawTextOutput.match(confidenceRegex);
-            if (confidenceMatch && confidenceMatch[1]) ampConfidence = parseFloat(confidenceMatch[1]) / 100;
+            if (confidenceMatch && confidenceMatch[1]) ampConfidenceFromPrediction = parseFloat(confidenceMatch[1]) / 100;
             else console.warn("Could not parse Confidence from output.");
 
             let currentSection = null; 
+            micDataForPdfFromPrediction = {}; 
+            limeFeaturesForPdfFromPrediction = [];
 
             for (const line of lines) {
-                if (micSectionHeaderRegex.test(line)) {
-                    currentSection = 'mic'; continue;
-                } else if (topFeaturesSectionHeaderRegex.test(line)) { 
-                    currentSection = 'lime_features'; continue;
-                } 
+                if (micSectionHeaderRegex.test(line)) { currentSection = 'mic'; continue; }
+                if (topFeaturesSectionHeaderRegex.test(line)) { currentSection = 'lime_features'; continue; } 
 
                 if (currentSection === 'mic') {
                     const micLineMatch = line.match(micLineRegex);
                     if (micLineMatch && micLineMatch[1] && micLineMatch[2]) {
-                        const bacteriumNameMap = { 'E.coli': 'e_coli', 'S.aureus': 's_aureus', 'P.aeruginosa': 'p_aeruginosa', 'K.Pneumonia': 'k_pneumoniae', 'K. pneumoniae': 'k_pneumoniae' }; // K.Pneumoniae also included
-                        const displayMicName = micLineMatch[1].trim();
-                        const internalKey = bacteriumNameMap[displayMicName];
-                        const isMicCheckboxChecked = Array.from(micCheckboxes).some(cb => cb.checked && cb.value === internalKey);
-                        if (internalKey && isMicCheckboxChecked) micDataForPdf[internalKey] = parseFloat(micLineMatch[2]);
+                        const bacteriumDisplayName = micLineMatch[1].trim();
+                        const micValueOrError = micLineMatch[2].trim();
+                        micDataForPdfFromPrediction[bacteriumDisplayName] = !isNaN(parseFloat(micValueOrError)) ? parseFloat(micValueOrError) : micValueOrError;
                     }
                 } else if (currentSection === 'lime_features') {
                     const featureMatch = line.match(featureExtractorRegex);
                     if (featureMatch) {
-                        const feature = featureMatch[1].trim();
-                        const condition = featureMatch[3] ? `${featureMatch[2].trim()} ${featureMatch[3].trim()}` : '';
-                        const value = parseFloat(featureMatch[4]);
-                        if (!isNaN(value)) {
-                            limeFeaturesForPdf.push({ feature: feature, condition: condition, value: value });
-                        } else {
-                            console.warn(`Could not parse LIME feature value from line: ${line}`);
-                        }
+                        const featureDescription = featureMatch[1].trim(); // This includes feature name and potentially condition
+                        const featureValue = parseFloat(featureMatch[2]);
+                        if (!isNaN(featureValue)) {
+                            // For simplicity, we'll store the full featureDescription as 'feature' for LIME PDF table
+                            limeFeaturesForPdfFromPrediction.push({ feature: featureDescription, condition: '', value: featureValue });
+                        } else { console.warn(`Could not parse LIME feature value from line: ${line}`); }
                     } else {
-                        if (line.trim().length > 0 && !line.includes('---')) {
-                             console.warn(`Line not parsed as LIME feature (possible unexpected content or section end): ${line}`);
-                        }
+                         if (line.trim().length > 0 && !line.includes('---') && !line.toLowerCase().includes("influencing prediction")) { // Avoid warning for section ender or sub-headers
+                             console.warn(`Line not parsed as LIME feature: ${line}`);
+                         }
                     }
                 }
             }
 
-            clearInterval(animationIntervalId); animationIntervalId = null;
-            progressBar.style.width = '100%';
-            progressContainer.style.display = 'none';
+            if(animationIntervalId) clearInterval(animationIntervalId); animationIntervalId = null;
+            if(progressBar) progressBar.style.width = '100%';
+            if(progressContainer) progressContainer.style.display = 'none';
 
-            ampClassificationOutput.innerHTML = `<p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabel.includes('Non-AMP') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0; text-align: center;">${ampLabel}</p>`;
-            additionalDetailsOutput.innerHTML = '<p class="info-message">Detailed report available for download:</p>';
-            additionalDetailsOutput.appendChild(downloadLink);
-            downloadLink.style.display = 'block';
-
-            if (ampLabel.includes('AMP (Positive)')) {
-                micCheckboxes.forEach(checkbox => checkbox.disabled = false);
-            } else {
-                micCheckboxes.forEach(checkbox => { checkbox.checked = false; checkbox.disabled = true; });
+            if(ampClassificationOutput) ampClassificationOutput.innerHTML = `<p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabelFromPrediction.toLowerCase().includes('non-amp') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0; text-align: center;">${ampLabelFromPrediction}</p>`;
+            if(additionalDetailsOutput) {
+                additionalDetailsOutput.innerHTML = '<p class="info-message">Detailed report available for download:</p>';
+                if(downloadLink) additionalDetailsOutput.appendChild(downloadLink);
             }
+            // Download link display is handled by generatePDFReportAndSendEmail
 
-            await generatePDFReport(sequence, ampLabel, ampConfidence, micDataForPdf, limeFeaturesForPdf); 
+            if (ampLabelFromPrediction.toLowerCase().includes('amp') && !ampLabelFromPrediction.toLowerCase().includes('non-amp')) {
+                if(micCheckboxes) micCheckboxes.forEach(checkbox => checkbox.disabled = false);
+            } else {
+                if(micCheckboxes) micCheckboxes.forEach(checkbox => { checkbox.checked = false; checkbox.disabled = true; });
+            }
+            
+            await generatePDFReportAndSendEmail(currentSequence, ampLabelFromPrediction, ampConfidenceFromPrediction, micDataForPdfFromPrediction, limeFeaturesForPdfFromPrediction, recipientEmail); 
 
         } catch (error) {
-            console.error("Error during prediction:", error);
-            if (animationIntervalId) { clearInterval(animationIntervalId); animationIntervalId = null; }
-            progressBar.style.width = '0%'; progressContainer.style.display = 'none';
-            showError("Prediction failed: " + (error.message || "Unknown error. The service might be temporarily down."));
-            ampClassificationOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error in Prediction</p>';
-            additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error during prediction. Detailed report not available.</p>';
-            additionalDetailsOutput.appendChild(downloadLink); downloadLink.style.display = 'none';
+            console.error("Error during prediction or processing:", error);
+            if(animationIntervalId) { clearInterval(animationIntervalId); animationIntervalId = null; }
+            if(progressBar) progressBar.style.width = '0%'; 
+            if(progressContainer) progressContainer.style.display = 'none';
+            showError("Prediction failed: " + (error.message || "Unknown error. Prediction service might be down."));
+            if(ampClassificationOutput) ampClassificationOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error in Prediction</p>';
+            if(additionalDetailsOutput) {
+                 additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Detailed report not available.</p>';
+                 if(downloadLink) { additionalDetailsOutput.appendChild(downloadLink); downloadLink.style.display = 'none';}
+            }
+            if (emailStatusDiv) { emailStatusDiv.textContent = 'Email not sent due to prediction error.'; emailStatusDiv.style.color = 'var(--warning-color)';}
         } finally {
-            predictBtn.disabled = false;
-            predictBtn.textContent = 'Submit';
-            if (!ampLabel.includes('AMP (Positive)')) {
-                micCheckboxes.forEach(checkbox => { checkbox.checked = false; checkbox.disabled = true; });
+            if (predictBtn) { predictBtn.disabled = false; predictBtn.textContent = 'Submit';}
+            if (ampLabelFromPrediction.toLowerCase().includes('amp') && !ampLabelFromPrediction.toLowerCase().includes('non-amp')) {
+                 if(micCheckboxes) micCheckboxes.forEach(cb => cb.disabled = false);
             } else {
-                 micCheckboxes.forEach(checkbox => checkbox.disabled = false);
+                 if(micCheckboxes) micCheckboxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
             }
         }
     }
 
-    // Helper to get image base64 from a URL
     async function getBase64Image(imgSrc) {
-        return new Promise((resolve, reject) => {
+        return new Promise((resolve) => { // Removed reject, always resolve (null on error)
+            if (!imgSrc) { resolve(null); return; }
             const img = new Image();
             img.crossOrigin = 'Anonymous'; 
             img.onload = () => {
                 if (img.naturalWidth === 0 || img.naturalHeight === 0) {
-                    console.warn(`getBase64Image: Image at "${imgSrc}" has no natural dimensions. Possibly corrupted or failed to load fully.`);
-                    resolve(null); 
-                    return;
+                    console.warn(`getBase64Image: Image at "${imgSrc}" has zero dimensions.`);
+                    resolve(null); return;
                 }
                 try {
                     const canvas = document.createElement("canvas");
-                    canvas.width = img.naturalWidth;
-                    canvas.height = img.naturalHeight;
+                    canvas.width = img.naturalWidth; canvas.height = img.naturalHeight;
                     const ctx = canvas.getContext("2d");
                     ctx.drawImage(img, 0, 0);
                     resolve(canvas.toDataURL("image/png"));
                 } catch (e) {
-                    // This often catches tainted canvas (CORS issues) or drawing errors
-                    console.error(`Error converting image "${imgSrc}" to base64 via canvas:`, e);
-                    reject(`Error converting image to base64: ${imgSrc} - ${e.message}`);
+                    console.error(`Error converting image "${imgSrc}" to base64:`, e);
+                    resolve(null);
                 }
             };
             img.onerror = () => {
-                console.error(`Failed to load image at URL: "${imgSrc}"`);
-                reject(`Failed to load image: ${imgSrc}`);
+                console.error(`Failed to load image for base64: "${imgSrc}"`);
+                resolve(null);
             };
             img.src = imgSrc;
         });
     }
 
+    async function generatePDFReportContent(sequenceForPdf, predictionForPdf, confidenceForPdf, micResultsForPdf, limeFeaturesForPdf) { // Renamed params
+        if (!window.jspdf || !window.jspdf.jsPDF) { console.error("jsPDF is not loaded."); return null; }
+        const { jsPDF } = window.jspdf; const pdf = new jsPDF(); 
+        const primaryC = [0,77,64], textC=[51,51,51], successC=[39,174,96], errorC=[231,76,60], headerTextC=[44,62,80];
+        const pageWidth = pdf.internal.pageSize.width; let yPos = 15; 
 
-    // Function to generate the PDF report using jspdf and jspdf-autotable
-    async function generatePDFReport(sequence, prediction, confidence, micResults = null, limeFeatures = null) {
-        if (!window.jspdf || !window.jspdf.jsPDF) {
-            console.error("jsPDF is not loaded correctly.");
-            return;
-        }
-        const { jsPDF } = window.jspdf; 
-        const pdf = new jsPDF(); 
-
-        const primaryColor = [0, 77, 64]; 
-        const textColor = [51, 51, 51]; 
-        const successColor = [39, 174, 96]; 
-        const errorColor = [231, 76, 60]; 
-        const headerTextColor = [44, 62, 80];
-
-        const pageWidth = pdf.internal.pageSize.width;
-        let yPos = 15; // Starting Y for elements on first page to allow space for logo + title
-
-        // --- Load images ---
-        let toolLogoBase64 = null;
-        let shapPlotBase64 = null;
-
-        try {
-            const toolLogoElement = document.querySelector('.logos-container img');
-            if (toolLogoElement && toolLogoElement.src) {
-                toolLogoBase64 = await getBase64Image(toolLogoElement.src);
-            }
-        } catch (error) {
-            console.error("Error loading tool logo for PDF:", error);
-            toolLogoBase64 = null;
-        }
-
-        try {
-            shapPlotBase64 = await getBase64Image('shap.png'); 
-        } catch (error) {
-            console.error("Error loading SHAP plot for PDF:", error);
-            shapPlotBase64 = null;
-        }
-        
-        // 1. Tool Logo
-        if (toolLogoBase64) {
-            const tempImgForRatio = new Image(); 
-            tempImgForRatio.src = toolLogoBase64;
-            await new Promise(resolve => tempImgForRatio.complete ? resolve() : (tempImgForRatio.onload = resolve));
-            
-            if (tempImgForRatio.naturalWidth > 0 && tempImgForRatio.naturalHeight > 0) {
-                const desiredLogoWidth = pageWidth * 0.8; // 80% width
-                const originalLogoRatio = tempImgForRatio.naturalHeight / tempImgForRatio.naturalWidth;
-                const calculatedLogoHeight = desiredLogoWidth * originalLogoRatio;
-                const logoX = (pageWidth - desiredLogoWidth) / 2; // Centered
-                
-                pdf.addImage(toolLogoBase64, 'PNG', logoX, yPos, desiredLogoWidth, calculatedLogoHeight);
-                yPos += calculatedLogoHeight + 5; // Spacing below logo
-            } else { 
-                yPos += 15; console.warn("PDF: Tool logo has invalid natural dimensions. Skipping image."); 
-            }
-        } else { 
-            yPos += 15; console.warn("PDF: Tool logo data not available. Skipping image."); 
-        }
-
-        // 2. Main Report Title (Centered, large)
-        pdf.setFont("helvetica", "bold");
-        pdf.setFontSize(28); 
-        pdf.setTextColor(headerTextColor[0], headerTextColor[1], headerTextColor[2]);
-        pdf.text("Anti-microbial Peptides Report", pageWidth / 2, yPos, { align: "center" });
-        yPos += 28 + 20; 
-
-        // 3. Input Sequence
-        pdf.setFontSize(16);
-        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        pdf.text("Input Sequence:", 20, yPos);
-        yPos += 7; 
-        pdf.setFontSize(11); 
-        pdf.setTextColor(textColor[0], textColor[1], textColor[2]);
-        const sequenceMaxWidth = pageWidth - 40; 
-        const sequenceLines = pdf.splitTextToSize(sequence, sequenceMaxWidth);
-        pdf.text(sequenceLines, 20, yPos);
-        yPos += (sequenceLines.length * (pdf.getFontSize() / pdf.internal.scaleFactor) * 1.15) + 18; 
+        let toolLogoB64 = null, shapPlotB64 = null; // Renamed local vars
+        const toolLogoEl = document.querySelector('.logos-container img');
+        if (toolLogoEl && toolLogoEl.src) toolLogoB64 = await getBase64Image(toolLogoEl.src);
+        const shapImgEl = document.querySelector('#shap-plot-container img');
+        if (shapImgEl && shapImgEl.src) shapPlotB64 = await getBase64Image(shapImgEl.src); 
+        else if (!shapImgEl) shapPlotB64 = await getBase64Image('shap.png'); // Fallback if element not found
 
 
-        // 4. Analysis Summary (Table for Prediction & Confidence)
-        if (yPos + 35 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; } 
-        
-        pdf.setFontSize(16);
-        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        pdf.text("Analysis Summary:", 20, yPos);
-        yPos += 8; 
-        
-        const predictionTableHead = [['Metric', 'Value']];
-        const predictionTableBody = [
-            ['Prediction', prediction],
-            ['Confidence', `${(confidence * 100).toFixed(2)}%`]
-        ];
-        
-        pdf.autoTable({
-            startY: yPos,
-            head: predictionTableHead,
-            body: predictionTableBody,
-            theme: 'striped',
-            headStyles: { 
-                fillColor: primaryColor, 
-                textColor: 255, 
-                fontSize: 11, 
-                fontStyle: 'bold', 
-                halign: 'left' 
-            }, 
-            bodyStyles: { 
-                textColor: textColor, 
-                fontSize: 10, 
-                cellPadding: 2, 
-                lineWidth: 0.1, 
-                lineColor: [200, 200, 200] 
-            },
-            columnStyles: { 
-                0: { cellWidth: 70, halign: 'left' }, 
-                1: { halign: 'left', cellWidth: 'auto' } 
-            },
-            didParseCell: function(data) { 
-                if (data.section === 'body' && data.column.dataKey === 1) { 
-                    if (data.row.raw[0] === 'Prediction') { 
-                        data.cell.styles.fontStyle = 'bold'; 
-                        data.cell.styles.textColor = (prediction.includes('(Non-AMP)')) ? errorColor : successColor;
-                    } else if (data.row.raw[0] === 'Confidence') { 
-                        data.cell.styles.textColor = successColor;
-                        data.cell.styles.fontStyle = 'normal'; 
-                    }
+        if (toolLogoB64) {
+            const img = new Image(); img.src = toolLogoB64; await new Promise(r=>img.onload=r);
+            if(img.naturalWidth > 0){
+                const logoW = pageWidth*0.8, ratio=img.naturalHeight/img.naturalWidth, logoH=logoW*ratio, logoX=(pageWidth-logoW)/2;
+                pdf.addImage(toolLogoB64,'PNG',logoX,yPos,logoW,logoH); yPos+=logoH+5;
+            } else {yPos+=15;}
+        } else { yPos+=15; }
+
+        pdf.setFont("helvetica","bold"); pdf.setFontSize(28); pdf.setTextColor(headerTextC[0],headerTextC[1],headerTextC[2]);
+        pdf.text("Anti-microbial Peptides Report",pageWidth/2,yPos,{align:"center"}); yPos+=28+20;
+        pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); pdf.text("Input Sequence:",20,yPos); yPos+=7;
+        pdf.setFontSize(10); pdf.setTextColor(textC[0],textC[1],textC[2]);
+        const seqLines=pdf.splitTextToSize(sequenceForPdf,pageWidth-40); pdf.text(seqLines,20,yPos); yPos+=(seqLines.length*(pdf.getFontSize()/pdf.internal.scaleFactor)*1.15)+18;
+
+        if(yPos+35 > pdf.internal.pageSize.height-30){pdf.addPage(); yPos=20;}
+        pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); pdf.text("Analysis Summary:",20,yPos); yPos+=8;
+        const predHead=[['Metric','Value']], predBody=[['Prediction',predictionForPdf],['Confidence',`${(confidenceForPdf*100).toFixed(2)}%`]];
+        pdf.autoTable({startY:yPos, head:predHead, body:predBody, theme:'striped',
+            headStyles:{fillColor:primaryC,textColor:255,fontSize:11,fontStyle:'bold',halign:'left'},
+            bodyStyles:{textColor:textC,fontSize:10,cellPadding:2,lineWidth:0.1,lineColor:[200,200,200]},
+            columnStyles:{0:{cellWidth:70,halign:'left'},1:{halign:'left',cellWidth:'auto'}},
+            didParseCell: (data) => {
+                if(data.section==='body' && data.column.index === 1 && data.row.raw[0]==='Prediction'){
+                    data.cell.styles.fontStyle='bold';
+                    data.cell.styles.textColor = predictionForPdf.toLowerCase().includes('non-amp') ? errorC : successC;
+                } else if (data.section === 'body' && data.column.index === 1 && data.row.raw[0]==='Confidence'){
+                     data.cell.styles.textColor = successC;
                 }
             }
         });
-        yPos = pdf.lastAutoTable.finalY + 20; 
+        yPos=pdf.lastAutoTable.finalY+20;
 
-
-        // 5. Predicted MIC Values (Table)
-        if (micResults && Object.keys(micResults).length > 0) {
-            if (yPos + 35 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; } 
-            
-            pdf.setFontSize(16);
-            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("Predicted MIC (µM):", 20, yPos); 
-            yPos += 8; 
-            
-            const micTableHead = [['Bacterium', 'MIC (µM)']]; // Exactly as requested
-            const micTableBody = [];
-            const bacteriumDisplayNamesForPdf = {
-                'e_coli': 'E.coli', 's_aureus': 'S.aureus', 'p_aeruginosa': 'P. aeruginosa', 'k_pneumoniae': 'K.Pneumoniae',
-            };
-            
-            // To match your screenshot ordering if keys are parsed differently
-            const orderedMicDisplayNames = ['E.coli', 'S.aureus', 'P. aeruginosa', 'K.Pneumoniae'];
-            orderedMicDisplayNames.forEach(displayName => {
-                const internalKey = Object.keys(bacteriumDisplayNamesForPdf).find(key => bacteriumDisplayNamesForPdf[key] === displayName);
-                if (internalKey && typeof micResults[internalKey] === 'number') {
-                    micTableBody.push([
-                        displayName, // Use the preferred display name
-                        micResults[internalKey].toFixed(3)
-                    ]);
+        const micDataForTable = [];
+        if (micResultsForPdf && Object.keys(micResultsForPdf).length > 0) {
+             Object.entries(micResultsForPdf).forEach(([bacterium, micVal]) => {
+                // Determine if this bacterium's checkbox is checked
+                let isChecked = false;
+                if(micCheckboxes) {
+                    micCheckboxes.forEach(cb => {
+                        const cbLabel = cb.parentElement.querySelector('.mic-label').textContent.trim();
+                        // Crude match: if bacterium display name contains checkbox label (e.g., "E.coli" in "E.coli")
+                        if (cb.checked && bacterium.toLowerCase().includes(cbLabel.toLowerCase().split('.')[0])) { 
+                            isChecked = true;
+                        }
+                    });
                 }
+                if(isChecked) { // Only add if checkbox was checked
+                    micDataForTable.push([bacterium, typeof micVal === 'number' ? micVal.toFixed(3) : String(micVal)]);
+                }
+             });
+        }
+        
+        if(micDataForTable.length > 0){
+            if(yPos+35 > pdf.internal.pageSize.height-30){pdf.addPage(); yPos=20;}
+            pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); pdf.text("Predicted MIC (µM):",20,yPos); yPos+=8;
+            const micHead=[['Bacterium','MIC (µM)']];
+            pdf.autoTable({startY:yPos, head:micHead, body:micDataForTable, theme:'striped',
+                headStyles:{fillColor:primaryC,textColor:255,fontSize:11,fontStyle:'bold',halign:'center'},
+                columnStyles:{0:{fontStyle:'italic',cellWidth:90,halign:'left'},1:{halign:'right',cellWidth:'auto'}},
+                styles:{cellPadding:2,fontSize:10,textColor:textC,lineColor:[200,200,200],lineWidth:0.1},
             });
-
-            // Fallback for any other MICs if they appear in `micResults` but aren't in `orderedMicDisplayNames`
-            Object.keys(micResults).filter(key => !orderedMicDisplayNames.includes(bacteriumDisplayNamesForPdf[key]))
-                .forEach(bacteriumKey => {
-                    if (typeof micResults[bacteriumKey] === 'number' && bacteriumDisplayNamesForPdf[bacteriumKey]) {
-                        micTableBody.push([
-                            bacteriumDisplayNamesForPdf[bacteriumKey],
-                            micResults[bacteriumKey].toFixed(3)
-                        ]);
-                    }
-                });
-            
-            pdf.autoTable({
-                startY: yPos,
-                head: micTableHead, 
-                body: micTableBody,
-                theme: 'striped', 
-                headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'center' },
-                columnStyles: { 
-                    0: { fontStyle: 'italic', cellWidth: 90, halign: 'left' }, 
-                    1: { halign: 'right', cellWidth: 'auto' } 
-                },
-                styles: { cellPadding: 2, fontSize: 10, textColor: textColor, lineColor: [200, 200, 200], lineWidth: 0.1 },
-            });
-            yPos = pdf.lastAutoTable.finalY + 20; 
-        } else { 
-            if (yPos + 25 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; }
+            yPos=pdf.lastAutoTable.finalY+20;
+        } else {
+            if(yPos+25 > pdf.internal.pageSize.height-30){pdf.addPage(); yPos=20;}
             pdf.setFontSize(10); pdf.setTextColor(100,100,100);
-            pdf.text("No MIC prediction performed for this peptide (e.g., non-AMP or no bacteria selected).", 20, yPos);
-            yPos += 15; 
+            pdf.text("No MIC prediction displayed (non-AMP, no bacteria selected, or no valid predictions for selected bacteria).", 20, yPos); yPos+=15;
         }
 
-        // --- NEW PAGE FOR XAI ---
-        pdf.addPage(); 
-        yPos = 20; 
+        if(!limeFeaturesForPdf || limeFeaturesForPdf.length === 0){ limeFeaturesForPdf = []; } // Ensure it's an array
 
-        // 6. LIME (Local XAI): Top Features Influencing Prediction (Table)
-        pdf.setFontSize(16);
-        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-        pdf.text("LIME (Local XAI): Top Features Influencing Prediction:", 20, yPos); 
-        yPos += 8; 
-
-        if (limeFeatures && limeFeatures.length > 0) {
-            const limeTableHead = [['Feature', 'Condition', 'SHAP Value']]; 
-            const limeTableBody = [];
-            
-            // Sort LIME features by absolute SHAP value (descending) to match screenshot order
-            limeFeatures.sort((a, b) => Math.abs(b.value) - Math.abs(a.value));
-
-            limeFeatures.forEach((f) => { 
-                limeTableBody.push([
-                    f.feature, 
-                    f.condition || '', 
-                    (typeof f.value === 'number' ? f.value.toFixed(4) : '') 
-                ]);
-            });
-            pdf.autoTable({
-                startY: yPos,
-                head: limeTableHead,
-                body: limeTableBody,
-                theme: 'striped',
-                headStyles: { fillColor: primaryColor, textColor: 255, fontSize: 11, fontStyle: 'bold', halign: 'left' }, 
-                columnStyles: { 
-                    0: { cellWidth: 70, halign: 'left' }, 
-                    1: { cellWidth: 50, halign: 'center' }, 
-                    2: { halign: 'right', cellWidth: 'auto' } 
-                },
-                styles: { cellPadding: 2, fontSize: 9.5, textColor: textColor, lineColor: [200, 200, 200], lineWidth: 0.1 },
+        if(limeFeaturesForPdf.length > 0) {
+            pdf.addPage(); yPos=20;
+            pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); pdf.text("LIME: Top Features Influencing Prediction",20,yPos); yPos+=8;
+            const limeHead = [['Feature Description','Importance (LIME Weight)']]; // Simplified LIME headers
+            const limeBody = limeFeaturesForPdf.sort((a,b)=>Math.abs(b.value)-Math.abs(a.value))
+                               .map(f=>[f.feature, typeof f.value === 'number' ? f.value.toFixed(4) : 'N/A']);
+            pdf.autoTable({startY:yPos, head:limeHead, body:limeBody, theme:'grid',
+                headStyles:{fillColor:primaryC,textColor:255,fontSize:10,fontStyle:'bold'},
+                styles:{fontSize:9,cellPadding:1.5,lineColor:[220,220,220],lineWidth:0.1},
+                columnStyles:{0:{cellWidth:100},1:{halign:'right'}},
                 didDrawCell: (data) => {
-                    if (data.column.index === 2 && data.row.section === 'body') { 
-                        const val = parseFloat(data.cell.raw);
-                        if (!isNaN(val)) {
-                            if (val > 0) pdf.setTextColor(successColor[0], successColor[1], successColor[2]); 
-                            else if (val < 0) pdf.setTextColor(errorColor[0], errorColor[1], errorColor[2]); 
+                    if(data.column.index===1 && data.row.section === 'body'){
+                        const val = parseFloat(String(data.cell.raw).trim());
+                        if(!isNaN(val)){
+                            if(val > 0) pdf.setTextColor(successC[0],successC[1],successC[2]);
+                            else if (val < 0) pdf.setTextColor(errorC[0],errorC[1],errorC[2]);
                         }
                     }
                 }
             });
-            yPos = pdf.lastAutoTable.finalY + 20; 
+            yPos=pdf.lastAutoTable.finalY+20;
         } else {
-            pdf.setFontSize(10); 
-            pdf.setTextColor(100,100,100);
-            pdf.text("LIME local explanation data not available for this prediction.", 20, yPos);
-            yPos += 15; 
+             if(yPos+20 > pdf.internal.pageSize.height-30){pdf.addPage();yPos=20;}
+             else { pdf.addPage(); yPos=20; } // Ensure LIME/SHAP on new page anyway
+             pdf.setFontSize(10); pdf.setTextColor(100,100,100);
+             pdf.text("LIME explanation data not available or not generated for this prediction.", 20, yPos); yPos+=15;
         }
-
-        // 7. SHAP Plot (Global XAI - Static image from file)
-        if (shapPlotBase64) {
-            const tempShapImg = new Image(); 
-            tempShapImg.src = shapPlotBase64;
-            await new Promise(resolve => tempShapImg.complete ? resolve() : (tempShapImg.onload = resolve));
-            
-            let imgWidth = tempShapImg.naturalWidth;
-            let imgHeight = tempShapImg.naturalHeight;
-            const ratio = imgWidth / imgHeight;
-            const imgMaxHeight = 120; // Increased max height
-            const imgMaxWidth = pageWidth - 40; 
-
-            if (imgWidth > imgMaxWidth) { imgWidth = imgMaxWidth; imgHeight = imgWidth / ratio; }
-            if (imgHeight > imgMaxHeight) { 
-                imgHeight = imgMaxHeight;
-                imgWidth = imgHeight * ratio;
-            }
-
-            if (yPos + imgHeight + 40 > pdf.internal.pageSize.height - 30) { 
-                pdf.addPage(); yPos = 20; 
-            }
-
-            pdf.setFontSize(16);
-            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("SHAP Plot (Global XAI):", 20, yPos); 
-            yPos += 8;
-
-            try {
-                const imageX = (pageWidth - imgWidth) / 2; 
-                pdf.addImage(shapPlotBase64, 'PNG', imageX, yPos, imgWidth, imgHeight); 
-                yPos += imgHeight + 15; 
-            } catch (imgError) { 
-                console.error("Error adding SHAP plot to PDF:", imgError);
-                pdf.setFontSize(10); pdf.setTextColor(100,100,100);
-                pdf.text("SHAP plot image could not be embedded due to an error.", 20, yPos);
-                yPos += 15;
+        
+        if (shapPlotB64) {
+            const img = new Image(); img.src = shapPlotB64; await new Promise(r=>img.onload=r);
+            if(img.naturalWidth > 0){
+                let imgW=img.naturalWidth,imgH=img.naturalHeight,ratio=imgW/imgH,maxH=100,maxW=pageWidth-40;
+                if(imgW>maxW){imgW=maxW;imgH=imgW/ratio;} if(imgH>maxH){imgH=maxH;imgW=imgH*ratio;}
+                if(yPos+imgH+30 > pdf.internal.pageSize.height-30){pdf.addPage(); yPos=20;}
+                pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); pdf.text("Global SHAP Feature Importance (Illustrative):",20,yPos); yPos+=8;
+                try{pdf.addImage(shapPlotB64,'PNG',(pageWidth-imgW)/2,yPos,imgW,imgH); yPos+=imgH+10;}
+                catch(e){console.error("Error adding SHAP PDF:",e); yPos+=10;}
             }
         } else {
-            if (yPos + 25 > pdf.internal.pageSize.height - 30) { pdf.addPage(); yPos = 20; }
-            pdf.setFontSize(16);
-            pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            pdf.text("SHAP Plot (Global XAI):", 20, yPos); 
-            yPos += 8;
-            pdf.setFontSize(10); pdf.setTextColor(100,100,100);
-            pdf.text("SHAP plot (Global XAI) could not be loaded or is not available.", 20, yPos); 
-            yPos += 15; 
+             if(yPos+20 > pdf.internal.pageSize.height-30){pdf.addPage();yPos=20;}
+             pdf.setFontSize(10); pdf.setTextColor(100,100,100);
+             pdf.text("Global SHAP plot image not available for this report.", 20, yPos); yPos+=15;
         }
 
-        // Add page numbers and standard footer (Generated by EPIC-AMP @ Zewail City)
         addPageNumbersAndFooter(pdf);
+        pdf.setPage(pdf.internal.getNumberOfPages());
+        pdf.setFontSize(10); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]);
+        pdf.text("For inquiries: epicamp.sup@gmail.com", pageWidth/2, pdf.internal.pageSize.height-18, {align:"center"});
 
-        // Add inquiry email only on the LAST page
-        pdf.setPage(pdf.internal.getNumberOfPages()); // Ensure we are on the last page
-        const emailText = "For inquiries: epicamp.sup@gmail.com";
-        const emailFontSize = 10;
-        const emailYPos = pdf.internal.pageSize.height - 18; // Adjust to fit above bottom edge and below default footer
-
-        pdf.setFontSize(emailFontSize);
-        pdf.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]); // Using primary color for emphasis
-        pdf.text(emailText, pageWidth / 2, emailYPos, { align: "center" });
-
-        // Finalize PDF and prepare for download link
-        const pdfBlob = pdf.output('blob');
-        const pdfUrl = URL.createObjectURL(pdfBlob);
-        downloadLink.href = pdfUrl;
-        downloadLink.download = `EPIC-AMP_Report_${new Date().toISOString().slice(0,10)}.pdf`;
+        return pdf;
     }
 
-    // Helper function to add page numbers and repeated footer
-    function addPageNumbersAndFooter(doc) {
+    function addPageNumbersAndFooter(doc) { // No changes
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
-            doc.setFontSize(9); 
-            doc.setTextColor(120, 120, 120); 
+            doc.setFontSize(9); doc.setTextColor(120,120,120); 
             doc.text(`Page ${i} of ${pageCount}`, doc.internal.pageSize.width - 20, doc.internal.pageSize.height - 7, { align: "right" });
             doc.text("Generated by EPIC-AMP @ Zewail City", doc.internal.pageSize.width / 2, doc.internal.pageSize.height - 7, { align: "center" });
+        }
+    }
+
+    async function generatePDFReportAndSendEmail(sequenceForPdfAndEmail, predictionForPdfAndEmail, confidenceForPdfAndEmail, micResultsForPdfAndEmail, limeFeaturesForPdfAndEmail, recipientEmailForSending) {
+        const pdfDoc = await generatePDFReportContent(sequenceForPdfAndEmail, predictionForPdfAndEmail, confidenceForPdfAndEmail, micResultsForPdfAndEmail, limeFeaturesForPdfAndEmail);
+
+        if (!pdfDoc) {
+            console.error("PDF generation failed, cannot set download link or send email.");
+            if(downloadLink) { downloadLink.innerHTML = "PDF Error"; downloadLink.href="#"; downloadLink.style.display = 'block';}
+            if(emailStatusDiv) { emailStatusDiv.textContent = "Email not sent: PDF error."; emailStatusDiv.style.color = "var(--warning-color)";}
+            return;
+        }
+
+        const pdfBlob = pdfDoc.output('blob');
+        const pdfUrl = URL.createObjectURL(pdfBlob);
+        const pdfFileName = `EPIC-AMP_Report_${sequenceForPdfAndEmail.substring(0, 10).replace(/[^a-zA-Z0-9]/g, '')}_${new Date().toISOString().slice(0, 10)}.pdf`;
+
+        if(downloadLink){
+            downloadLink.href = pdfUrl;
+            downloadLink.download = pdfFileName;
+            downloadLink.innerHTML = `<i class="fas fa-download"></i> Download Report (PDF)`;
+            downloadLink.style.display = 'block';
+        }
+
+        // Email sending is mandatory as per new requirement, recipientEmailForSending is already validated
+        if (recipientEmailForSending) { // Should always be true if logic upstream is correct
+            if(emailStatusDiv) {
+                emailStatusDiv.textContent = 'Preparing PDF for email...';
+                emailStatusDiv.style.color = 'var(--info-color)';
+            }
+            
+            const reader = new FileReader();
+            reader.readAsDataURL(pdfBlob);
+            reader.onloadend = async function() {
+                const base64PdfOnly = reader.result.split(',')[1]; 
+                await sendReportViaApi(recipientEmailForSending, base64PdfOnly, pdfFileName);
+            };
+            reader.onerror = function() {
+                console.error("Error reading PDF blob for email.");
+                if(emailStatusDiv){
+                    emailStatusDiv.textContent = 'Error preparing PDF for email attachment.';
+                    emailStatusDiv.style.color = 'var(--warning-color)';
+                }
+            };
+        } else {
+            // This state implies an issue with mandatory email logic upstream
+            console.error("generatePDFReportAndSendEmail called without a mandatory recipientEmail.");
+            if(emailStatusDiv) {
+                emailStatusDiv.textContent = 'Critical Error: Email address was missing for sending.';
+                emailStatusDiv.style.color = 'var(--warning-color)';
+            }
+        }
+    }
+
+    async function sendReportViaApi(emailAddr, pdfBase64Str, pdfFileNm) { // Param names updated
+        if(emailStatusDiv) {
+            emailStatusDiv.textContent = 'Sending email via API...';
+            emailStatusDiv.style.color = 'var(--info-color)';
+        }
+        console.log(`Sending email to ${emailAddr} via ${EMAIL_SERVICE_API_URL} for file ${pdfFileNm}`);
+
+        try {
+            const response = await fetch(EMAIL_SERVICE_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', },
+                body: JSON.stringify({
+                    recipient_email: emailAddr,
+                    pdf_base64_data: pdfBase64Str,
+                    pdf_filename: pdfFileNm
+                })
+            });
+
+            const responseText = await response.text(); 
+            console.log("Raw response from Email API:", responseText);
+            let resultJson = {};
+            try {
+                resultJson = JSON.parse(responseText); 
+            } catch (jsonError) {
+                console.error("Email API response not valid JSON:", jsonError, "\nResponse Text:", responseText);
+                throw new Error(response.statusText || `Email API returned non-JSON. Status: ${response.status}. Check API logs and ensure it is correctly deployed & running.`);
+            }
+            
+            console.log("Parsed JSON Email API Result:", resultJson);
+
+            if (response.ok && resultJson.status === "success") {
+                 if(emailStatusDiv) {
+                    emailStatusDiv.textContent = resultJson.message || "Report successfully sent.";
+                    emailStatusDiv.style.color = 'var(--success-color)';
+                 }
+            } else {
+                 if(emailStatusDiv) {
+                    emailStatusDiv.textContent = `Email sending failed: ${resultJson.message || "Unknown error from email API. Check API logs."}`;
+                    emailStatusDiv.style.color = 'var(--warning-color)';
+                 }
+            }
+        } catch (error) {
+            console.error("Error calling email API:", error);
+            if(emailStatusDiv) {
+                emailStatusDiv.textContent = "Error sending email: " + (error.message || "Email API unavailable/network issue. Ensure service is running.");
+                emailStatusDiv.style.color = 'var(--warning-color)';
+            }
         }
     }
 </script>
