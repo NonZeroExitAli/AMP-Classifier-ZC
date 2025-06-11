@@ -110,7 +110,7 @@
         cursor: pointer;
         font-size: 1rem;
         transition: transform 0.2s ease, background-color 0.3s ease;
-        margin-top: 1rem;
+        /* margin-top: 1rem; Removed individual margin-top for buttons */
     }
       .button-group button{
        margin: 0 0.2rem;
@@ -130,6 +130,7 @@
 
     #predict-btn {
         background-color: var(--analyze-button-bg);
+        min-width: 230px; /* To accommodate count-up text better */
     }
 
     #predict-btn:hover {
@@ -189,24 +190,6 @@
     .info-icon:hover + .tooltip,
     .tooltip:hover {
         display: block;
-    }
-
-    .progress-container {
-         width: 100%;
-        height: 8px;
-        background-color: var(--border-color);
-        border-radius: 4px;
-        margin-top: 1rem;
-        overflow: hidden;
-        display: none;
-    }
-
-
-    .progress-bar {
-        height: 100%;
-        width: 0;
-        background-color: var(--success-color);
-        transition: width 0.3s ease;
     }
 
     @keyframes fadeIn {
@@ -328,6 +311,21 @@
     }
 
 
+    .button-group-wrapper { /* New wrapper for buttons and the time info */
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        width: 100%;
+        margin-top: 1rem; /* Spacing for the wrapper itself */
+    }
+    #processing-time-info {
+        font-size: 0.9em;
+        color: var(--text-color);
+        margin-bottom: 0.75rem; /* Space between this info and the buttons */
+    }
+    .dark-mode #processing-time-info {
+        color: var(--text-color); /* Ensure dark mode text color is applied */
+    }
     .button-group {
         display: flex;
         justify-content: center;
@@ -533,10 +531,9 @@
         font-weight: normal;
     }
 
-    /* Styles for Email input and status messages */
     #user-email-input-group {
-        margin-top: 1.5rem;     /* Space above the email input section */
-        margin-bottom: 1rem;    /* Space between email input and buttons */
+        margin-top: 1.5rem;
+        margin-bottom: 1rem;
     }
     #user-email {
         width: 100%;
@@ -552,14 +549,12 @@
         outline: none;
         border-color: var(--secondary-color);
     }
-    /* #email-error is already styled by .error-message */
     #email-status {
         text-align: left;
         font-size: 0.9rem;
         margin-top: 0.3rem;
-        min-height: 1.2em; /* Reserve space to prevent layout jumps */
+        min-height: 1.2em;
     }
-    /* End of Email input styles */
 
 
     @media (max-width: 768px) {
@@ -620,7 +615,7 @@
 
 <div class="container">
     <div class="logos-container">
-        <img src="image2.png" alt="Tool Logo"> <!-- Ensure image2.png exists -->
+        <img src="image2.png" alt="Tool Logo">
     </div>
 
     <div class="tabs">
@@ -675,26 +670,23 @@
             </label>
         </div>
 
-        <!-- ***** MOVED AND MODIFIED EMAIL INPUT FIELD SECTION (NOW MANDATORY) ***** -->
         <div class="input-group" id="user-email-input-group" style="margin-top: 1.5rem; margin-bottom: 1rem;">
             <label for="user-email" style="display:block; text-align:left; margin-bottom:0.5rem; font-weight:bold;">Your Email Address (for Report):<span style="color:red;">*</span></label>
             <input type="email" id="user-email" placeholder="Enter your email to receive the PDF report" required>
-            <div id="email-error" class="error-message" style="text-align:left; font-size:0.9rem; margin-top:0.3rem; display:none;"></div> <!-- Initially hidden -->
+            <div id="email-error" class="error-message" style="text-align:left; font-size:0.9rem; margin-top:0.3rem; display:none;"></div>
             <div id="email-status" style="text-align:left; font-size:0.9rem; margin-top:0.3rem; min-height: 1.2em;"></div>
         </div>
-        <!-- ***** END: EMAIL INPUT FIELD SECTION ***** -->
 
-        <div class="button-group">
-            <button onclick="clearInput()" id="clear-btn">Clear Input</button>
-            <button onclick="classifySequenceDebounced()" id="predict-btn">Submit</button>
+        <!-- Wrapper for estimated time and buttons -->
+        <div class="button-group-wrapper">
+            <div id="processing-time-info">Estimated processing time: around 30 seconds.</div>
+            <div class="button-group">
+                <button onclick="clearInput()" id="clear-btn">Clear Input</button>
+                <button onclick="classifySequenceDebounced()" id="predict-btn">Submit</button>
+            </div>
         </div>
 
         <div class="error-message" id="error"></div>
-
-
-        <div class="progress-container" id="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
 
         <div class="results-display-group">
             <div class="result-box">
@@ -812,14 +804,14 @@
         <h2 style="margin-top: 2rem;">Model Interpretability</h2>
         <p>To understand how our model makes predictions, we use SHAP (SHapley Additive exPlanations) values globally and LIME (Local Interpretable Model-agnostic Explanations) locally. SHAP values help assess the overall contribution of each feature to model predictions across the dataset, while LIME explains the features influencing a single, specific prediction.</p>
 
-        <h3>Global SHAP Plot (Illustrative)</h3>
+        <h3>Global SHAP Plot</h3>
         <p>The SHAP plot below visualizes the features that most significantly influence the model's predictions *on average across all data*. Positive SHAP values generally contribute to the sequence being classified as AMP, while negative values contribute to Non-AMP classification.</p>
 
         <div id="shap-plot-container">
-            <img src="shap.png" alt="SHAP Plot" > <!-- Ensure shap.png exists -->
+            <img src="shap.png" alt="SHAP Plot" >
         </div>
 
-        <h3>Interpretation of Global SHAP Plot (Illustrative)</h3>
+        <h3>Interpretation of Global SHAP Plot</h3>
         <div class="scrollable-content">
              <p>Based on the SHAP plot, the model's predictions for Antimicrobial Peptides (AMPs) are influenced by a combination of sequence-based, structural, and biophysical features. Here’s a breakdown of the key features and their biological implications:</p>
             <h4>A. Sequence-Based Features</h4>
@@ -941,7 +933,7 @@
             <li>The Centre for Genomics at Zewail City.</li>
         </ul>
         <h3>Contact</h3>
-        <p>For questions, inquiries, or feedback, please reach out to us at: <a href="mailto:epicamp.sup@gmail.com">epicamp.sup@gmail.com</a></p>
+        <p>For questions, inquiries, or feedback, please reach out to us at: <a href="mailto:epicamp.sup@gmail.com">epicamp.sup@gmail.com</a></p>    
     </div>
 
      <div class="tab-content" id="usage">
@@ -953,23 +945,23 @@
             <li>Ensure your sequence contains only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY).</li>
              <li>The sequence length must be between 10 and 100 amino acids.</li>
         </ul>
-        <h3>Step 2: Input the Sequence & Email</h3> <!-- MODIFIED -->
+        <h3>Step 2: Input the Sequence & Email</h3>
         <ul>
             <li><strong>Direct Input:</strong> Type or paste your sequence into the text area provided.</li>
             <li><strong>FASTA File Upload:</strong> Click the "Choose File" button and select your .fasta, .fa, or .fna file.</li>
             <li>The character count will update as you type or upload a sequence.</li>
-            <li><strong>Enter Your Email:</strong> Input your email address in the "Your Email Address (for Report)" field. This is required to receive the PDF report.</li> <!-- MODIFIED -->
+            <li><strong>Enter Your Email:</strong> Input your email address in the "Your Email Address (for Report)" field. This is required to receive the PDF report.</li>
         </ul>
         <h3>Step 3: Analyze the Sequence</h3>
         <ul>
             <li>Click the "Submit" button.</li>
-            <li>A progress bar will appear, indicating that the analysis is underway.</li>
+            <li>A message indicating the estimated processing time will be visible above the buttons, and the button itself will show elapsed time.</li>
         </ul>
-        <h3>Step 4: View the Results</h3> <!-- MODIFIED -->
+        <h3>Step 4: View the Results</h3>
         <ul>
             <li>Once the analysis is complete, the prediction (AMP or Non-AMP) will be displayed in the "AMP Classification" box.</li>
-            <li>A link to "Download Detailed Report (PDF)" will appear.</li>
-            <li>The PDF report will also be automatically sent to the email address you provided. Check your inbox and spam folder.</li>
+            <li>A link to "Download Detailed Report (PDF)" will appear in the "Additional Details" box if the report was generated successfully.</li>
+            <li>The PDF report will also be automatically sent to the email address you provided. Check your inbox and spam folder. The status of the email will be shown below the email input field.</li>
         </ul>
         <h3>Step 5: Clear the Input</h3>
         <ul>
@@ -980,7 +972,7 @@
                 <li><strong>Invalid Characters:</strong> If you see an error message about invalid characters, double-check that your sequence contains only standard amino acid characters.</li>
                 <li><strong>Sequence Length:</strong> Ensure your sequence is between 10 and 100 characters long.</li>
                  <li><strong>Invalid FASTA Format:</strong> If you encounter an error with a FASTA file, make sure the file is correctly formatted.</li>
-                 <li><strong>Email Not Received:</strong> Ensure you entered your email address correctly (it's a required field). Also, check your spam/junk folder. The email sending service might be temporarily unavailable; in this case, please use the "Download Detailed Report (PDF)" link which will always be available after a successful analysis.</li> <!-- MODIFIED -->
+                 <li><strong>Email Not Received:</strong> Ensure you entered your email address correctly. Also, check your spam/junk folder. If the email service encounters an issue, the "Download Detailed Report (PDF)" link should still be available if the report itself was generated.</li>
             </ul>
     </div>
 </div>
@@ -1001,13 +993,8 @@
 
 <script>
     // ***** START: IMPORTANT CONFIGURATION - YOU MUST EDIT THESE *****
-    // 1. URL of YOUR Email Sender API Docker Space on Hugging Face
     const EMAIL_SERVICE_API_URL = "https://nonzeroexit-epic-amp-email-sender.hf.space/send-report-via-email"; 
-    // Example: const EMAIL_SERVICE_API_URL = "https://ali-magdi-epicamp-email-sender.hf.space/send-report-via-email";
-
-    // 2. Space ID or URL of YOUR Gradio Prediction Backend
     const GRADIO_PREDICTION_SPACE_ID_OR_URL = "nonzeroexit/AMP-Classifier"; 
-    // Example for local: const GRADIO_PREDICTION_SPACE_ID_OR_URL = "http://127.0.0.1:7860/";
     // ***** END: IMPORTANT CONFIGURATION *****
 
 
@@ -1015,8 +1002,6 @@
     const charCount = document.getElementById('char-count');
     const errorDiv = document.getElementById('error');
     const predictBtn = document.getElementById('predict-btn');
-    const progressContainer = document.getElementById('progress-container');
-    const progressBar = document.getElementById('progress-bar');
     const fileInput = document.getElementById('file-input');
     const downloadLink = document.getElementById('download-link'); 
     const ampClassificationOutput = document.getElementById('amp-classification-output');
@@ -1025,10 +1010,13 @@
     const tabs = document.querySelectorAll('.tab');
     const tabContents = document.querySelectorAll('.tab-content');
 
-    // New Email Field Selectors
     const userEmailInput = document.getElementById('user-email');
     const emailErrorDiv = document.getElementById('email-error');
     const emailStatusDiv = document.getElementById('email-status');
+
+    let clientInstance;
+    let debounceTimer;
+    let countUpIntervalId; // For count-up timer
 
     tabs.forEach(tab => {
         tab.addEventListener('click', () => {
@@ -1038,10 +1026,6 @@
             document.getElementById(tab.dataset.tab).classList.add('active');
         });
     });
-
-    let clientInstance;
-    let debounceTimer;
-    let animationIntervalId;
 
     async function initClient() {
         if (!window.gradio || !window.gradio.client) {
@@ -1094,17 +1078,21 @@
         if(sequenceInput) sequenceInput.value = '';
         if(fileInput) fileInput.value = '';
         if(charCount) charCount.textContent = '0';
-        clearError(); // Clears main error div
+        clearError(); 
         
         if(downloadLink) {
             downloadLink.style.display = 'none';
             downloadLink.href = '#'; 
+            downloadLink.innerHTML = 'Download Detailed Report (PDF)';
         }
 
         if(ampClassificationOutput) ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>';
         if(additionalDetailsOutput) {
             additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; 
-            if(downloadLink) additionalDetailsOutput.appendChild(downloadLink); 
+            if(downloadLink && !additionalDetailsOutput.contains(downloadLink)) {
+                 additionalDetailsOutput.appendChild(downloadLink);
+                 downloadLink.style.display = 'none';
+            }
         }
 
         if(micCheckboxes) micCheckboxes.forEach(checkbox => {
@@ -1112,12 +1100,10 @@
             checkbox.disabled = true;
         });
 
-        if (animationIntervalId) {
-            clearInterval(animationIntervalId);
-            animationIntervalId = null;
+        if (countUpIntervalId) { // Clear count-up timer
+            clearInterval(countUpIntervalId);
+            countUpIntervalId = null;
         }
-        if(progressBar) progressBar.style.width = '0%';
-        if(progressContainer) progressContainer.style.display = 'none';
 
         if(predictBtn) {
             predictBtn.disabled = true; 
@@ -1157,7 +1143,7 @@
         const reader = new FileReader();
         reader.onload = function(e) {
             try {
-                const parsedSeq = parseFASTA(e.target.result); // Renamed to avoid conflict
+                const parsedSeq = parseFASTA(e.target.result);
                 if (parsedSeq) {
                     if(sequenceInput) {
                         sequenceInput.value = parsedSeq;
@@ -1192,9 +1178,9 @@
         reader.readAsText(file);
     }
 
-    function parseFASTA(text) { // No changes to this function's logic
+    function parseFASTA(text) {
         const lines = text.trim().split(/[\r\n]+/);
-        let sequenceData = ''; // Renamed local var to avoid conflict with global `sequenceInput`
+        let sequenceData = '';
         let headerFound = false;
         for (const line of lines) {
             const trimmedLine = line.trim();
@@ -1219,13 +1205,13 @@
     }
 
 
-    function validateSequence(seqToValidate) { // Parameter renamed
+    function validateSequence(seqToValidate) {
         let isValid = true;
         let errorMessage = '';
         const currentLength = seqToValidate.length;
 
         if (!seqToValidate) {
-            isValid = false; // No error message, just disable button
+            isValid = false;
         } else if (/[^ACDEFGHIKLMNPQRSTVWY]/i.test(seqToValidate)) { 
             errorMessage = 'Invalid characters in sequence. Only standard amino acid characters (ACDEFGHIKLMNPQRSTVWY) are allowed.';
             isValid = false;
@@ -1266,7 +1252,6 @@
         sequenceInput.addEventListener('paste', (e) => {
             e.preventDefault();
             const paste = (e.clipboardData || window.clipboardData).getData('text');
-            // Simpler paste cleaning, relies on main validation
             const cleanPaste = paste.replace(/[\s\r\n]+/g, '').toUpperCase(); 
 
             const selectionStart = sequenceInput.selectionStart;
@@ -1309,8 +1294,8 @@
         }
     }
 
-    function validateEmail(emailToVal) { // Parameter renamed
-        if (!userEmailInput) return true; // If field doesn't exist, bypass
+    function validateEmail(emailToVal) {
+        if (!userEmailInput) return true;
 
         if (!emailToVal || !emailToVal.trim()) { 
             if(emailErrorDiv) {
@@ -1351,42 +1336,44 @@
         const recipientEmail = userEmailInput ? userEmailInput.value.trim() : "";
 
         if (!validateSequence(currentSequence)) return;
-        if (!validateEmail(recipientEmail)) { // Email is now mandatory
+        if (!validateEmail(recipientEmail)) {
             if (userEmailInput) userEmailInput.focus();
             return;
         }
 
-        clearError(); // Clear general error
-        if (emailErrorDiv) { emailErrorDiv.style.display = 'none'; emailErrorDiv.textContent = ''; } // Clear specific email error
-        if (emailStatusDiv) emailStatusDiv.textContent = ''; // Clear previous email status
+        clearError();
+        if (emailErrorDiv) { emailErrorDiv.style.display = 'none'; emailErrorDiv.textContent = ''; }
+        if (emailStatusDiv) emailStatusDiv.textContent = '';
 
-        if (predictBtn) { predictBtn.disabled = true; predictBtn.textContent = 'Processing...'; }
+        if (predictBtn) predictBtn.disabled = true;
         if (ampClassificationOutput) ampClassificationOutput.innerHTML = '<p class="info-message">Analyzing...</p>';
         if (additionalDetailsOutput) {
              additionalDetailsOutput.innerHTML = '<p class="info-message">Generating detailed report...</p>';
-             if(downloadLink) additionalDetailsOutput.appendChild(downloadLink); 
+             if(downloadLink && !additionalDetailsOutput.contains(downloadLink)) {
+                 additionalDetailsOutput.appendChild(downloadLink);
+             }
+             if(downloadLink) downloadLink.style.display = 'none'; 
         }
-        if (downloadLink) downloadLink.style.display = 'none'; 
         if (micCheckboxes) micCheckboxes.forEach(checkbox => checkbox.disabled = true);
-        if (progressContainer) progressContainer.style.display = 'block';
-        if (progressBar) progressBar.style.width = '0%';
         
+        let secondsElapsed = 0;
+        if(predictBtn) predictBtn.textContent = `Processing... (${secondsElapsed}s elapsed)`;
+        
+        if (countUpIntervalId) clearInterval(countUpIntervalId); // Clear any existing interval
+        countUpIntervalId = setInterval(() => {
+            secondsElapsed++;
+            if(predictBtn) predictBtn.textContent = `Processing... (${secondsElapsed}s elapsed)`;
+        }, 1000);
+
 
         let micDataForPdfFromPrediction = {};
         let ampLabelFromPrediction = 'Unknown';
         let ampConfidenceFromPrediction = 0;
         let limeFeaturesForPdfFromPrediction = []; 
 
-        let animationProgress = 0;
-        animationIntervalId = setInterval(() => {
-            if (animationProgress < 95) {
-                animationProgress += 5;
-                if(progressBar) progressBar.style.width = `${animationProgress}%`;
-            }
-        }, 100);
-
         try {
             const classificationResult = await clientInstance.predict("/predict", [currentSequence]); 
+            // Don't clear interval here immediately, let it run until all processing (including PDF/email) is done or errors out
             console.log("Gradio Result (Prediction):", classificationResult);
 
             if (!classificationResult || !classificationResult.data || typeof classificationResult.data[0] !== 'string') {
@@ -1396,12 +1383,12 @@
             console.log("Raw text output from Gradio (Prediction):\n", rawTextOutput);
 
             const lines = rawTextOutput.split('\n').map(line => line.trim()).filter(Boolean);
-            const labelRegex = /Prediction:\s*(.+)/i; // Case insensitive match for Prediction
-            const confidenceRegex = /Confidence:\s*([\d.]+)%/i; // Case insensitive match
+            const labelRegex = /Prediction:\s*(.+)/i;
+            const confidenceRegex = /Confidence:\s*([\d.]+)%/i;
             const micSectionHeaderRegex = /Predicted MIC Values \(μM\):/i;
-            const topFeaturesSectionHeaderRegex = /Top Features Influencing Prediction/i; // Removed : for flexibility
-            const micLineRegex = /-\s*([^:]+?):\s*((?:[\d.]+)|(?:Error:.*)|(?:N\/A)|(?:Could not process)|(?:Skipped))/i; // Capture various MIC states
-            const featureExtractorRegex = /-\s*(.+?)\s*:\s*([+-]?[\d.]+)/i; // Simpler, assuming "Feature: Value" or "Feature Condition: Value"
+            const topFeaturesSectionHeaderRegex = /Top Features Influencing Prediction/i;
+            const micLineRegex = /-\s*([^:]+?):\s*((?:[\d.]+)|(?:Error:.*)|(?:N\/A)|(?:Could not process)|(?:Skipped))/i;
+            const featureExtractorRegex = /-\s*(.+?)\s*:\s*([+-]?[\d.]+)/i;
 
             const labelMatch = rawTextOutput.match(labelRegex);
             if (labelMatch && labelMatch[1]) ampLabelFromPrediction = labelMatch[1];
@@ -1429,63 +1416,64 @@
                 } else if (currentSection === 'lime_features') {
                     const featureMatch = line.match(featureExtractorRegex);
                     if (featureMatch) {
-                        const featureDescription = featureMatch[1].trim(); // This includes feature name and potentially condition
+                        const featureDescription = featureMatch[1].trim();
                         const featureValue = parseFloat(featureMatch[2]);
                         if (!isNaN(featureValue)) {
-                            // For simplicity, we'll store the full featureDescription as 'feature' for LIME PDF table
                             limeFeaturesForPdfFromPrediction.push({ feature: featureDescription, condition: '', value: featureValue });
                         } else { console.warn(`Could not parse LIME feature value from line: ${line}`); }
                     } else {
-                         if (line.trim().length > 0 && !line.includes('---') && !line.toLowerCase().includes("influencing prediction")) { // Avoid warning for section ender or sub-headers
+                         if (line.trim().length > 0 && !line.includes('---') && !line.toLowerCase().includes("influencing prediction")) {
                              console.warn(`Line not parsed as LIME feature: ${line}`);
                          }
                     }
                 }
             }
-
-            if(animationIntervalId) clearInterval(animationIntervalId); animationIntervalId = null;
-            if(progressBar) progressBar.style.width = '100%';
-            if(progressContainer) progressContainer.style.display = 'none';
+            
+            await generatePDFReportAndSendEmail(currentSequence, ampLabelFromPrediction, ampConfidenceFromPrediction, micDataForPdfFromPrediction, limeFeaturesForPdfFromPrediction, recipientEmail); 
 
             if(ampClassificationOutput) ampClassificationOutput.innerHTML = `<p style="font-size: 1.3rem; font-weight: bold; color: ${ampLabelFromPrediction.toLowerCase().includes('non-amp') ? 'var(--clear-button-bg)' : 'var(--success-color)'}; margin: 0; text-align: center;">${ampLabelFromPrediction}</p>`;
-            if(additionalDetailsOutput) {
-                additionalDetailsOutput.innerHTML = '<p class="info-message">Detailed report available for download:</p>';
-                if(downloadLink) additionalDetailsOutput.appendChild(downloadLink);
+            
+            if(additionalDetailsOutput && downloadLink) {
+                if (downloadLink.style.display === 'block' && downloadLink.href && downloadLink.href !== '#' && !downloadLink.href.endsWith('#')) {
+                    additionalDetailsOutput.innerHTML = '<p class="info-message">Detailed report available:</p>';
+                    if (!additionalDetailsOutput.contains(downloadLink)) {
+                        additionalDetailsOutput.appendChild(downloadLink);
+                    }
+                } else { // This else means PDF generation likely failed (downloadLink was not properly set)
+                    additionalDetailsOutput.innerHTML = '<p class="info-message" style="color: var(--warning-color);">Could not generate PDF report for download.</p>';
+                    if (downloadLink.parentNode === additionalDetailsOutput) { // Make sure we only hide it if it's there
+                       downloadLink.style.display = 'none';
+                    }
+                }
             }
-            // Download link display is handled by generatePDFReportAndSendEmail
 
             if (ampLabelFromPrediction.toLowerCase().includes('amp') && !ampLabelFromPrediction.toLowerCase().includes('non-amp')) {
                 if(micCheckboxes) micCheckboxes.forEach(checkbox => checkbox.disabled = false);
             } else {
                 if(micCheckboxes) micCheckboxes.forEach(checkbox => { checkbox.checked = false; checkbox.disabled = true; });
             }
-            
-            await generatePDFReportAndSendEmail(currentSequence, ampLabelFromPrediction, ampConfidenceFromPrediction, micDataForPdfFromPrediction, limeFeaturesForPdfFromPrediction, recipientEmail); 
 
         } catch (error) {
             console.error("Error during prediction or processing:", error);
-            if(animationIntervalId) { clearInterval(animationIntervalId); animationIntervalId = null; }
-            if(progressBar) progressBar.style.width = '0%'; 
-            if(progressContainer) progressContainer.style.display = 'none';
+            // countUpIntervalId is cleared in finally
             showError("Prediction failed: " + (error.message || "Unknown error. Prediction service might be down."));
             if(ampClassificationOutput) ampClassificationOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Error in Prediction</p>';
             if(additionalDetailsOutput) {
                  additionalDetailsOutput.innerHTML = '<p style="text-align: center; color: var(--clear-button-bg);">Detailed report not available.</p>';
-                 if(downloadLink) { additionalDetailsOutput.appendChild(downloadLink); downloadLink.style.display = 'none';}
+                 if(downloadLink) { 
+                     if(!additionalDetailsOutput.contains(downloadLink)) additionalDetailsOutput.appendChild(downloadLink);
+                     downloadLink.style.display = 'none';
+                 }
             }
             if (emailStatusDiv) { emailStatusDiv.textContent = 'Email not sent due to prediction error.'; emailStatusDiv.style.color = 'var(--warning-color)';}
         } finally {
+            if (countUpIntervalId) { clearInterval(countUpIntervalId); countUpIntervalId = null; }
             if (predictBtn) { predictBtn.disabled = false; predictBtn.textContent = 'Submit';}
-            if (ampLabelFromPrediction.toLowerCase().includes('amp') && !ampLabelFromPrediction.toLowerCase().includes('non-amp')) {
-                 if(micCheckboxes) micCheckboxes.forEach(cb => cb.disabled = false);
-            } else {
-                 if(micCheckboxes) micCheckboxes.forEach(cb => { cb.checked = false; cb.disabled = true; });
-            }
         }
     }
 
     async function getBase64Image(imgSrc) {
-        return new Promise((resolve) => { // Removed reject, always resolve (null on error)
+        return new Promise((resolve) => {
             if (!imgSrc) { resolve(null); return; }
             const img = new Image();
             img.crossOrigin = 'Anonymous'; 
@@ -1513,30 +1501,32 @@
         });
     }
 
-    async function generatePDFReportContent(sequenceForPdf, predictionForPdf, confidenceForPdf, micResultsForPdf, limeFeaturesForPdf) { // Renamed params
+    async function generatePDFReportContent(sequenceForPdf, predictionForPdf, confidenceForPdf, micResultsForPdf, limeFeaturesForPdf) {
         if (!window.jspdf || !window.jspdf.jsPDF) { console.error("jsPDF is not loaded."); return null; }
         const { jsPDF } = window.jspdf; const pdf = new jsPDF(); 
         const primaryC = [0,77,64], textC=[51,51,51], successC=[39,174,96], errorC=[231,76,60], headerTextC=[44,62,80];
         const pageWidth = pdf.internal.pageSize.width; let yPos = 15; 
 
-        let toolLogoB64 = null, shapPlotB64 = null; // Renamed local vars
+        let toolLogoB64 = null, shapPlotB64 = null;
         const toolLogoEl = document.querySelector('.logos-container img');
         if (toolLogoEl && toolLogoEl.src) toolLogoB64 = await getBase64Image(toolLogoEl.src);
         const shapImgEl = document.querySelector('#shap-plot-container img');
         if (shapImgEl && shapImgEl.src) shapPlotB64 = await getBase64Image(shapImgEl.src); 
-        else if (!shapImgEl) shapPlotB64 = await getBase64Image('shap.png'); // Fallback if element not found
+        else if (!shapImgEl) shapPlotB64 = await getBase64Image('shap.png');
 
 
         if (toolLogoB64) {
             const img = new Image(); img.src = toolLogoB64; await new Promise(r=>img.onload=r);
             if(img.naturalWidth > 0){
                 const logoW = pageWidth*0.8, ratio=img.naturalHeight/img.naturalWidth, logoH=logoW*ratio, logoX=(pageWidth-logoW)/2;
-                pdf.addImage(toolLogoB64,'PNG',logoX,yPos,logoW,logoH); yPos+=logoH+5;
+                pdf.addImage(toolLogoB64,'PNG',logoX,yPos,logoW,logoH); yPos+=logoH+10;
             } else {yPos+=15;}
         } else { yPos+=15; }
+        
+        yPos += 5;
 
         pdf.setFont("helvetica","bold"); pdf.setFontSize(28); pdf.setTextColor(headerTextC[0],headerTextC[1],headerTextC[2]);
-        pdf.text("Anti-microbial Peptides Report",pageWidth/2,yPos,{align:"center"}); yPos+=28+20;
+        pdf.text("Anti-microbial Peptides Report",pageWidth/2,yPos,{align:"center"}); yPos+=28+10;
         pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); pdf.text("Input Sequence:",20,yPos); yPos+=7;
         pdf.setFontSize(10); pdf.setTextColor(textC[0],textC[1],textC[2]);
         const seqLines=pdf.splitTextToSize(sequenceForPdf,pageWidth-40); pdf.text(seqLines,20,yPos); yPos+=(seqLines.length*(pdf.getFontSize()/pdf.internal.scaleFactor)*1.15)+18;
@@ -1562,18 +1552,16 @@
         const micDataForTable = [];
         if (micResultsForPdf && Object.keys(micResultsForPdf).length > 0) {
              Object.entries(micResultsForPdf).forEach(([bacterium, micVal]) => {
-                // Determine if this bacterium's checkbox is checked
                 let isChecked = false;
                 if(micCheckboxes) {
                     micCheckboxes.forEach(cb => {
                         const cbLabel = cb.parentElement.querySelector('.mic-label').textContent.trim();
-                        // Crude match: if bacterium display name contains checkbox label (e.g., "E.coli" in "E.coli")
                         if (cb.checked && bacterium.toLowerCase().includes(cbLabel.toLowerCase().split('.')[0])) { 
                             isChecked = true;
                         }
                     });
                 }
-                if(isChecked) { // Only add if checkbox was checked
+                if(isChecked) {
                     micDataForTable.push([bacterium, typeof micVal === 'number' ? micVal.toFixed(3) : String(micVal)]);
                 }
              });
@@ -1595,12 +1583,14 @@
             pdf.text("No MIC prediction displayed (non-AMP, no bacteria selected, or no valid predictions for selected bacteria).", 20, yPos); yPos+=15;
         }
 
-        if(!limeFeaturesForPdf || limeFeaturesForPdf.length === 0){ limeFeaturesForPdf = []; } // Ensure it's an array
+        if(!limeFeaturesForPdf || limeFeaturesForPdf.length === 0){ limeFeaturesForPdf = []; }
 
         if(limeFeaturesForPdf.length > 0) {
             pdf.addPage(); yPos=20;
-            pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); pdf.text("LIME: Top Features Influencing Prediction",20,yPos); yPos+=8;
-            const limeHead = [['Feature Description','Importance (LIME Weight)']]; // Simplified LIME headers
+            pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); 
+            pdf.text("Top Features Influencing Prediction (Local XAI by LIME)",20,yPos);
+            yPos+=8;
+            const limeHead = [['Feature Description','Importance (LIME Weight)']];
             const limeBody = limeFeaturesForPdf.sort((a,b)=>Math.abs(b.value)-Math.abs(a.value))
                                .map(f=>[f.feature, typeof f.value === 'number' ? f.value.toFixed(4) : 'N/A']);
             pdf.autoTable({startY:yPos, head:limeHead, body:limeBody, theme:'grid',
@@ -1620,7 +1610,7 @@
             yPos=pdf.lastAutoTable.finalY+20;
         } else {
              if(yPos+20 > pdf.internal.pageSize.height-30){pdf.addPage();yPos=20;}
-             else { pdf.addPage(); yPos=20; } // Ensure LIME/SHAP on new page anyway
+             else { pdf.addPage(); yPos=20; }
              pdf.setFontSize(10); pdf.setTextColor(100,100,100);
              pdf.text("LIME explanation data not available or not generated for this prediction.", 20, yPos); yPos+=15;
         }
@@ -1631,7 +1621,9 @@
                 let imgW=img.naturalWidth,imgH=img.naturalHeight,ratio=imgW/imgH,maxH=100,maxW=pageWidth-40;
                 if(imgW>maxW){imgW=maxW;imgH=imgW/ratio;} if(imgH>maxH){imgH=maxH;imgW=imgH*ratio;}
                 if(yPos+imgH+30 > pdf.internal.pageSize.height-30){pdf.addPage(); yPos=20;}
-                pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); pdf.text("Global SHAP Feature Importance (Illustrative):",20,yPos); yPos+=8;
+                pdf.setFontSize(16); pdf.setTextColor(primaryC[0],primaryC[1],primaryC[2]); 
+                pdf.text("Global SHAP Feature Importance:",20,yPos);
+                yPos+=8;
                 try{pdf.addImage(shapPlotB64,'PNG',(pageWidth-imgW)/2,yPos,imgW,imgH); yPos+=imgH+10;}
                 catch(e){console.error("Error adding SHAP PDF:",e); yPos+=10;}
             }
@@ -1649,7 +1641,7 @@
         return pdf;
     }
 
-    function addPageNumbersAndFooter(doc) { // No changes
+    function addPageNumbersAndFooter(doc) {
         const pageCount = doc.internal.getNumberOfPages();
         for (let i = 1; i <= pageCount; i++) {
             doc.setPage(i);
@@ -1664,8 +1656,15 @@
 
         if (!pdfDoc) {
             console.error("PDF generation failed, cannot set download link or send email.");
-            if(downloadLink) { downloadLink.innerHTML = "PDF Error"; downloadLink.href="#"; downloadLink.style.display = 'block';}
-            if(emailStatusDiv) { emailStatusDiv.textContent = "Email not sent: PDF error."; emailStatusDiv.style.color = "var(--warning-color)";}
+            if(downloadLink) { 
+                downloadLink.innerHTML = "PDF Generation Error"; 
+                downloadLink.href="#"; 
+                downloadLink.style.display = 'block'; // Still show it's an error state for download
+            }
+            if(emailStatusDiv) { 
+                emailStatusDiv.textContent = "Email not sent: PDF generation error."; 
+                emailStatusDiv.style.color = "var(--warning-color)";
+            }
             return;
         }
 
@@ -1680,8 +1679,7 @@
             downloadLink.style.display = 'block';
         }
 
-        // Email sending is mandatory as per new requirement, recipientEmailForSending is already validated
-        if (recipientEmailForSending) { // Should always be true if logic upstream is correct
+        if (recipientEmailForSending) {
             if(emailStatusDiv) {
                 emailStatusDiv.textContent = 'Preparing PDF for email...';
                 emailStatusDiv.style.color = 'var(--info-color)';
@@ -1701,7 +1699,6 @@
                 }
             };
         } else {
-            // This state implies an issue with mandatory email logic upstream
             console.error("generatePDFReportAndSendEmail called without a mandatory recipientEmail.");
             if(emailStatusDiv) {
                 emailStatusDiv.textContent = 'Critical Error: Email address was missing for sending.';
@@ -1710,12 +1707,12 @@
         }
     }
 
-    async function sendReportViaApi(emailAddr, pdfBase64Str, pdfFileNm) { // Param names updated
+    async function sendReportViaApi(emailAddr, pdfBase64Str, pdfFileNm) {
         if(emailStatusDiv) {
-            emailStatusDiv.textContent = 'Sending email via API...';
+            emailStatusDiv.textContent = 'Sending email...';
             emailStatusDiv.style.color = 'var(--info-color)';
         }
-        console.log(`Sending email to ${emailAddr} via ${EMAIL_SERVICE_API_URL} for file ${pdfFileNm}`);
+        console.log(`Sending email to ${emailAddr} via API for file ${pdfFileNm}`);
 
         try {
             const response = await fetch(EMAIL_SERVICE_API_URL, {
@@ -1735,7 +1732,7 @@
                 resultJson = JSON.parse(responseText); 
             } catch (jsonError) {
                 console.error("Email API response not valid JSON:", jsonError, "\nResponse Text:", responseText);
-                throw new Error(response.statusText || `Email API returned non-JSON. Status: ${response.status}. Check API logs and ensure it is correctly deployed & running.`);
+                throw new Error(response.statusText || `Email API returned non-JSON. Status: ${response.status}. Check API logs.`);
             }
             
             console.log("Parsed JSON Email API Result:", resultJson);
@@ -1747,14 +1744,14 @@
                  }
             } else {
                  if(emailStatusDiv) {
-                    emailStatusDiv.textContent = `Email sending failed: ${resultJson.message || "Unknown error from email API. Check API logs."}`;
+                    emailStatusDiv.textContent = `Email sending failed: ${resultJson.message || "Unknown error from email service. Please check API logs."}`;
                     emailStatusDiv.style.color = 'var(--warning-color)';
                  }
             }
         } catch (error) {
             console.error("Error calling email API:", error);
             if(emailStatusDiv) {
-                emailStatusDiv.textContent = "Error sending email: " + (error.message || "Email API unavailable/network issue. Ensure service is running.");
+                emailStatusDiv.textContent = "Error sending email: " + (error.message || "Email service unavailable or network issue.");
                 emailStatusDiv.style.color = 'var(--warning-color)';
             }
         }
