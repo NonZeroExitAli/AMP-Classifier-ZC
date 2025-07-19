@@ -987,8 +987,10 @@
 </footer>
 
 <script type="module">
-    import { client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
-    window.gradio = { client };
+    // *** MODIFIED LINE START ***
+    import { Client } from "https://cdn.jsdelivr.net/npm/@gradio/client/+esm";
+    window.gradio = { client: Client }; // Assign the imported 'Client' (capital C) to the 'client' property (lowercase c)
+    // *** MODIFIED LINE END ***
 </script>
 
 <script>
@@ -1088,11 +1090,11 @@
 
         if(ampClassificationOutput) ampClassificationOutput.innerHTML = '<p class="info-message">The prediction will appear here.</p>';
         if(additionalDetailsOutput) {
-            additionalDetailsOutput.innerHTML = '<p class="info-message">The detailed report will appear here.</p>'; 
-            if(downloadLink && !additionalDetailsOutput.contains(downloadLink)) {
+             additionalDetailsOutput.innerHTML = '<p class="info-message">Generating detailed report...</p>';
+             if(downloadLink && !additionalDetailsOutput.contains(downloadLink)) {
                  additionalDetailsOutput.appendChild(downloadLink);
-                 downloadLink.style.display = 'none';
-            }
+             }
+             if(downloadLink) downloadLink.style.display = 'none'; 
         }
 
         if(micCheckboxes) micCheckboxes.forEach(checkbox => {
